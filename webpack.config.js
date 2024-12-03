@@ -40,7 +40,7 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       template: './src/index.html',
-      title: 'Restaurant page',
+      title: 'Battleship',
       filename: 'index.html',
       inject: 'body',
     }),
