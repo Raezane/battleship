@@ -1,4 +1,4 @@
-import {ship} from '../src/models/ship';
+import {ship} from '../src/models/shipHandler';
 
 let testShip;
 
