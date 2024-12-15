@@ -21,47 +21,143 @@ const boardHandler = function() {
     }
   }
 
-  const placeShip = function(ship, frontCoords, rearCoords) {
+  const shipSetter = function(ship, frontCoords, rearCoords) {
+
+    /* first check if the selected area for the ship to be placed is not
+    already occupied. We'll create copy of the actual coordinates here so 
+    that the iterator won't modify the original ones */
+
+    const getCoordsCopy = (coords) => [...coords];
+
+    let frontCoordsCopy = getCoordsCopy(frontCoords)
+
+    let surroundingArea = {
+      north: [frontCoordsCopy[0]-1, frontCoordsCopy[1]],
+      northEast: [frontCoordsCopy[0]-1, frontCoordsCopy[1]+1],
+      east: [frontCoordsCopy[0], frontCoordsCopy[1]+1],
+      southEast: [frontCoordsCopy[0]+1, frontCoordsCopy[1]+1],
+      south: [frontCoordsCopy[0]+1, frontCoordsCopy[1]],
+      southWest: [frontCoordsCopy[0]+1, frontCoordsCopy[1]-1],
+      west: [frontCoordsCopy[0], frontCoordsCopy[1]-1],
+      northWest: [frontCoordsCopy[0]-1, frontCoordsCopy[1]-1]
+    };
 
     /* function drawShipSurrounding() {
       
     } */
 
     function setShip(direction, frontCoords, rearCoords) {
-      while (frontCoords[direction] <= rearCoords[direction]) {
-        board[frontCoords[0]][frontCoords[1]] = ship
-        frontCoords[direction] += 1
+
+      if (direction == 0) {
+        setNorthernSurrounding(surroundingArea.north, surroundingArea.northEast, surroundingArea.northWest)
+        setVertically(surroundingArea.west, surroundingArea.east)
+        setSouthernSurrounding(surroundingArea.south, surroundingArea.southEast, surroundingArea.southWest)
+      } else {
+        setWesternSurrounding(surroundingArea.west, surroundingArea.northWest, surroundingArea.southWest)
+        setHorizontally(surroundingArea.north, surroundingArea.south)
+        setEasternSurrounding(surroundingArea.east, surroundingArea.northEast, surroundingArea.southEast)
+      }
+
+      function setVertically(west, east) {
+        let westCoordsCopy = getCoordsCopy(west);
+        let eastCoordsCopy = getCoordsCopy(east);
+        while (frontCoords[direction] <= rearCoords[direction]) {
+
+          if (isInBounds(westCoordsCopy)) {
+            board[westCoordsCopy[0]][westCoordsCopy[1]] = markers.shipSurrounding
+            westCoordsCopy[0] += 1
+          }
+
+          board[frontCoords[0]][frontCoords[1]] = ship
+          frontCoords[direction] += 1
+
+          if (isInBounds(eastCoordsCopy)) {
+            board[eastCoordsCopy[0]][eastCoordsCopy[1]] = markers.shipSurrounding
+            eastCoordsCopy[0] += 1 
+          }
+        }
+      }
+
+      function setHorizontally(north, south) {
+        let northCoordsCopy = getCoordsCopy(north);
+        let southCoordsCopy = getCoordsCopy(south);
+        while (frontCoords[direction] <= rearCoords[direction]) {
+
+          if (isInBounds(northCoordsCopy)) {
+            board[northCoordsCopy[0]][northCoordsCopy[1]] = markers.shipSurrounding
+            northCoordsCopy[1] += 1
+          }
+
+          board[frontCoords[0]][frontCoords[1]] = ship
+          frontCoords[direction] += 1
+
+          if (isInBounds(southCoordsCopy)) {
+            board[southCoordsCopy[0]][southCoordsCopy[1]] = markers.shipSurrounding
+            southCoordsCopy[1] += 1 
+          }
+        }
+      }
+
+      function setNorthernSurrounding(...surroundings) {
+        directionIterator(surroundings)
+      }
+
+      function setSouthernSurrounding(...surroundings) {
+        let southernCoords = 
+        [
+          [frontCoords[direction], surroundings[0][1]], 
+          [frontCoords[direction], surroundings[1][1]],
+          [frontCoords[direction], surroundings[2][1]],
+        ] 
+
+        directionIterator(southernCoords)
+      }
+
+      function setWesternSurrounding(...surroundings) {
+        directionIterator(surroundings)
+      }
+
+      function setEasternSurrounding(...surroundings) {
+        let easternCoords = [
+          [surroundings[0][0], frontCoords[direction]], 
+          [surroundings[1][0], frontCoords[direction]],
+          [surroundings[2][0], frontCoords[direction]]
+        ]
+        directionIterator(easternCoords)
       }
     }
 
-    function validPlacement(direction, frontCoords, rearCoords) {
+    function directionIterator(surroundings) {
+      surroundings.forEach(coords => {
+        if (isInBounds(coords)) {
+          board[coords[0]][coords[1]] = markers.shipSurrounding
+        }
+      });
+    }
 
-      /* first check if the selected area for the ship to be placed is not
-      already occupied. We'll create copy of the actual coordinates here so 
-      that the iterator won't modify the original ones */
-      let frontCoordsCopy = [...frontCoords];
-      let rearCoordsCopy = [...rearCoords];
+    function isInBounds(shipCoords) {
+      const [row, col] = shipCoords;
+      return row >= 0 && row < board.length && col >= 0 && col < board[0].length;
+    }
+
+    function validPlacement(direction) {
 
       function isSurroundingClear() {
 
-        let surroundingArea = {
-          north: board[frontCoordsCopy[0]-1][frontCoordsCopy[1]],
-          northEast: board[frontCoordsCopy[0]-1][frontCoordsCopy[1]+1],
-          east: board[frontCoordsCopy[0]][frontCoordsCopy[1]+1],
-          southEast: board[frontCoordsCopy[0]+1][frontCoordsCopy[1]+1],
-          south: board[frontCoordsCopy[0]+1][frontCoordsCopy[1]],
-          southWest: board[frontCoordsCopy[0]+1][frontCoordsCopy[1]-1],
-          west: board[frontCoordsCopy[0]][frontCoordsCopy[1]-1],
-          northWest: board[frontCoordsCopy[0]-1][frontCoordsCopy[1]-1]
-        };
-
         for (const key in surroundingArea) {
-          if (surroundingArea[key] && typeof surroundingArea[key] === 'object') return false
+          let [row, col] = surroundingArea[key]
+          try {
+            if (board[row][col] && typeof board[row][col] === 'object') return false
+          } catch (error) {
+            /* if the current value is undefined (outside bounds), this catch-block catches it without 
+            crashing the app */ 
+            console.log(`the current value is outside board bounds and thus undefined`)
+          }
         } return true
 
       }
 
-      while (frontCoordsCopy[direction] <= rearCoordsCopy[direction]) {
+      while (frontCoordsCopy[direction] <= rearCoords[direction]) {
           // check by iterating if the area where ship is placed is null and there aren't ships straight next to it.
           if (board[frontCoordsCopy[0]][frontCoordsCopy[1]] == null && isSurroundingClear()) {
             frontCoordsCopy[direction] += 1;    
@@ -96,7 +192,7 @@ const boardHandler = function() {
     };
   };
 
-  return {getGameBoard, buildBoard, placeShip, receiveAttack}
+  return {getGameBoard, buildBoard, shipSetter, receiveAttack}
 
 }
 
@@ -104,9 +200,9 @@ let board = boardHandler();
 board.buildBoard();
 let ship1 = ship(3);
 let ship3 = ship(4);
-board.placeShip(ship1, [2,3], [2,6]);
-board.placeShip(ship1, [1,3], [1,4]);
-board.placeShip(ship3, [1,4], [3,4]);
+board.shipSetter(ship3, [0,4], [2,4]);
+board.shipSetter(ship1, [6,2], [6,5]);
+board.shipSetter(ship1, [1,3], [1,4]);
 board.getGameBoard()
 board.receiveAttack(6,10)
 board.receiveAttack(6,7)
