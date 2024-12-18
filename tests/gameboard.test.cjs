@@ -3,10 +3,9 @@ import {ship} from "../src/models/shipHandler";
 
 let testGameBoard;
 
-beforeEach(() => {
-  testGameBoard = boardHandler();
-  testGameBoard.buildBoard()
-});
+testGameBoard = boardHandler();
+testGameBoard.buildBoard()
+
 
 test('gameboard is set up correctly', () => {
   expect(testGameBoard.getGameBoard()).toEqual([
@@ -27,16 +26,21 @@ describe('ship placement and hit registration', () => {
 
   let testShip;
   beforeEach(() => {
+    testGameBoard = boardHandler();
+    testGameBoard.buildBoard()
     testShip = ship(4)
   });
 
-  test('gameboard should place ships correctly with given coordinates vertically', () => {
+  test('gameboard should place ships correctly with given coordinates vertically and horizontally', () => {
     testGameBoard.shipSetter(testShip, [4,7], [7,7])
+    
+    let testShip2 = ship(3);
+    testGameBoard.shipSetter(testShip2, [1,1], [1,3])
 
     expect(testGameBoard.getGameBoard()).toEqual([
-      [null, null, null, null, null, null, null, null, null, null],
-      [null, null, null, null, null, null, null, null, null, null],
-      [null, null, null, null, null, null, null, null, null, null],
+      ['u', 'u', 'u', 'u', 'u', null, null, null, null, null],
+      ['u', testShip2, testShip2, testShip2, 'u', null, null, null, null, null],
+      ['u', 'u', 'u', 'u', 'u', null, null, null, null, null],
       [null, null, null, null, null, null, 'u', 'u', 'u', null],
       [null, null, null, null, null, null, 'u', testShip, 'u', null],
       [null, null, null, null, null, null, 'u', testShip, 'u', null],
@@ -64,9 +68,10 @@ describe('ship placement and hit registration', () => {
     ]);
   });
 
-  test('gameboard should register missed attack', () => {
+  test('gameboard should register missed attack properly', () => {
     testGameBoard.shipSetter(testShip, [6,2], [8,2])
     testGameBoard.receiveAttack(2,5)
+    testGameBoard.receiveAttack(8,3)
     
     expect(testGameBoard.getGameBoard()).toEqual([
       [null, null, null, null, null, null, null, null, null, null],
@@ -74,11 +79,11 @@ describe('ship placement and hit registration', () => {
       [null, null, null, null, null, 'o', null, null, null, null],
       [null, null, null, null, null, null, null, null, null, null],
       [null, null, null, null, null, null, null, null, null, null],
-      [null, null, null, null, null, null, null, null, null, null],
-      [null, null, testShip, null, null, null, null, null, null, null],
-      [null, null, testShip, null, null, null, null, null, null, null],
-      [null, null, testShip, null, null, null, null, null, null, null],
-      [null, null, null, null, null, null, null, null, null, null],
+      [null, 'u', 'u', 'u', null, null, null, null, null, null],
+      [null, 'u', testShip, 'u', null, null, null, null, null, null],
+      [null, 'u', testShip, 'u', null, null, null, null, null, null],
+      [null, 'u', testShip, ['u', 'o'], null, null, null, null, null, null],
+      [null, 'u', 'u', 'u', null, null, null, null, null, null],
     ]);
   })
 
@@ -92,9 +97,9 @@ describe('ship placement and hit registration', () => {
       [null, null, null, null, null, null, null, null, null, null],
       [null, null, null, null, null, null, null, null, null, null],
       [null, null, null, null, null, null, null, null, null, null],
-      [null, null, null, null, null, null, null, null, null, null],
-      [null, null, testShip, [testShip, 'x'], testShip, testShip, null, null, null, null],
-      [null, null, null, null, null, null, null, null, null, null],
+      [null, 'u', 'u', 'u', 'u', 'u', 'u', null, null, null],
+      [null, 'u', testShip, [testShip, 'x'], testShip, testShip, 'u', null, null, null],
+      [null, 'u', 'u', 'u', 'u', 'u', 'u', null, null, null],
       [null, null, null, null, null, null, null, null, null, null],
       [null, null, null, null, null, null, null, null, null, null],
     ]);
@@ -109,9 +114,9 @@ describe('ship placement and hit registration', () => {
 
     expect(testGameBoard.getGameBoard()).toEqual([
       [null, null, null, null, null, null, null, null, null, null],
-      [null, null, null, null, null, null, null, null, null, null],
-      [null, null, null, testShip, testShip, testShip, testShip, null, null, null],
-      [null, null, null, null, null, null, null, null, null, null],
+      [null, null, 'u', 'u', 'u', 'u', 'u', 'u', null, null],
+      [null, null, 'u', testShip, testShip, testShip, testShip, 'u', null, null],
+      [null, null, 'u', 'u', 'u', 'u', 'u', 'u', null, null],
       [null, null, null, null, null, null, null, null, null, null],
       [null, null, null, null, null, null, null, null, null, null],
       [null, null, null, null, null, null, null, null, null, null],
@@ -138,15 +143,81 @@ describe('ship placement and hit registration', () => {
 
     expect(testGameBoard.getGameBoard()).toEqual([
       [null, null, null, null, null, null, null, null, null, null],
-      [null, null, null, null, null, null, null, null, null, null],
-      [null, testShip2, null, testShip, testShip, testShip, testShip, null, null, null],
-      [null, testShip2, null, null, null, null, null, null, null, null],
-      [null, testShip2, null, null, null, null, null, null, null, null],
-      [null, null, null, null, null, null, null, null, null, null],
+      ['u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', null, null],
+      ['u', testShip2, 'u', testShip, testShip, testShip, testShip, 'u', null, null],
+      ['u', testShip2, 'u', 'u', 'u', 'u', 'u', 'u', null, null],
+      ['u', testShip2, 'u', null, null, null, null, null, null, null],
+      ['u', 'u', 'u', null, null, null, null, null, null, null],
       [null, null, null, null, null, null, null, null, null, null],
       [null, null, null, null, null, null, null, null, null, null],
       [null, null, null, null, null, null, null, null, null, null],
       [null, null, null, null, null, null, null, null, null, null],
     ]);
   });
+
+  test("ship can be placed to edge correctly", () => {
+    let testShip = ship(3);
+    let testShip2 = ship(2);
+
+    testGameBoard.shipSetter(testShip, [2,9], [4,9]);
+    testGameBoard.shipSetter(testShip2, [8,0], [9,0]);
+
+    expect(testGameBoard.getGameBoard()).toEqual([
+      [null, null, null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null, 'u', 'u'],
+      [null, null, null, null, null, null, null, null, 'u', testShip],
+      [null, null, null, null, null, null, null, null, 'u', testShip],
+      [null, null, null, null, null, null, null, null, 'u', testShip],
+      [null, null, null, null, null, null, null, null, 'u', 'u'],
+      [null, null, null, null, null, null, null, null, null, null],
+      ['u', 'u', null, null, null, null, null, null, null, null],
+      [testShip2, 'u', null, null, null, null, null, null, null, null],
+      [testShip2, 'u', null, null, null, null, null, null, null, null]
+    ]);
+  });
+
+  test("Gameboard should report if all the ships have been sunken", () => {
+    let testShip0 = ship(4);
+    let testShip1 = ship(3);
+    let testShip2 = ship(3);
+    let testShip3 = ship(2);
+    let testShip4 = ship(2);
+    let testShip5 = ship(2);
+    let testShip6 = ship(1);
+    let testShip7 = ship(1);
+    let testShip8 = ship(1);
+    let testShip9 = ship(1);
+
+    testGameBoard.shipSetter(testShip0, [1,0], [1,3]);
+    testGameBoard.shipSetter(testShip1, [3,1], [5,1]);
+    testGameBoard.shipSetter(testShip2, [7,1], [9,1]);
+    testGameBoard.shipSetter(testShip3, [8,3], [8,4]);
+    testGameBoard.shipSetter(testShip4, [5,3], [6,3]);
+    testGameBoard.shipSetter(testShip5, [5,7], [5,8]);
+    testGameBoard.shipSetter(testShip6, [3,4], [3,4]);
+    testGameBoard.shipSetter(testShip7, [8,8], [8,8]);
+    testGameBoard.shipSetter(testShip8, [2,9], [2,9]);
+    testGameBoard.shipSetter(testShip9, [0,7], [0,7]); 
+
+    testGameBoard.getGameBoard().forEach((row) => {
+      row.forEach((value, colIndex) => {
+        //if (typeof value == 'object') console.log(value)
+        console.log(value)
+      }); 
+    });
+    
+
+    expect(testGameBoard.getGameBoard()).toEqual([
+      ['u', 'u', 'u', 'u', 'u', null, 'u', [testShip9, 'x'], 'u', null],
+      [[testShip0, 'x'], [testShip0, 'x'], [testShip0, 'x'], [testShip0, 'x'], 'u', null, 'u', 'u', 'u', 'u'],
+      ['u', 'u', 'u', 'u', 'u', 'u', null, null, 'u', [testShip8, 'x']],
+      ['u', [testShip1, 'x'], 'u', 'u', [testShip6, 'x'], 'u', null, null, 'u', 'u'],
+      ['u', [testShip1, 'x'], 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u'],
+      ['u', [testShip1, 'x'], 'u', [testShip4, 'x'], 'u', null, 'u', [testShip5, 'x'], [testShip5, 'x'], 'u'],
+      ['u', 'u', 'u', [testShip4, 'x'], 'u', null, 'u', 'u', 'u', 'u'],
+      ['u', [testShip2, 'x'], 'u', 'u', 'u', 'u', null, 'u', 'u', 'u'],
+      ['u', [testShip2, 'x'], 'u', [testShip3, 'x'], [testShip3, 'x'], 'u', null, 'u', [testShip7, 'x'], 'u'],
+      ['u', [testShip2, 'x'], 'u', 'u', 'u', 'u', null, 'u', 'u', 'u']
+    ]);
+  }); 
 });
