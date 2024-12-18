@@ -2,6 +2,7 @@ import {ship} from "./shipHandler.js"
 
 const boardHandler = function() {
   let board = []
+  let sunkenShips = [];
 
   const markers = {
     hit: 'x',
@@ -10,6 +11,7 @@ const boardHandler = function() {
   }
 
   const getGameBoard = () => board
+  //const getSunkenShips
 
   const buildBoard = function() {
     for (let y = 0; y < 10; y++) {
@@ -41,10 +43,6 @@ const boardHandler = function() {
       west: [frontCoordsCopy[0], frontCoordsCopy[1]-1],
       northWest: [frontCoordsCopy[0]-1, frontCoordsCopy[1]-1]
     };
-
-    /* function drawShipSurrounding() {
-      
-    } */
 
     function setShip(direction, frontCoords, rearCoords) {
 
@@ -154,7 +152,6 @@ const boardHandler = function() {
             console.log(`the current value is outside board bounds and thus undefined`)
           }
         } return true
-
       }
 
       while (frontCoordsCopy[direction] <= rearCoords[direction]) {
@@ -172,8 +169,11 @@ const boardHandler = function() {
         return callback(0, frontCoords, rearCoords)
       } else if (frontCoords[1] < rearCoords[1]) {
         return callback(1, frontCoords, rearCoords)
-      };
-    };
+        //if neither of above applies, then check if ship is the smallest one which takes only one cell
+      } else if (JSON.stringify(frontCoords) === JSON.stringify(rearCoords)) {
+        return callback(1, frontCoords, rearCoords)
+      }
+    }
 
     let isValid = HorizontalOrVertical(validPlacement);
     if (isValid) HorizontalOrVertical(setShip);
@@ -189,7 +189,9 @@ const boardHandler = function() {
     } else if (typeof board[y][x] == 'object') {
       board[y][x].hit()
       board[y][x] = [board[y][x], markers.hit]
-    };
+    } else if (board[y][x] == markers.shipSurrounding) {
+      board[y][x] = [markers.shipSurrounding, markers.miss]
+    }
   };
 
   return {getGameBoard, buildBoard, shipSetter, receiveAttack}
@@ -198,11 +200,12 @@ const boardHandler = function() {
 
 let board = boardHandler();
 board.buildBoard();
+let ship0 = ship(4);
 let ship1 = ship(3);
-let ship3 = ship(4);
-board.shipSetter(ship3, [0,4], [2,4]);
-board.shipSetter(ship1, [6,2], [6,5]);
-board.shipSetter(ship1, [1,3], [1,4]);
+let ship2 = ship(1);
+board.shipSetter(ship0, [1,0], [1,3]);
+board.shipSetter(ship1, [3,1], [5,1]);
+board.shipSetter(ship2, [0,7], [0,7]);
 board.getGameBoard()
 board.receiveAttack(6,10)
 board.receiveAttack(6,7)
