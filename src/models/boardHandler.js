@@ -11,7 +11,12 @@ const boardHandler = function() {
   }
 
   const getGameBoard = () => board
-  //const getSunkenShips
+  const getSunkenShips = () => sunkenShips
+
+  const areAllSunk = function() {
+    if (sunkenShips.length >= 10) return true
+    return false
+  }
 
   const buildBoard = function() {
     for (let y = 0; y < 10; y++) {
@@ -181,20 +186,42 @@ const boardHandler = function() {
   };
 
   const receiveAttack = function(y, x) {
+
+    function attackMissed() {
+      board[y][x] = markers.miss;
+    }
+
+    function attackHit() {
+      board[y][x].hit();
+      board[y][x] = [board[y][x], markers.hit];
+      checkIfSunk(board[y][x][0])
+    };
+
+    function closeCall() {
+      board[y][x] = [markers.shipSurrounding, markers.miss];
+    };
+
+    function checkIfSunk(thisShip) {
+      if (thisShip.isSunk()) {
+        sunkenShips.push(thisShip);
+        areAllSunk()
+      };
+    };
+
     // check if the attacked square is empty by checking if square holds just a null
     if (board[y][x] == null) {
-      board[y][x] = markers.miss;
-    /* if not a number, then check if ship already resides in the square -> in other words, is the square a ship object. 
-       If so, then hit the ship */
-    } else if (typeof board[y][x] == 'object') {
-      board[y][x].hit()
-      board[y][x] = [board[y][x], markers.hit]
+      attackMissed();
+      //also a miss, but hit to ship surrounding
     } else if (board[y][x] == markers.shipSurrounding) {
-      board[y][x] = [markers.shipSurrounding, markers.miss]
-    }
+      closeCall();
+    /* if not a number, then check if ship already resides in the square -> in other words, is the square a ship object. 
+      If so, then hit the ship */
+    } else if (typeof board[y][x] == 'object') {
+      attackHit();
+    } 
   };
 
-  return {getGameBoard, buildBoard, shipSetter, receiveAttack}
+  return {getGameBoard, getSunkenShips, areAllSunk, buildBoard, shipSetter, receiveAttack}
 
 }
 
@@ -207,8 +234,10 @@ board.shipSetter(ship0, [1,0], [1,3]);
 board.shipSetter(ship1, [3,1], [5,1]);
 board.shipSetter(ship2, [0,7], [0,7]);
 board.getGameBoard()
-board.receiveAttack(6,10)
-board.receiveAttack(6,7)
+board.receiveAttack(0,7)
+board.receiveAttack(4,1)
+board.receiveAttack(8,3)
+board.receiveAttack(6,6)
 board.getGameBoard()
 ship1.getHits()
 
