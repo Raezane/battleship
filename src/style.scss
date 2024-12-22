@@ -1,0 +1,81 @@
+html, body {
+  height: 100%;
+}
+
+.gametablecontainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  height: 100%;
+}
+
+.title {
+  position: absolute;
+  font-size: 30px;
+  top: 40px;
+  left: 60px;
+}
+
+#gametable {
+  height: 550px;
+  width: 800px;
+  min-width: max-content;
+  background-color: brown;
+  border-radius: 10px;
+  //box-sizing: border-box;
+  padding: 10px;
+  display: grid;
+  grid-template-columns: repeat(4, 200px);
+  grid-template-rows: 2fr 40px 10fr;
+
+  .upperheaders {
+    grid-area: 1 / 1 / 2 / 5;
+    background-color: beige;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .choices {
+    grid-area: 2 / 2 / 3 / 4;
+    align-self: center;
+    display: flex;
+    justify-content: space-around;
+
+    button {
+      padding: 10px 30px;
+    }
+  }
+
+  .upperheaders,
+  .choices {
+    text-align: center;
+  }
+}
+
+.boardscontainer {
+  grid-area: 3 / 1 / 4 / 5;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 30px 400px;
+  background-color: aquamarine;
+  display: grid;
+  align-items: center;
+  justify-items: center;
+  grid-auto-flow: column;
+
+  .board {
+    height: 350px;
+    width: 350px;
+    border: 2px solid grey;
+    border-radius: 4px;
+    background-color: white;
+    justify-self: center;
+  }
+}
+
+.turnheader {
+  text-align: center;
+  padding-top: 20px;
+}

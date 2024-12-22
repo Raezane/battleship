@@ -6,24 +6,22 @@
   <title>Document</title>
 </head>
 <body>
-  <h1>Battleship</h1>
-  <div id="gametable">
-    <div class="upperheaders">
-      <h2>You win!</h3>
-      <h3>Play again?</h3>
-    </div>
-    <div class="choices">
-      <button>yes</button>
-      <button>no</button>
-    </div>
-    <div class="boardscontainer">
-      <div class="playerboard">
-        <h2 class="turnheader">Your turn!</h2>
-        <div class="board"></div>
+  <h1 class="title">Battleship</h1>
+  <div class="gametablecontainer">
+    <div id="gametable">
+      <div class="upperheaders">
+        <h2>You win!</h2>
+        <h3>Play again?</h3>
       </div>
-      <div class="enemyboard">
-        <h2 class="turnheader">Enemy's turn!</h2>
-        <div class="board"></div>
+      <div class="choices">
+        <button>yes</button>
+        <button>no</button>
+      </div>
+      <div class="boardscontainer">
+        <h2 class="yourturn turnheader">Your turn!</h2>
+        <div class="player board"></div>
+        <h2 class="enemyturn turnheader">Enemy's turn!</h2>
+        <div class="enemy board"></div>
       </div>
     </div>
   </div>
