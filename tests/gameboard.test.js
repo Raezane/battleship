@@ -177,6 +177,8 @@ describe('ship placement and hit registration', () => {
   });
 
   test("Gameboard should report if all the ships have been sunken", () => {
+
+    let board = testGameBoard.getGameBoard()
     let testShip0 = ship(4);
     let testShip1 = ship(3);
     let testShip2 = ship(3);
@@ -199,13 +201,13 @@ describe('ship placement and hit registration', () => {
     testGameBoard.shipSetter(testShip8, [2,9], [2,9]);
     testGameBoard.shipSetter(testShip9, [0,7], [0,7]); 
 
-    testGameBoard.getGameBoard().forEach((row) => {
-      row.forEach((value, colIndex) => {
-        //if (typeof value == 'object') console.log(value)
-        console.log(value)
-      }); 
-    });
-    
+    for (let row = 0; row < 10; row++) {
+      for (let column = 0; column < 10; column++) {
+        if (board[row][column] !== null && typeof board[row][column] === 'object') {
+          testGameBoard.receiveAttack(row,column)
+        }
+      }
+    }
 
     expect(testGameBoard.getGameBoard()).toEqual([
       ['u', 'u', 'u', 'u', 'u', null, 'u', [testShip9, 'x'], 'u', null],
@@ -219,5 +221,7 @@ describe('ship placement and hit registration', () => {
       ['u', [testShip2, 'x'], 'u', [testShip3, 'x'], [testShip3, 'x'], 'u', null, 'u', [testShip7, 'x'], 'u'],
       ['u', [testShip2, 'x'], 'u', 'u', 'u', 'u', null, 'u', 'u', 'u']
     ]);
+    
+    expect(testGameBoard.areAllSunk()).toBe(true)
   }); 
 });
