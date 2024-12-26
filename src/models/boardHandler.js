@@ -28,6 +28,34 @@ const boardHandler = function() {
     }
   }
 
+  const randomiseCoords = function(ship) {
+
+    let randomCoords = [[], []]
+
+    function getRandomNumber(num) {
+      return Math.floor(Math.random() * num)
+    }
+
+    let direction = getRandomNumber(10)
+    /* here we calculate the possible area for the ship to be set by deducting current ship's length from board length.
+       We need to do this so that part of the ship won't be outside bounds */
+    let possibleArea = board.length - ship.getLength()
+    let shipStart = getRandomNumber(possibleArea)
+    
+    randomCoords[0].push(shipStart)
+    randomCoords[1].push(shipStart + ship.getLength() -1)
+
+    if (direction < 5) {
+      randomCoords[0].unshift(direction)
+      randomCoords[1].unshift(direction)
+    } else {
+      randomCoords[0].push(direction)
+      randomCoords[1].push(direction)
+    }
+
+    return randomCoords
+  }
+
   const shipSetter = function(ship, frontCoords, rearCoords) {
 
     /* first check if the selected area for the ship to be placed is not
@@ -138,13 +166,20 @@ const boardHandler = function() {
       });
     }
 
-    function isInBounds(shipCoords) {
-      const [row, col] = shipCoords;
+    function isInBounds(coords) {
+      const [row, col] = coords;
       return row >= 0 && row < board.length && col >= 0 && col < board[0].length;
     }
 
     function validPlacement(direction) {
 
+      function IsCoordsFormCorrect() {
+        return ((frontCoords[0] == rearCoords[0] && frontCoords[1] < rearCoords[1])
+              || (frontCoords[1] == rearCoords[1] && frontCoords[0] < rearCoords[0])
+              || (frontCoords[1] == rearCoords[1] && frontCoords[0] == rearCoords[0])
+        )
+      }
+ 
       function isSurroundingClear() {
 
         for (const key in surroundingArea) {
@@ -158,6 +193,10 @@ const boardHandler = function() {
           }
         } return true
       }
+
+      if (IsCoordsFormCorrect() == false) return false
+      if (isInBounds(frontCoords) == false) return false
+      if (isInBounds(rearCoords) == false) return false
 
       while (frontCoordsCopy[direction] <= rearCoords[direction]) {
           // check by iterating if the area where ship is placed is null and there aren't ships straight next to it.
@@ -182,6 +221,7 @@ const boardHandler = function() {
 
     let isValid = HorizontalOrVertical(validPlacement);
     if (isValid) HorizontalOrVertical(setShip);
+    else return false
 
   };
 
@@ -221,7 +261,7 @@ const boardHandler = function() {
     } 
   };
 
-  return {getGameBoard, getSunkenShips, areAllSunk, buildBoard, shipSetter, receiveAttack}
+  return {getGameBoard, getSunkenShips, areAllSunk, buildBoard, randomiseCoords, shipSetter, receiveAttack}
 
 }
 
@@ -230,7 +270,8 @@ board.buildBoard();
 let ship0 = ship(4);
 let ship1 = ship(3);
 let ship2 = ship(1);
-board.shipSetter(ship0, [1,0], [1,3]);
+let rndCoords = board.randomiseCoords(ship2)
+board.shipSetter(ship0, [1,0], [1,10]);
 board.shipSetter(ship1, [3,1], [5,1]);
 board.shipSetter(ship2, [0,7], [0,7]);
 board.getGameBoard()
