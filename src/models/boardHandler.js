@@ -1,7 +1,8 @@
 import {ship} from "./shipHandler.js"
 
 const boardHandler = function() {
-  let board = []
+  let board = [];
+  let ships = [];
   let sunkenShips = [];
 
   const markers = {
@@ -10,8 +11,9 @@ const boardHandler = function() {
     shipSurrounding: 'u'
   }
 
-  const getGameBoard = () => board
-  const getSunkenShips = () => sunkenShips
+  const getGameBoard = () => board;
+  const getShips = () => ships;
+  const getSunkenShips = () => sunkenShips;
 
   const areAllSunk = function() {
     if (sunkenShips.length >= 10) return true
@@ -25,9 +27,24 @@ const boardHandler = function() {
         arr.push(null)
       }
       board.push(arr)
-    }
-  }
+    };
+  };
 
+  const createShips = function() {
+    let shipLengths = [4, 3, 3, 2, 2, 2, 1, 1, 1, 1];
+    shipLengths.forEach(shipLength => ships.push(ship(shipLength)));
+  };
+
+  const setCreatedShips = function() {
+    let currentShip = 0
+    while (currentShip < 10) {
+      let coords = randomiseCoords(ships[currentShip]);
+      
+      if (shipSetter(ship, coords[0], coords[1]) !== false) currentShip += 1
+    };
+  };
+
+  //TÄTÄ PITÄÄ TARKASTELLA UUDELLEEN, KOSKA EI ASETA LAIVOJA TASAPUOLISESTI YMPÄRI KENTTÄÄ
   const randomiseCoords = function(ship) {
 
     let randomCoords = [[], []]
@@ -36,21 +53,24 @@ const boardHandler = function() {
       return Math.floor(Math.random() * num)
     }
 
-    let direction = getRandomNumber(10)
-    /* here we calculate the possible area for the ship to be set by deducting current ship's length from board length.
-       We need to do this so that part of the ship won't be outside bounds */
-    let possibleArea = board.length - ship.getLength()
+    let lengthOfShip = ship.getLength()
+    let direction = getRandomNumber(2)
+    /* here we calculate the possible start area for the ship to be set by deducting current ship's length
+    from board length. We need to do this so that part of the ship won't be outside bounds */
+    let possibleArea = board.length - lengthOfShip +1
     let shipStart = getRandomNumber(possibleArea)
     
     randomCoords[0].push(shipStart)
-    randomCoords[1].push(shipStart + ship.getLength() -1)
+    randomCoords[1].push(shipStart + lengthOfShip -1)
 
-    if (direction < 5) {
-      randomCoords[0].unshift(direction)
-      randomCoords[1].unshift(direction)
+    let colOrRow = getRandomNumber(10)
+
+    if (direction == 0) {
+      randomCoords[0].push(colOrRow)
+      randomCoords[1].push(colOrRow)
     } else {
-      randomCoords[0].push(direction)
-      randomCoords[1].push(direction)
+      randomCoords[0].unshift(colOrRow)
+      randomCoords[1].unshift(colOrRow)
     }
 
     return randomCoords
@@ -66,27 +86,32 @@ const boardHandler = function() {
 
     let frontCoordsCopy = getCoordsCopy(frontCoords)
 
-    let surroundingArea = {
-      north: [frontCoordsCopy[0]-1, frontCoordsCopy[1]],
-      northEast: [frontCoordsCopy[0]-1, frontCoordsCopy[1]+1],
-      east: [frontCoordsCopy[0], frontCoordsCopy[1]+1],
-      southEast: [frontCoordsCopy[0]+1, frontCoordsCopy[1]+1],
-      south: [frontCoordsCopy[0]+1, frontCoordsCopy[1]],
-      southWest: [frontCoordsCopy[0]+1, frontCoordsCopy[1]-1],
-      west: [frontCoordsCopy[0], frontCoordsCopy[1]-1],
-      northWest: [frontCoordsCopy[0]-1, frontCoordsCopy[1]-1]
-    };
+    function getSurroundingArea(coords) {
+      let surroundingArea = {
+        north: [coords[0]-1, coords[1]],
+        northEast: [coords[0]-1, coords[1]+1],
+        east: [coords[0], coords[1]+1],
+        southEast: [coords[0]+1, coords[1]+1],
+        south: [coords[0]+1, coords[1]],
+        southWest: [coords[0]+1, coords[1]-1],
+        west: [coords[0], coords[1]-1],
+        northWest: [coords[0]-1, coords[1]-1]
+      }
+      return surroundingArea
+    }
 
     function setShip(direction, frontCoords, rearCoords) {
 
+      let surrounding = getSurroundingArea(frontCoords)
+
       if (direction == 0) {
-        setNorthernSurrounding(surroundingArea.north, surroundingArea.northEast, surroundingArea.northWest)
-        setVertically(surroundingArea.west, surroundingArea.east)
-        setSouthernSurrounding(surroundingArea.south, surroundingArea.southEast, surroundingArea.southWest)
+        setNorthernSurrounding(surrounding.north, surrounding.northEast, surrounding.northWest)
+        setVertically(surrounding.west, surrounding.east)
+        setSouthernSurrounding(surrounding.south, surrounding.southEast, surrounding.southWest)
       } else {
-        setWesternSurrounding(surroundingArea.west, surroundingArea.northWest, surroundingArea.southWest)
-        setHorizontally(surroundingArea.north, surroundingArea.south)
-        setEasternSurrounding(surroundingArea.east, surroundingArea.northEast, surroundingArea.southEast)
+        setWesternSurrounding(surrounding.west, surrounding.northWest, surrounding.southWest)
+        setHorizontally(surrounding.north, surrounding.south)
+        setEasternSurrounding(surrounding.east, surrounding.northEast, surrounding.southEast)
       }
 
       function setVertically(west, east) {
@@ -182,8 +207,10 @@ const boardHandler = function() {
  
       function isSurroundingClear() {
 
-        for (const key in surroundingArea) {
-          let [row, col] = surroundingArea[key]
+        let surrounding = getSurroundingArea(frontCoordsCopy)
+
+        for (const key in surrounding) {
+          let [row, col] = surrounding[key]
           try {
             if (board[row][col] && typeof board[row][col] === 'object') return false
           } catch (error) {
@@ -261,26 +288,34 @@ const boardHandler = function() {
     } 
   };
 
-  return {getGameBoard, getSunkenShips, areAllSunk, buildBoard, randomiseCoords, shipSetter, receiveAttack}
+  return {getGameBoard, getSunkenShips, areAllSunk, buildBoard, createShips, setCreatedShips, getShips, randomiseCoords, shipSetter, receiveAttack}
 
 }
 
 let board = boardHandler();
 board.buildBoard();
+board.createShips();
+//let ship0 = ship(4);
+//let rndCoords = board.randomiseCoords(ship0)
+board.setCreatedShips()
+board.getGameBoard()
+/* board.getShips();
 let ship0 = ship(4);
 let ship1 = ship(3);
-let ship2 = ship(1);
+let ship2 = ship(3);
+let ship3 = ship(1);
 let rndCoords = board.randomiseCoords(ship2)
-board.shipSetter(ship0, [1,0], [1,10]);
+board.shipSetter(ship0, [1,0], [1,3]);
 board.shipSetter(ship1, [3,1], [5,1]);
-board.shipSetter(ship2, [0,7], [0,7]);
+board.shipSetter(ship2, rndCoords[0], rndCoords[1]);
+board.shipSetter(ship3, [0,7], [0,7]);
 board.getGameBoard()
 board.receiveAttack(0,7)
 board.receiveAttack(4,1)
 board.receiveAttack(8,3)
 board.receiveAttack(6,6)
 board.getGameBoard()
-ship1.getHits()
+ship1.getHits() */
 
 
 export {boardHandler}
