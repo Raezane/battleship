@@ -44,7 +44,6 @@ const boardHandler = function() {
     };
   };
 
-  //TÄTÄ PITÄÄ TARKASTELLA UUDELLEEN, KOSKA EI ASETA LAIVOJA TASAPUOLISESTI YMPÄRI KENTTÄÄ
   const randomiseCoords = function(ship) {
 
     let randomCoords = [[], []]
@@ -106,50 +105,30 @@ const boardHandler = function() {
 
       if (direction == 0) {
         setNorthernSurrounding(surrounding.north, surrounding.northEast, surrounding.northWest)
-        setVertically(surrounding.west, surrounding.east)
+        placeSidesAndPartOfShip(0, surrounding.west, surrounding.east)
         setSouthernSurrounding(surrounding.south, surrounding.southEast, surrounding.southWest)
       } else {
         setWesternSurrounding(surrounding.west, surrounding.northWest, surrounding.southWest)
-        setHorizontally(surrounding.north, surrounding.south)
+        placeSidesAndPartOfShip(1, surrounding.north, surrounding.south)
         setEasternSurrounding(surrounding.east, surrounding.northEast, surrounding.southEast)
       }
 
-      function setVertically(west, east) {
-        let westCoordsCopy = getCoordsCopy(west);
-        let eastCoordsCopy = getCoordsCopy(east);
+      function placeSidesAndPartOfShip(axis, side1, side2) {
+        let side1coordsCopy = getCoordsCopy(side1);
+        let side2coordsCopy = getCoordsCopy(side2);
         while (frontCoords[direction] <= rearCoords[direction]) {
 
-          if (isInBounds(westCoordsCopy)) {
-            board[westCoordsCopy[0]][westCoordsCopy[1]] = markers.shipSurrounding
-            westCoordsCopy[0] += 1
+          if (isInBounds(side1coordsCopy)) {
+            board[side1coordsCopy[0]][side1coordsCopy[1]] = markers.shipSurrounding
+            side1coordsCopy[axis] += 1
           }
 
           board[frontCoords[0]][frontCoords[1]] = ship
           frontCoords[direction] += 1
 
-          if (isInBounds(eastCoordsCopy)) {
-            board[eastCoordsCopy[0]][eastCoordsCopy[1]] = markers.shipSurrounding
-            eastCoordsCopy[0] += 1 
-          }
-        }
-      }
-
-      function setHorizontally(north, south) {
-        let northCoordsCopy = getCoordsCopy(north);
-        let southCoordsCopy = getCoordsCopy(south);
-        while (frontCoords[direction] <= rearCoords[direction]) {
-
-          if (isInBounds(northCoordsCopy)) {
-            board[northCoordsCopy[0]][northCoordsCopy[1]] = markers.shipSurrounding
-            northCoordsCopy[1] += 1
-          }
-
-          board[frontCoords[0]][frontCoords[1]] = ship
-          frontCoords[direction] += 1
-
-          if (isInBounds(southCoordsCopy)) {
-            board[southCoordsCopy[0]][southCoordsCopy[1]] = markers.shipSurrounding
-            southCoordsCopy[1] += 1 
+          if (isInBounds(side2coordsCopy)) {
+            board[side2coordsCopy[0]][side2coordsCopy[1]] = markers.shipSurrounding
+            side2coordsCopy[axis] += 1 
           }
         }
       }

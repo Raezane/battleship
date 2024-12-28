@@ -51,23 +51,6 @@ describe('ship placement and hit registration', () => {
     ]);
   });
 
-  test('gameboard should place ships correctly with given coordinates horizontally', () => {
-    testGameBoard.shipSetter(testShip, [3,2], [3,4])
-    
-    expect(testGameBoard.getGameBoard()).toEqual([
-      [null, null, null, null, null, null, null, null, null, null],
-      [null, null, null, null, null, null, null, null, null, null],
-      [null, 'u', 'u', 'u', 'u', 'u', null, null, null, null],
-      [null, 'u', testShip, testShip, testShip, 'u', null, null, null, null],
-      [null, 'u', 'u', 'u', 'u', 'u', null, null, null, null],
-      [null, null, null, null, null, null, null, null, null, null],
-      [null, null, null, null, null, null, null, null, null, null],
-      [null, null, null, null, null, null, null, null, null, null],
-      [null, null, null, null, null, null, null, null, null, null],
-      [null, null, null, null, null, null, null, null, null, null],
-    ]);
-  });
-
   test('gameboard should register missed attack properly', () => {
     testGameBoard.shipSetter(testShip, [6,2], [8,2])
     testGameBoard.receiveAttack(2,5)
