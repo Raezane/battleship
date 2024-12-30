@@ -40,11 +40,11 @@ const boardHandler = function() {
     while (currentShip < 10) {
       let coords = randomiseCoords(ships[currentShip]);
       
-      if (shipSetter(ship, coords[0], coords[1]) !== false) currentShip += 1
+      if (shipSetter(ships[currentShip], coords[0], coords[1]) !== false) currentShip += 1
     };
   };
 
-  const randomiseCoords = function(ship) {
+  const randomiseCoords = function(shipObj) {
 
     let randomCoords = [[], []]
 
@@ -52,7 +52,7 @@ const boardHandler = function() {
       return Math.floor(Math.random() * num)
     }
 
-    let lengthOfShip = ship.getLength()
+    let lengthOfShip = shipObj.getLength()
     let direction = getRandomNumber(2)
     /* here we calculate the possible start area for the ship to be set by deducting current ship's length
     from board length. We need to do this so that part of the ship won't be outside bounds */
@@ -75,7 +75,7 @@ const boardHandler = function() {
     return randomCoords
   }
 
-  const shipSetter = function(ship, frontCoords, rearCoords) {
+  const shipSetter = function(shipObj, frontCoords, rearCoords) {
 
     /* first check if the selected area for the ship to be placed is not
     already occupied. We'll create copy of the actual coordinates here so 
@@ -123,7 +123,7 @@ const boardHandler = function() {
             side1coordsCopy[axis] += 1
           }
 
-          board[frontCoords[0]][frontCoords[1]] = ship
+          board[frontCoords[0]][frontCoords[1]] = shipObj
           frontCoords[direction] += 1
 
           if (isInBounds(side2coordsCopy)) {
