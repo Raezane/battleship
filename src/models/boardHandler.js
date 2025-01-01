@@ -9,11 +9,13 @@ const boardHandler = function() {
     hit: 'x',
     miss: 'o',
     shipSurrounding: 'u'
-  }
+  };
 
   const getGameBoard = () => board;
   const getShips = () => ships;
   const getSunkenShips = () => sunkenShips;
+
+  const isShip = (boardEntry) => boardEntry !== null && typeof boardEntry === 'object';
 
   const areAllSunk = function() {
     if (sunkenShips.length >= 10) return true
@@ -44,13 +46,13 @@ const boardHandler = function() {
     };
   };
 
+  const getRandomNumber = function(num) {
+    return Math.floor(Math.random() * num)
+  }
+
   const randomiseCoords = function(shipObj) {
 
     let randomCoords = [[], []]
-
-    function getRandomNumber(num) {
-      return Math.floor(Math.random() * num)
-    }
 
     let lengthOfShip = shipObj.getLength()
     let direction = getRandomNumber(2)
@@ -75,6 +77,25 @@ const boardHandler = function() {
     return randomCoords
   }
 
+  const getSurroundingArea = function(coords) {
+    let surroundingArea = {
+      north: [coords[0]-1, coords[1]],
+      northEast: [coords[0]-1, coords[1]+1],
+      east: [coords[0], coords[1]+1],
+      southEast: [coords[0]+1, coords[1]+1],
+      south: [coords[0]+1, coords[1]],
+      southWest: [coords[0]+1, coords[1]-1],
+      west: [coords[0], coords[1]-1],
+      northWest: [coords[0]-1, coords[1]-1]
+    }
+    return surroundingArea
+  }
+
+  const isInBounds = function(coords) {
+    const [row, col] = coords;
+    return row >= 0 && row < board.length && col >= 0 && col < board[0].length;
+  }
+
   const shipSetter = function(shipObj, frontCoords, rearCoords) {
 
     /* first check if the selected area for the ship to be placed is not
@@ -84,20 +105,6 @@ const boardHandler = function() {
     const getCoordsCopy = (coords) => [...coords];
 
     let frontCoordsCopy = getCoordsCopy(frontCoords)
-
-    function getSurroundingArea(coords) {
-      let surroundingArea = {
-        north: [coords[0]-1, coords[1]],
-        northEast: [coords[0]-1, coords[1]+1],
-        east: [coords[0], coords[1]+1],
-        southEast: [coords[0]+1, coords[1]+1],
-        south: [coords[0]+1, coords[1]],
-        southWest: [coords[0]+1, coords[1]-1],
-        west: [coords[0], coords[1]-1],
-        northWest: [coords[0]-1, coords[1]-1]
-      }
-      return surroundingArea
-    }
 
     function setShip(direction, frontCoords, rearCoords) {
 
@@ -166,14 +173,9 @@ const boardHandler = function() {
       surroundings.forEach(coords => {
         if (isInBounds(coords)) {
           board[coords[0]][coords[1]] = markers.shipSurrounding
-        }
+        };
       });
-    }
-
-    function isInBounds(coords) {
-      const [row, col] = coords;
-      return row >= 0 && row < board.length && col >= 0 && col < board[0].length;
-    }
+    };
 
     function validPlacement(direction) {
 
@@ -191,7 +193,7 @@ const boardHandler = function() {
         for (const key in surrounding) {
           let [row, col] = surrounding[key]
           try {
-            if (board[row][col] && typeof board[row][col] === 'object') return false
+            if (isShip(board[row][col])) return false
           } catch (error) {
             /* if the current value is undefined (outside bounds), this catch-block catches it without 
             crashing the app */ 
@@ -267,7 +269,7 @@ const boardHandler = function() {
     } 
   };
 
-  return {getGameBoard, getSunkenShips, areAllSunk, buildBoard, createShips, setCreatedShips, getShips, randomiseCoords, shipSetter, receiveAttack}
+  return {getGameBoard, getSunkenShips, isShip, areAllSunk, buildBoard, createShips, setCreatedShips, getShips, randomiseCoords, getRandomNumber, getSurroundingArea, isInBounds, shipSetter, receiveAttack}
 
 }
 
