@@ -9,9 +9,10 @@ const gameController = function() {
   const computer = playerHandler();
 
   function activateDOMelements() {
-    display.initiateClickables();
+    display.initiateDOM();
     display.attachListeners();
   }
+
   activateDOMelements();
 
   player.initiateBoard();
@@ -23,8 +24,9 @@ const gameController = function() {
   computer.playerBoard.setCreatedShips();
 
   display.boardRefresher(player.playerBoard.getGameBoard(), 'player');
-  display.boardRefresher(computer.playerBoard.getGameBoard(), 'computer');
 
+  //function getDirectionAndLength() {}
 }
+
 
 export {gameController}
