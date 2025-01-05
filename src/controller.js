@@ -19,13 +19,12 @@ const gameController = function() {
   player.playerBoard.createShips();
   player.playerBoard.setCreatedShips();
 
+
   computer.initiateBoard();
   computer.playerBoard.createShips();
   computer.playerBoard.setCreatedShips();
 
-  display.boardRefresher(player.playerBoard.getGameBoard(), 'player');
-
-  //function getDirectionAndLength() {}
+  display.setPlayerShips(player.playerBoard.getGameBoard());
 }
 
 
