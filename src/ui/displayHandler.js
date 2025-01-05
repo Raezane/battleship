@@ -1,5 +1,7 @@
 import { gameController } from "../controller.js";
-import { boardHandler } from "../models/boardHandler.js";
+import { getSurroundingArea, getRandomNumber, isInBounds, isShip } from "../utilities.js";
+
+//ship models
 import ship1 from "../assets/images/boat1.png";
 import ship2A from "../assets/images/ship_small_body.png";
 import ship2B from "../assets/images/ship_small_body_destroyed.png";
@@ -8,11 +10,12 @@ import ship3B from "../assets/images/ship_medium_body_destroyed.png";
 import ship4A from "../assets/images/ship_large_body.png";
 import ship4B from "../assets/images/ship_large_body_destroyed.png";
 
-const displayHandler = function() {
+//explosion and miss models
+import explosion from "../assets/images/explosion.png";
+import watersplash from "../assets/images/watersplash.png";
 
-  /* we declare a general board object here so that we may use its 
-  helper functions */
-  let boardObject = boardHandler();
+
+const displayHandler = function() {
 
   //declare interactive dom elements
   let playerBoardcells, enemyBoardCells
@@ -20,7 +23,6 @@ const displayHandler = function() {
   document.addEventListener('DOMContentLoaded', () => {
     initiateDOM();
     //initiateImages()
-    attachListeners();
   });
 
   function initiateDOM() {
@@ -33,7 +35,11 @@ const displayHandler = function() {
   } */
  
   function attachListeners() {
-
+    enemyBoardCells.forEach((cell) => {
+      cell.addEventListener('click', (e) => {
+        e.target.style.backgroundColor = 'blue'
+      })
+    }) 
   }
 
   function getProperShipImg(shipObject, shipLength) {
@@ -58,20 +64,18 @@ const displayHandler = function() {
     let shipLength = shipObj.getLength();
     
     if (shipLength > 1) {
-      let surrounding = boardObject.getSurroundingArea([rowInt, colInt])
+      let surrounding = getSurroundingArea([rowInt, colInt])
 
       /* we'll also need to check if the received surroundingCoords are in bounds
       before we check in which direction should the ship image be placed */
-      if (boardObject.isInBounds(surrounding.east)) {
-        if (boardObject.isShip(board[surrounding.south[0]][surrounding.south[1]])) {
-          direction = 'vertical';
-        } 
-      } else direction = 'horizontal';
+      if (isInBounds(surrounding.east)) {
+        if (isShip(board[surrounding.east[0]][surrounding.east[1]])) {
+          direction = 'horizontal';
+        } else direction = 'vertical';
+      } 
     } else {
       // if the shipLength is only 1, we may set a random direction for it
-        let randomDirection = boardObject.getRandomNumber(2);
-        if (randomDirection == 0) direction = 'vertical';
-        else direction = 'horizontal';
+        direction = 'vertical';
       };
 
     return [direction, shipLength];
@@ -88,12 +92,21 @@ const displayHandler = function() {
     shipLargeDestroyed: ship4B,
   }
 
-  function setImage(shipImg, cell, direction) {
+  function setImage(shipImg, cell, shipLength, direction) {
     const ship = new Image();
     ship.src = shipImg;
 
-    //JATKA TÄSTÄ!
-    cell.classList.add('placedShip');
+    if (direction === 'horizontal') cell.classList.add('imageHorizontal');
+    else cell.classList.add('imageVertical');
+
+    if (shipLength === 1) {
+      cell.classList.add('boat');
+    } else if (shipLength === 2) {
+      cell.classList.add('smallShip');
+    } else if (shipLength === 3) {
+      cell.classList.add('mediumShip');
+    } else cell.classList.add('largeShip');
+
     cell.append(ship);
   }
 
@@ -101,25 +114,27 @@ const displayHandler = function() {
     shipObj.setImg();
   }
 
-  function boardRefresher(board, whichOne) {
+  function setPlayerShips(boardArray) {
 
-    let boardCells;
-    whichOne === 'player' ? boardCells = playerBoardcells : boardCells = enemyBoardCells;
-
-    boardCells.forEach(cell => {
+    //tähän pitäisi saada päivitystoiminto myös sen osalta, 
+    // kun tietokone hyökkää johonkin ruutuun
+    playerBoardcells.forEach(cell => {
       let row = cell.getAttribute('row');
       let col = cell.getAttribute('col');
-      if (boardObject.isShip(board[row][col]) && board[row][col].isImgSet() == false) {
-        let directionAndLength = getDirectionAndLength(board[row][col], board, row, col);
+      if (isShip(boardArray[row][col]) && boardArray[row][col].isImgSet() == false) {
+        
+        let directionAndLength = getDirectionAndLength(boardArray[row][col], boardArray, row, col);
         let shipLength = directionAndLength[1];
-        let shipImage = getProperShipImg(board[row][col], shipLength);
-        setImage(shipImage, cell, directionAndLength[0]);
-        informShipObj(board[row][col])
+        let direction = directionAndLength[0];
+        let shipImage = getProperShipImg(boardArray[row][col], shipLength);
+        
+        setImage(shipImage, cell, shipLength, direction);
+        informShipObj(boardArray[row][col])
       };
     });
   };
 
-  return {initiateDOM, attachListeners, boardRefresher}
+  return {initiateDOM, attachListeners, setPlayerShips}
 };
 
 export {displayHandler}

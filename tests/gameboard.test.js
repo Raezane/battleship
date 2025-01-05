@@ -80,9 +80,9 @@ describe('ship placement and hit registration', () => {
       [null, null, null, null, null, null, null, null, null, null],
       [null, null, null, null, null, null, null, null, null, null],
       [null, null, null, null, null, null, null, null, null, null],
-      [null, 'u', 'u', 'u', 'u', 'u', 'u', null, null, null],
+      [null, 'u', 's', 'u', 's', 'u', 'u', null, null, null],
       [null, 'u', testShip, [testShip, 'x'], testShip, testShip, 'u', null, null, null],
-      [null, 'u', 'u', 'u', 'u', 'u', 'u', null, null, null],
+      [null, 'u', 's', 'u', 's', 'u', 'u', null, null, null],
       [null, null, null, null, null, null, null, null, null, null],
       [null, null, null, null, null, null, null, null, null, null],
     ]);
@@ -138,7 +138,7 @@ describe('ship placement and hit registration', () => {
     ]);
   });
 
-  test("ship can be placed to edge correctly", () => {
+  test("ship can be placed to edges correctly", () => {
     let testShip = ship(3);
     let testShip2 = ship(2);
 
@@ -193,16 +193,16 @@ describe('ship placement and hit registration', () => {
     }
 
     expect(testGameBoard.getGameBoard()).toEqual([
-      ['u', 'u', 'u', 'u', 'u', null, 'u', [testShip9, 'x'], 'u', null],
-      [[testShip0, 'x'], [testShip0, 'x'], [testShip0, 'x'], [testShip0, 'x'], 'u', null, 'u', 'u', 'u', 'u'],
-      ['u', 'u', 'u', 'u', 'u', 'u', null, null, 'u', [testShip8, 'x']],
-      ['u', [testShip1, 'x'], 'u', 'u', [testShip6, 'x'], 'u', null, null, 'u', 'u'],
-      ['u', [testShip1, 'x'], 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u'],
-      ['u', [testShip1, 'x'], 'u', [testShip4, 'x'], 'u', null, 'u', [testShip5, 'x'], [testShip5, 'x'], 'u'],
-      ['u', 'u', 'u', [testShip4, 'x'], 'u', null, 'u', 'u', 'u', 'u'],
-      ['u', [testShip2, 'x'], 'u', 'u', 'u', 'u', null, 'u', 'u', 'u'],
-      ['u', [testShip2, 'x'], 'u', [testShip3, 'x'], [testShip3, 'x'], 'u', null, 'u', [testShip7, 'x'], 'u'],
-      ['u', [testShip2, 'x'], 'u', 'u', 'u', 'u', null, 'u', 'u', 'u']
+      ['s', 's', 's', 's', 's', null, 's', [testShip9, 'x'], 's', null],
+      [[testShip0, 'x'], [testShip0, 'x'], [testShip0, 'x'], [testShip0, 'x'], 's', null, 's', 's', 's', 's'],
+      ['s', 's', 's', 's', 's', 's', null, null, 's', [testShip8, 'x']],
+      ['s', [testShip1, 'x'], 's', 's', [testShip6, 'x'], 's', null, null, 's', 's'],
+      ['s', [testShip1, 'x'], 's', 's', 's', 's', 's', 's', 's', 's'],
+      ['s', [testShip1, 'x'], 's', [testShip4, 'x'], 's', null, 's', [testShip5, 'x'], [testShip5, 'x'], 's'],
+      ['s', 's', 's', [testShip4, 'x'], 's', null, 's', 's', 's', 's'],
+      ['s', [testShip2, 'x'], 's', 's', 's', 's', null, 's', 's', 's'],
+      ['s', [testShip2, 'x'], 's', [testShip3, 'x'], [testShip3, 'x'], 's', null, 's', [testShip7, 'x'], 's'],
+      ['s', [testShip2, 'x'], 's', 's', 's', 's', null, 's', 's', 's']
     ]);
     
     expect(testGameBoard.areAllSunk()).toBe(true)

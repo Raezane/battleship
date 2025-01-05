@@ -1,54 +1,54 @@
-import {ship} from "./shipHandler.js"
+import {ship} from "./shipHandler.js";
+import { getSurroundingArea, getRandomNumber, isInBounds, isShip } from "../utilities.js";
 
 const boardHandler = function() {
   let board = [];
-  let ships = [];
+  let createdShips = [];
+  let placedShips = [];
   let sunkenShips = [];
 
   const markers = {
     hit: 'x',
+    hitSplash: 's',
     miss: 'o',
-    shipSurrounding: 'u'
+    shipSurrounding: 'u',
   };
 
   const getGameBoard = () => board;
-  const getShips = () => ships;
+  const getCreatedShips = () => createdShips;
+  const getPlacedShips = () => placedShips;
   const getSunkenShips = () => sunkenShips;
-
-  const isShip = (boardEntry) => boardEntry !== null && typeof boardEntry === 'object';
 
   const areAllSunk = function() {
     if (sunkenShips.length >= 10) return true
     return false
   }
 
+  /* buildBoard function creates the gameboard and with the same iteration, 
+  also returns available moves for each player. */
   const buildBoard = function() {
     for (let y = 0; y < 10; y++) {
       let arr = [];
       for (let x = 0; x < 10; x++) {
-        arr.push(null)
+        arr.push(null);
       }
-      board.push(arr)
+      board.push(arr);
     };
   };
 
   const createShips = function() {
     let shipLengths = [4, 3, 3, 2, 2, 2, 1, 1, 1, 1];
-    shipLengths.forEach(shipLength => ships.push(ship(shipLength)));
+    shipLengths.forEach(shipLength => createdShips.push(ship(shipLength)));
   };
 
   const setCreatedShips = function() {
     let currentShip = 0
     while (currentShip < 10) {
-      let coords = randomiseCoords(ships[currentShip]);
+      let coords = randomiseCoords(createdShips[currentShip]);
       
-      if (shipSetter(ships[currentShip], coords[0], coords[1]) !== false) currentShip += 1
+      if (shipSetter(createdShips[currentShip], coords[0], coords[1]) !== false) currentShip += 1
     };
   };
-
-  const getRandomNumber = function(num) {
-    return Math.floor(Math.random() * num)
-  }
 
   const randomiseCoords = function(shipObj) {
 
@@ -77,36 +77,23 @@ const boardHandler = function() {
     return randomCoords
   }
 
-  const getSurroundingArea = function(coords) {
-    let surroundingArea = {
-      north: [coords[0]-1, coords[1]],
-      northEast: [coords[0]-1, coords[1]+1],
-      east: [coords[0], coords[1]+1],
-      southEast: [coords[0]+1, coords[1]+1],
-      south: [coords[0]+1, coords[1]],
-      southWest: [coords[0]+1, coords[1]-1],
-      west: [coords[0], coords[1]-1],
-      northWest: [coords[0]-1, coords[1]-1]
-    }
-    return surroundingArea
-  }
-
-  const isInBounds = function(coords) {
-    const [row, col] = coords;
-    return row >= 0 && row < board.length && col >= 0 && col < board[0].length;
-  }
-
   const shipSetter = function(shipObj, frontCoords, rearCoords) {
 
     /* first check if the selected area for the ship to be placed is not
     already occupied. We'll create copy of the actual coordinates here so 
     that the iterator won't modify the original ones */
-
     const getCoordsCopy = (coords) => [...coords];
 
     let frontCoordsCopy = getCoordsCopy(frontCoords)
 
     function setShip(direction, frontCoords, rearCoords) {
+
+      placedShips.push({placedShip: shipObj, coords: [frontCoords, rearCoords]})
+
+      /* refresh the value of frontCoordsCopy to original values of front- and rearCoords
+      so that original values still won't be mutated and thus we may use them later when
+      searching for ship's front and rear coords when the ship has sunk */
+      frontCoordsCopy = getCoordsCopy(frontCoords)
 
       let surrounding = getSurroundingArea(frontCoords)
 
@@ -123,15 +110,15 @@ const boardHandler = function() {
       function placeSidesAndPartOfShip(axis, side1, side2) {
         let side1coordsCopy = getCoordsCopy(side1);
         let side2coordsCopy = getCoordsCopy(side2);
-        while (frontCoords[direction] <= rearCoords[direction]) {
+        while (frontCoordsCopy[direction] <= rearCoords[direction]) {
 
           if (isInBounds(side1coordsCopy)) {
             board[side1coordsCopy[0]][side1coordsCopy[1]] = markers.shipSurrounding
             side1coordsCopy[axis] += 1
           }
 
-          board[frontCoords[0]][frontCoords[1]] = shipObj
-          frontCoords[direction] += 1
+          board[frontCoordsCopy[0]][frontCoordsCopy[1]] = shipObj
+          frontCoordsCopy[direction] += 1
 
           if (isInBounds(side2coordsCopy)) {
             board[side2coordsCopy[0]][side2coordsCopy[1]] = markers.shipSurrounding
@@ -147,9 +134,9 @@ const boardHandler = function() {
       function setSouthernSurrounding(...surroundings) {
         let southernCoords = 
         [
-          [frontCoords[direction], surroundings[0][1]], 
-          [frontCoords[direction], surroundings[1][1]],
-          [frontCoords[direction], surroundings[2][1]],
+          [frontCoordsCopy[direction], surroundings[0][1]], 
+          [frontCoordsCopy[direction], surroundings[1][1]],
+          [frontCoordsCopy[direction], surroundings[2][1]],
         ] 
 
         directionIterator(southernCoords)
@@ -161,9 +148,9 @@ const boardHandler = function() {
 
       function setEasternSurrounding(...surroundings) {
         let easternCoords = [
-          [surroundings[0][0], frontCoords[direction]], 
-          [surroundings[1][0], frontCoords[direction]],
-          [surroundings[2][0], frontCoords[direction]]
+          [surroundings[0][0], frontCoordsCopy[direction]], 
+          [surroundings[1][0], frontCoordsCopy[direction]],
+          [surroundings[2][0], frontCoordsCopy[direction]]
         ]
         directionIterator(easternCoords)
       }
@@ -239,20 +226,59 @@ const boardHandler = function() {
       board[y][x] = markers.miss;
     }
 
+    function closeCall() {
+      board[y][x] = [markers.shipSurrounding, markers.miss];
+    };
+
     function attackHit() {
       board[y][x].hit();
       board[y][x] = [board[y][x], markers.hit];
-      checkIfSunk(board[y][x][0])
+
+      let surrounding = getSurroundingArea([y, x]);
+      let diagonals = [surrounding.northEast, surrounding.southEast, surrounding.southWest, surrounding.northWest]
+      splashSurrounding(diagonals);
+
+      if (checkIfSunk(board[y][x][0])) {
+        let shipFrontAndRear = getShipEndsCoords(board[y][x][0]);
+        let frontSurrounding = getSurroundingArea(shipFrontAndRear[0]);
+        let rearSurrounding = getSurroundingArea(shipFrontAndRear[1]);
+
+        splashShipEnds(frontSurrounding, rearSurrounding);
+        
+        areAllSunk();
+      };
     };
 
-    function closeCall() {
-      board[y][x] = [markers.shipSurrounding, markers.miss];
+    function getShipEndsCoords(shipObj) {
+      for (let obj of placedShips) {
+        if (shipObj === obj.placedShip) return obj.coords
+      }
+    }
+
+    function splashSurrounding(diagonals) {
+      diagonals.forEach((cell) => {
+        if (isInBounds(cell)) {
+          board[cell[0]][cell[1]] = markers.hitSplash
+        };
+      });
+    };
+
+    function splashShipEnds(frontSurrounding, rearSurrounding) {
+      let frontVerAndHorSides = [frontSurrounding.north, frontSurrounding.east, frontSurrounding.south, frontSurrounding.west];
+      let rearVerAndHorSides = [rearSurrounding.north, rearSurrounding.east, rearSurrounding.south, rearSurrounding.west];
+      let combined = [...frontVerAndHorSides, ...rearVerAndHorSides]
+
+      combined.forEach((cell) => {
+        if (isInBounds(cell) && board[cell[0]][cell[1]] == markers.shipSurrounding) {
+          board[cell[0]][cell[1]] = markers.hitSplash
+        };
+      });
     };
 
     function checkIfSunk(thisShip) {
       if (thisShip.isSunk()) {
         sunkenShips.push(thisShip);
-        areAllSunk()
+        return true
       };
     };
 
@@ -262,24 +288,32 @@ const boardHandler = function() {
       //also a miss, but hit to ship surrounding
     } else if (board[y][x] == markers.shipSurrounding) {
       closeCall();
-    /* if not a number, then check if ship already resides in the square -> in other words, is the square a ship object. 
-      If so, then hit the ship */
-    } else if (typeof board[y][x] == 'object') {
+    /* if not a number, then check if ship already resides in the square -> 
+    in other words, is the square a ship object. If so, then hit the ship */
+    } else if (isShip(board[y][x])) {
       attackHit();
     } 
   };
 
-  return {getGameBoard, getSunkenShips, isShip, areAllSunk, buildBoard, createShips, setCreatedShips, getShips, randomiseCoords, getRandomNumber, getSurroundingArea, isInBounds, shipSetter, receiveAttack}
+  return {getGameBoard, getSunkenShips, areAllSunk, buildBoard, createShips, setCreatedShips, getCreatedShips, getPlacedShips, randomiseCoords, shipSetter, receiveAttack}
 
 }
 
 let board = boardHandler();
 board.buildBoard();
 board.createShips();
-//let ship0 = ship(4);
-//let rndCoords = board.randomiseCoords(ship0)
-board.setCreatedShips()
+let ship0 = ship(4);
+let ship1 = ship(4);
+board.shipSetter(ship1, [1,8], [4,8]);
+board.shipSetter(ship0, [6,2], [6,5]);
+board.receiveAttack(6,3);
+board.receiveAttack(6,2);
+board.receiveAttack(6,4);
+board.receiveAttack(6,5);
 board.getGameBoard()
+//let rndCoords = board.randomiseCoords(ship0)
+//board.setCreatedShips()
+//board.getGameBoard()
 /* board.getShips();
 let ship0 = ship(4);
 let ship1 = ship(3);
