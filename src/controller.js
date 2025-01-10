@@ -28,6 +28,7 @@ const gameController = function() {
   console.log(computer.playerBoard.getGameBoard());
 
   display.setPlayerShips(player.playerBoard.getGameBoard());
+  display
 
   function startGame() {
 
@@ -41,12 +42,15 @@ const gameController = function() {
     let colInt = +col
     
     let whichGameBoard;
+
     if (domBoard == 'player') {
+      domBoard = 'mainBoardPlayer'
       whichGameBoard = player.playerBoard
-      player.makeMove(rowInt, colInt);
+      player.makeMove([rowInt, colInt]);
     } else {
+      domBoard = 'mainBoardEnemy'
       whichGameBoard = computer.playerBoard
-      computer.makeMove(rowInt, colInt);
+      computer.makeMove([rowInt, colInt]);
     }
     
     whichGameBoard.receiveAttack(rowInt, colInt);

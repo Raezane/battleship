@@ -18,8 +18,10 @@ const displayHandler = function() {
 
   //declare interactive dom elements in object
   let boardCells = {
-    'player': null,
-    'enemy': null
+    'subBoardPlayer': null,
+    'mainBoardPlayer': null,
+    'subBoardEnemy': null,
+    'mainBoardEnemy': null
   }
 
   document.addEventListener('DOMContentLoaded', () => {
@@ -28,8 +30,10 @@ const displayHandler = function() {
   });
 
   function initiateDOM() {
-    boardCells['player'] = document.querySelectorAll('.player div');
-    boardCells['enemy'] = document.querySelectorAll('.enemy div');
+    boardCells['subBoardPlayer'] = document.querySelectorAll('.sub > div');
+    boardCells['mainBoardPlayer'] = document.querySelectorAll('.player > div:nth-child(n+2)');
+    //boardCells['subBoardEnemy'] = document.querySelectorAll('.enemy > div');
+    //boardCells['mainBoardEnemy'] = document.querySelectorAll('.enemy > div:nth-child(n+2)');
   }
 
   /* function initiateImages() {
@@ -44,8 +48,8 @@ const displayHandler = function() {
       });
     };
 
-    setBoardCellListeners(boardCells['player']);
-    setBoardCellListeners(boardCells['enemy']);
+    setBoardCellListeners(boardCells['mainBoardPlayer']);
+    //setBoardCellListeners(boardCells['mainBoardEnemy']);
   };
 
   function getClickedCell() {
@@ -129,7 +133,7 @@ const displayHandler = function() {
 
   function setPlayerShips(boardArray) {
 
-    boardCells['player'].forEach(cell => {
+    boardCells['subBoardPlayer'].forEach(cell => {
       let row = cell.getAttribute('row');
       let col = cell.getAttribute('col');
       if (isShip(boardArray[row][col]) && boardArray[row][col].isImgSet() == false) {
@@ -148,12 +152,14 @@ const displayHandler = function() {
   function setMissImage(cell) {
     const missImage = new Image();
     missImage.src = watersplash;
+    missImage.id = 'watersplashImg'
     cell.append(missImage);
   }
 
   function setHitImage(cell) {
     const hitImage = new Image();
     hitImage.src = explosion;
+    hitImage.id = 'explosionImg'
     cell.append(hitImage);
   }
 

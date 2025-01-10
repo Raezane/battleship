@@ -56,6 +56,7 @@ html, body {
 }
 
 .boardscontainer {
+  
   grid-area: 3 / 1 / 4 / 5;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 30px 400px;
@@ -64,6 +65,18 @@ html, body {
   align-items: center;
   justify-items: center;
   grid-auto-flow: column;
+
+  .player {
+    position: relative;
+  }
+
+  .sub {
+    position: absolute;
+
+    div {
+      z-index: 1;
+    }
+  }
 
   .board {
     display: grid;
@@ -76,14 +89,32 @@ html, body {
   }
 }
 
-.board div {
+.sub div,
+.player > div:nth-child(n+2),
+.enemy div {
   display: flex;
   justify-content: center;
-  //align-items: center;
+}
+
+.player > div:nth-child(n+2),
+.enemy div {
+  z-index: 2;
+  align-items: center;
   box-sizing: border-box;
   width: 100%;
   height: 100%;
   border: 1px solid rgba(130, 130, 130, 0.4);
+}
+
+#watersplashImg {
+  width: 100%;
+  height: 100%;
+  opacity: 0.95;
+}
+
+#explosionImg {
+  width: 75%;
+  height: 75%;
 }
 
 .boat img {
@@ -103,6 +134,7 @@ html, body {
 }
 
 .largeShip img {
+  
   width: 27px;
   height: 132px;
 }
