@@ -1,4 +1,4 @@
-import { gameController } from "../controller.js";
+import { controller } from "../index.js";
 import { getSurroundingArea, getRandomNumber, isInBounds, isShip } from "../utilities.js";
 
 //ship models
@@ -10,15 +10,17 @@ import ship3B from "../assets/images/ship_medium_body_destroyed.png";
 import ship4A from "../assets/images/ship_large_body.png";
 import ship4B from "../assets/images/ship_large_body_destroyed.png";
 
-//explosion and miss models
+//explosion and misshit models
 import explosion from "../assets/images/explosion.png";
 import watersplash from "../assets/images/watersplash.png";
 
-
 const displayHandler = function() {
 
-  //declare interactive dom elements
-  let playerBoardcells, enemyBoardCells
+  //declare interactive dom elements in object
+  let boardCells = {
+    'player': null,
+    'enemy': null
+  }
 
   document.addEventListener('DOMContentLoaded', () => {
     initiateDOM();
@@ -26,8 +28,8 @@ const displayHandler = function() {
   });
 
   function initiateDOM() {
-    playerBoardcells = document.querySelectorAll('.player div');
-    enemyBoardCells = document.querySelectorAll('.enemy div');
+    boardCells['player'] = document.querySelectorAll('.player div');
+    boardCells['enemy'] = document.querySelectorAll('.enemy div');
   }
 
   /* function initiateImages() {
@@ -35,12 +37,23 @@ const displayHandler = function() {
   } */
  
   function attachListeners() {
-    enemyBoardCells.forEach((cell) => {
-      cell.addEventListener('click', (e) => {
-        e.target.style.backgroundColor = 'blue'
-      })
-    }) 
-  }
+    
+    function setBoardCellListeners(playerOrComp) {
+      playerOrComp.forEach((cell) => {
+        cell.addEventListener('click', getClickedCell)
+      });
+    };
+
+    setBoardCellListeners(boardCells['player']);
+    setBoardCellListeners(boardCells['enemy']);
+  };
+
+  function getClickedCell() {
+    let clickedBoard = this.parentNode.classList[0];
+    let row = this.getAttribute('row');
+    let col = this.getAttribute('col');
+    controller.handleAttack(clickedBoard, row, col);
+  };
 
   function getProperShipImg(shipObject, shipLength) {
     let isSunk = shipObject.isSunk();
@@ -92,7 +105,7 @@ const displayHandler = function() {
     shipLargeDestroyed: ship4B,
   }
 
-  function setImage(shipImg, cell, shipLength, direction) {
+  function setShipImage(shipImg, cell, shipLength, direction) {
     const ship = new Image();
     ship.src = shipImg;
 
@@ -116,9 +129,7 @@ const displayHandler = function() {
 
   function setPlayerShips(boardArray) {
 
-    //tähän pitäisi saada päivitystoiminto myös sen osalta, 
-    // kun tietokone hyökkää johonkin ruutuun
-    playerBoardcells.forEach(cell => {
+    boardCells['player'].forEach(cell => {
       let row = cell.getAttribute('row');
       let col = cell.getAttribute('col');
       if (isShip(boardArray[row][col]) && boardArray[row][col].isImgSet() == false) {
@@ -128,13 +139,42 @@ const displayHandler = function() {
         let direction = directionAndLength[0];
         let shipImage = getProperShipImg(boardArray[row][col], shipLength);
         
-        setImage(shipImage, cell, shipLength, direction);
+        setShipImage(shipImage, cell, shipLength, direction);
         informShipObj(boardArray[row][col])
       };
     });
   };
 
-  return {initiateDOM, attachListeners, setPlayerShips}
+  function setMissImage(cell) {
+    const missImage = new Image();
+    missImage.src = watersplash;
+    cell.append(missImage);
+  }
+
+  function setHitImage(cell) {
+    const hitImage = new Image();
+    hitImage.src = explosion;
+    cell.append(hitImage);
+  }
+
+  function refreshBoard(domBoard, boardArray) {
+    console.log(boardCells[domBoard]);
+    boardCells[domBoard].forEach((cell) => {
+      cell.textContent = '';
+      let rowInt = cell.getAttribute('row');
+      let colInt = cell.getAttribute('col'); 
+      if (boardArray[rowInt][colInt] == 's' || boardArray[rowInt][colInt] == 'o') {
+        setMissImage(cell)
+      }
+      else if (Array.isArray(boardArray[rowInt][colInt]) && boardArray[rowInt][colInt][1] == 'o') {
+        setMissImage(cell);
+      } else if (boardArray[rowInt][colInt] == 'x' || (Array.isArray(boardArray[rowInt][colInt]) && boardArray[rowInt][colInt][1] == 'x')) {
+        setHitImage(cell)
+      }
+    }); 
+  };
+
+  return {initiateDOM, attachListeners, setPlayerShips, refreshBoard}
 };
 
 export {displayHandler}

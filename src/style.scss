@@ -110,10 +110,12 @@ html, body {
 .imageHorizontal img {
   transform-origin: top;
   transform: rotate(-90deg) translate(-17px, -14px);
+  pointer-events: none;
 }
 
 .imageVertical img {
   transform: translate(0px, 4px);
+  pointer-events: none;
 }
 
 .turnheader {
