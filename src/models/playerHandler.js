@@ -21,10 +21,15 @@ const playerHandler = function() {
   };
 
   const makeMove = function(coords) {
-    const index = availableMoves.findIndex(arr => 
-      arr.length === coords.length && arr.every((val, i) => val === coords[i]));
-
-    availableMoves.splice(index, 1);
+    try {
+      const index = availableMoves.findIndex(arr => 
+        arr.length === coords.length && arr.every((val, i) => val === coords[i]));
+        
+      availableMoves.splice(index, 1);
+    } catch (error) {
+      console.log("can't select same tile twice")
+    }
+    
   };
 
   return {playerBoard, initiateBoard, getAvailableMoves, createAvailableMoves, makeMove}

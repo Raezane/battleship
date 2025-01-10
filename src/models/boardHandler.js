@@ -269,7 +269,7 @@ const boardHandler = function() {
       let combined = [...frontVerAndHorSides, ...rearVerAndHorSides]
 
       combined.forEach((cell) => {
-        if (isInBounds(cell) && board[cell[0]][cell[1]] == markers.shipSurrounding) {
+        if (isInBounds(cell) && (board[cell[0]][cell[1]] == markers.shipSurrounding)) {
           board[cell[0]][cell[1]] = markers.hitSplash
         };
       });
@@ -299,7 +299,7 @@ const boardHandler = function() {
 
 }
 
-let board = boardHandler();
+/* let board = boardHandler();
 board.buildBoard();
 board.createShips();
 let ship0 = ship(4);
