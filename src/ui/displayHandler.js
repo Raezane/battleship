@@ -30,10 +30,10 @@ const displayHandler = function() {
   });
 
   function initiateDOM() {
-    boardCells['subBoardPlayer'] = document.querySelectorAll('.sub > div');
+    boardCells['subBoardPlayer'] = document.querySelectorAll('.player .sub > div');
     boardCells['mainBoardPlayer'] = document.querySelectorAll('.player > div:nth-child(n+2)');
-    //boardCells['subBoardEnemy'] = document.querySelectorAll('.enemy > div');
-    //boardCells['mainBoardEnemy'] = document.querySelectorAll('.enemy > div:nth-child(n+2)');
+    boardCells['subBoardEnemy'] = document.querySelectorAll('.enemy .sub > div');
+    boardCells['mainBoardEnemy'] = document.querySelectorAll('.enemy > div:nth-child(n+2)');
   }
 
   /* function initiateImages() {
@@ -49,7 +49,7 @@ const displayHandler = function() {
     };
 
     setBoardCellListeners(boardCells['mainBoardPlayer']);
-    //setBoardCellListeners(boardCells['mainBoardEnemy']);
+    setBoardCellListeners(boardCells['mainBoardEnemy']);
   };
 
   function getClickedCell() {
@@ -62,7 +62,7 @@ const displayHandler = function() {
   function getProperShipImg(shipObject, shipLength) {
     let isSunk = shipObject.isSunk();
 
-    if (shipLength == 1 && isSunk == false) return shipImages.boat;
+    if (shipLength == 1) return shipImages.boat;
     if (shipLength == 2 && isSunk == false) return shipImages.shipSmall;
     if (shipLength == 2 && isSunk) return shipImages.shipSmallDestroyed;
     if (shipLength == 3 && isSunk == false) return shipImages.shipMedium;
@@ -127,25 +127,22 @@ const displayHandler = function() {
     cell.append(ship);
   }
 
-  function informShipObj(shipObj) {
-    shipObj.setImg();
-  }
+  function setPlayerShips(whichSubBoard, placedShips) {
 
-  function setPlayerShips(boardArray) {
+    placedShips.forEach(shipObj => {
+      console.log(shipObj)
+      let row = shipObj.coords[0][0];
+      let col = shipObj.coords[0][1];
+      let cell = document.querySelector(`.player .sub [row="${row}"][col="${col}"]`)
+      //empty the dom cell from the previous ship image before inserting a new one
+      cell.textContent = '';
 
-    boardCells['subBoardPlayer'].forEach(cell => {
-      let row = cell.getAttribute('row');
-      let col = cell.getAttribute('col');
-      if (isShip(boardArray[row][col]) && boardArray[row][col].isImgSet() == false) {
-        
-        let directionAndLength = getDirectionAndLength(boardArray[row][col], boardArray, row, col);
-        let shipLength = directionAndLength[1];
-        let direction = directionAndLength[0];
-        let shipImage = getProperShipImg(boardArray[row][col], shipLength);
-        
-        setShipImage(shipImage, cell, shipLength, direction);
-        informShipObj(boardArray[row][col])
-      };
+      let shipLength = shipObj.placedShip.getLength();
+      let direction = shipObj.direction == 1 ? 'horizontal' : 'vertical';
+      let shipImage = getProperShipImg(shipObj.placedShip, shipLength);
+
+      setShipImage(shipImage, cell, shipLength, direction);
+
     });
   };
 

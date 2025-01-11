@@ -1,11 +1,8 @@
 const ship = function(length) {
 
   let hits = 0
-  let imgIsSet = false;
 
   const hit = () => hits += 1;
-  const setImg = () => imgIsSet = true;
-  const isImgSet = () => imgIsSet
 
   const getLength = () => length
   const getHits = () => hits
@@ -15,7 +12,7 @@ const ship = function(length) {
     return false
   } 
 
-  return {hit, getLength, getHits, isSunk, setImg, isImgSet}
+  return {hit, getLength, getHits, isSunk}
 }
 
 export {ship}

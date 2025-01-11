@@ -1,5 +1,5 @@
 import {ship} from "./shipHandler.js";
-import { getSurroundingArea, getRandomNumber, isInBounds, isShip } from "../utilities.js";
+import { getSurroundingArea, getRandomNumber, isInBounds, isShip, HorizontalOrVertical, getCoordsCopy } from "../utilities.js";
 
 const boardHandler = function() {
   let board = [];
@@ -41,16 +41,30 @@ const boardHandler = function() {
     shipLengths.forEach(shipLength => createdShips.push(ship(shipLength)));
   };
 
-  const setCreatedShips = function() {
+  const setShipsRandomly = function() {
     let currentShip = 0
     while (currentShip < 10) {
-      let coords = randomiseCoords(createdShips[currentShip]);
-      
-      if (shipSetter(createdShips[currentShip], coords[0], coords[1]) !== false) currentShip += 1
+      let coords = getRandomCoords(createdShips[currentShip]);
+      let direction = HorizontalOrVertical(coords[0], coords[1]);
+      let areCoordsValid = validPlacement(direction, coords[0], coords[1])
+      if (areCoordsValid) {
+        createdShips[currentShip] = {
+          createdShip: createdShips[currentShip], 
+          coords: [coords[0], coords[1]],
+          direction: direction
+        }
+        setShip(
+          createdShips[currentShip].direction, 
+          createdShips[currentShip].coords[0], 
+          createdShips[currentShip].coords[1], 
+          createdShips[currentShip].createdShip
+        );
+        currentShip += 1
+      };
     };
-  };
+  }
 
-  const randomiseCoords = function(shipObj) {
+  const getRandomCoords = function(shipObj) {
 
     let randomCoords = [[], []]
 
@@ -77,84 +91,83 @@ const boardHandler = function() {
     return randomCoords
   }
 
-  const shipSetter = function(shipObj, frontCoords, rearCoords) {
+  const validateAndPlace = function(shipObj, frontCoords, rearCoords) {
+
+    let direction = HorizontalOrVertical(frontCoords, rearCoords)
+    let isValid = validPlacement(direction, frontCoords, rearCoords);
+    if (isValid) setShip(direction, frontCoords, rearCoords, shipObj);
+    else return false
+
+  };
+
+  const setShip = function(direction, frontCoords, rearCoords, shipObj) {
 
     /* first check if the selected area for the ship to be placed is not
     already occupied. We'll create copy of the actual coordinates here so 
     that the iterator won't modify the original ones */
-    const getCoordsCopy = (coords) => [...coords];
-
     let frontCoordsCopy = getCoordsCopy(frontCoords)
 
-    function setShip(direction, frontCoords, rearCoords) {
+    placedShips.push({placedShip: shipObj, coords: [frontCoords, rearCoords], direction})
 
-      placedShips.push({placedShip: shipObj, coords: [frontCoords, rearCoords]})
+    let surrounding = getSurroundingArea(frontCoords)
 
-      /* refresh the value of frontCoordsCopy to original values of front- and rearCoords
-      so that original values still won't be mutated and thus we may use them later when
-      searching for ship's front and rear coords when the ship has sunk */
-      frontCoordsCopy = getCoordsCopy(frontCoords)
+    if (direction == 0) {
+      setNorthernSurrounding(surrounding.north, surrounding.northEast, surrounding.northWest)
+      placeSidesAndPartOfShip(0, surrounding.west, surrounding.east)
+      setSouthernSurrounding(surrounding.south, surrounding.southEast, surrounding.southWest)
+    } else {
+      setWesternSurrounding(surrounding.west, surrounding.northWest, surrounding.southWest)
+      placeSidesAndPartOfShip(1, surrounding.north, surrounding.south)
+      setEasternSurrounding(surrounding.east, surrounding.northEast, surrounding.southEast)
+    }
 
-      let surrounding = getSurroundingArea(frontCoords)
+    function placeSidesAndPartOfShip(axis, side1, side2) {
+      let side1coordsCopy = getCoordsCopy(side1);
+      let side2coordsCopy = getCoordsCopy(side2);
+      while (frontCoordsCopy[direction] <= rearCoords[direction]) {
 
-      if (direction == 0) {
-        setNorthernSurrounding(surrounding.north, surrounding.northEast, surrounding.northWest)
-        placeSidesAndPartOfShip(0, surrounding.west, surrounding.east)
-        setSouthernSurrounding(surrounding.south, surrounding.southEast, surrounding.southWest)
-      } else {
-        setWesternSurrounding(surrounding.west, surrounding.northWest, surrounding.southWest)
-        placeSidesAndPartOfShip(1, surrounding.north, surrounding.south)
-        setEasternSurrounding(surrounding.east, surrounding.northEast, surrounding.southEast)
-      }
+        if (isInBounds(side1coordsCopy)) {
+          board[side1coordsCopy[0]][side1coordsCopy[1]] = markers.shipSurrounding
+          side1coordsCopy[axis] += 1
+        }
 
-      function placeSidesAndPartOfShip(axis, side1, side2) {
-        let side1coordsCopy = getCoordsCopy(side1);
-        let side2coordsCopy = getCoordsCopy(side2);
-        while (frontCoordsCopy[direction] <= rearCoords[direction]) {
+        board[frontCoordsCopy[0]][frontCoordsCopy[1]] = shipObj
+        frontCoordsCopy[direction] += 1
 
-          if (isInBounds(side1coordsCopy)) {
-            board[side1coordsCopy[0]][side1coordsCopy[1]] = markers.shipSurrounding
-            side1coordsCopy[axis] += 1
-          }
-
-          board[frontCoordsCopy[0]][frontCoordsCopy[1]] = shipObj
-          frontCoordsCopy[direction] += 1
-
-          if (isInBounds(side2coordsCopy)) {
-            board[side2coordsCopy[0]][side2coordsCopy[1]] = markers.shipSurrounding
-            side2coordsCopy[axis] += 1 
-          }
+        if (isInBounds(side2coordsCopy)) {
+          board[side2coordsCopy[0]][side2coordsCopy[1]] = markers.shipSurrounding
+          side2coordsCopy[axis] += 1 
         }
       }
-
-      function setNorthernSurrounding(...surroundings) {
-        directionIterator(surroundings)
-      }
-
-      function setSouthernSurrounding(...surroundings) {
-        let southernCoords = 
-        [
-          [frontCoordsCopy[direction], surroundings[0][1]], 
-          [frontCoordsCopy[direction], surroundings[1][1]],
-          [frontCoordsCopy[direction], surroundings[2][1]],
-        ] 
-
-        directionIterator(southernCoords)
-      }
-
-      function setWesternSurrounding(...surroundings) {
-        directionIterator(surroundings)
-      }
-
-      function setEasternSurrounding(...surroundings) {
-        let easternCoords = [
-          [surroundings[0][0], frontCoordsCopy[direction]], 
-          [surroundings[1][0], frontCoordsCopy[direction]],
-          [surroundings[2][0], frontCoordsCopy[direction]]
-        ]
-        directionIterator(easternCoords)
-      }
     }
+
+    function setNorthernSurrounding(...surroundings) {
+      directionIterator(surroundings)
+    }
+
+    function setSouthernSurrounding(...surroundings) {
+      let southernCoords = 
+      [
+        [frontCoordsCopy[direction], surroundings[0][1]], 
+        [frontCoordsCopy[direction], surroundings[1][1]],
+        [frontCoordsCopy[direction], surroundings[2][1]],
+      ] 
+
+      directionIterator(southernCoords)
+    }
+
+    function setWesternSurrounding(...surroundings) {
+      directionIterator(surroundings)
+    }
+
+    function setEasternSurrounding(...surroundings) {
+      let easternCoords = [
+        [surroundings[0][0], frontCoordsCopy[direction]], 
+        [surroundings[1][0], frontCoordsCopy[direction]],
+        [surroundings[2][0], frontCoordsCopy[direction]]
+      ]
+      directionIterator(easternCoords)
+    };
 
     function directionIterator(surroundings) {
       surroundings.forEach(coords => {
@@ -163,61 +176,46 @@ const boardHandler = function() {
         };
       });
     };
+  };
 
-    function validPlacement(direction) {
+  const validPlacement = function(direction, frontCoords, rearCoords) {
 
-      function IsCoordsFormCorrect() {
-        return ((frontCoords[0] == rearCoords[0] && frontCoords[1] < rearCoords[1])
-              || (frontCoords[1] == rearCoords[1] && frontCoords[0] < rearCoords[0])
-              || (frontCoords[1] == rearCoords[1] && frontCoords[0] == rearCoords[0])
-        )
-      }
- 
-      function isSurroundingClear() {
+    let frontCoordsCopy = getCoordsCopy(frontCoords)
 
-        let surrounding = getSurroundingArea(frontCoordsCopy)
-
-        for (const key in surrounding) {
-          let [row, col] = surrounding[key]
-          try {
-            if (isShip(board[row][col])) return false
-          } catch (error) {
-            /* if the current value is undefined (outside bounds), this catch-block catches it without 
-            crashing the app */ 
-            console.log(`the current value is outside board bounds and thus undefined`)
-          }
-        } return true
-      }
-
-      if (IsCoordsFormCorrect() == false) return false
-      if (isInBounds(frontCoords) == false) return false
-      if (isInBounds(rearCoords) == false) return false
-
-      while (frontCoordsCopy[direction] <= rearCoords[direction]) {
-          // check by iterating if the area where ship is placed is null and there aren't ships straight next to it.
-          if (board[frontCoordsCopy[0]][frontCoordsCopy[1]] == null && isSurroundingClear()) {
-            frontCoordsCopy[direction] += 1;    
-            } else return false  
-          };
-        return true;
-    };
-
-    function HorizontalOrVertical(callback) {
-      //here we give direction parameter as a number to callback function; 0 is vertical, 1 is horizontal
-      if (frontCoords[0] < rearCoords[0]) {
-        return callback(0, frontCoords, rearCoords)
-      } else if (frontCoords[1] < rearCoords[1]) {
-        return callback(1, frontCoords, rearCoords)
-        //if neither of above applies, then check if ship is the smallest one which takes only one cell
-      } else if (JSON.stringify(frontCoords) === JSON.stringify(rearCoords)) {
-        return callback(1, frontCoords, rearCoords)
-      }
+    function IsCoordsFormCorrect() {
+      return ((frontCoords[0] == rearCoords[0] && frontCoords[1] < rearCoords[1])
+            || (frontCoords[1] == rearCoords[1] && frontCoords[0] < rearCoords[0])
+            || (frontCoords[1] == rearCoords[1] && frontCoords[0] == rearCoords[0])
+      )
     }
 
-    let isValid = HorizontalOrVertical(validPlacement);
-    if (isValid) HorizontalOrVertical(setShip);
-    else return false
+    function isSurroundingClear() {
 
+      let surrounding = getSurroundingArea(frontCoordsCopy)
+
+      for (const key in surrounding) {
+        let [row, col] = surrounding[key]
+        try {
+          if (isShip(board[row][col])) return false
+        } catch (error) {
+          /* if the current value is undefined (outside bounds), this catch-block catches it without 
+          crashing the app */ 
+          console.log(`the current value is outside board bounds and thus undefined`)
+        }
+      } return true
+    }
+
+    if (IsCoordsFormCorrect() == false) return false
+    if (isInBounds(frontCoords) == false) return false
+    if (isInBounds(rearCoords) == false) return false
+
+    while (frontCoordsCopy[direction] <= rearCoords[direction]) {
+        // check by iterating if the area where ship is placed is null and there aren't ships straight next to it.
+        if (board[frontCoordsCopy[0]][frontCoordsCopy[1]] == null && isSurroundingClear()) {
+          frontCoordsCopy[direction] += 1;    
+          } else return false  
+        };
+      return true;
   };
 
   const receiveAttack = function(y, x) {
@@ -295,23 +293,23 @@ const boardHandler = function() {
     } 
   };
 
-  return {getGameBoard, getSunkenShips, areAllSunk, buildBoard, createShips, setCreatedShips, getCreatedShips, getPlacedShips, randomiseCoords, shipSetter, receiveAttack}
+  return {getGameBoard, getSunkenShips, areAllSunk, buildBoard, createShips, setShipsRandomly, getCreatedShips, getPlacedShips, getRandomCoords, validateAndPlace, receiveAttack}
 
 }
 
-/* let board = boardHandler();
+let board = boardHandler();
 board.buildBoard();
 board.createShips();
 let ship0 = ship(4);
 let ship1 = ship(4);
-board.shipSetter(ship1, [1,8], [4,8]);
-board.shipSetter(ship0, [6,2], [6,5]);
-board.receiveAttack(6,3);
+board.validateAndPlace(ship1, [1,8], [4,8]);
+board.validateAndPlace(ship0, [6,2], [6,5]);
+/*board.receiveAttack(6,3);
 board.receiveAttack(6,2);
 board.receiveAttack(6,4);
-board.receiveAttack(6,5);
+board.receiveAttack(6,5); */
 board.getGameBoard()
-//let rndCoords = board.randomiseCoords(ship0)
+//let rndCoords = board.getRandomCoords(ship0)
 //board.setCreatedShips()
 //board.getGameBoard()
 /* board.getShips();
@@ -319,7 +317,7 @@ let ship0 = ship(4);
 let ship1 = ship(3);
 let ship2 = ship(3);
 let ship3 = ship(1);
-let rndCoords = board.randomiseCoords(ship2)
+let rndCoords = board.getRandomCoords(ship2)
 board.shipSetter(ship0, [1,0], [1,3]);
 board.shipSetter(ship1, [3,1], [5,1]);
 board.shipSetter(ship2, rndCoords[0], rndCoords[1]);

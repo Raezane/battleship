@@ -28,10 +28,21 @@ const isShip = function(boardEntry) {
   return false
 }
 
+const HorizontalOrVertical = function (frontCoords, rearCoords) {
+  //0 means the ship is to be vertical, 1 when horizontal
+  if (frontCoords[0] < rearCoords[0]) return 0
+  else if (frontCoords[1] < rearCoords[1]) return 1
+  else return 0
+};
+
+const getCoordsCopy = (coords) => [...coords];
+
 export {
   getSurroundingArea,
   getRandomNumber,
   isInBounds,
-  isShip
+  isShip,
+  HorizontalOrVertical,
+  getCoordsCopy
 }
 

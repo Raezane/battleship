@@ -56,7 +56,6 @@ html, body {
 }
 
 .boardscontainer {
-  
   grid-area: 3 / 1 / 4 / 5;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 30px 400px;
@@ -65,18 +64,6 @@ html, body {
   align-items: center;
   justify-items: center;
   grid-auto-flow: column;
-
-  .player {
-    position: relative;
-  }
-
-  .sub {
-    position: absolute;
-
-    div {
-      z-index: 1;
-    }
-  }
 
   .board {
     display: grid;
@@ -87,17 +74,31 @@ html, body {
     background-color: white;
     justify-self: center;
   }
+
+  .player,
+  .enemy {
+    position: relative;
+  }
+
+  .sub {
+    position: absolute;
+    
+
+    div {
+      z-index: 1;
+    }
+  }
 }
 
 .sub div,
 .player > div:nth-child(n+2),
-.enemy div {
+.enemy > div:nth-child(n+2) {
   display: flex;
   justify-content: center;
 }
 
 .player > div:nth-child(n+2),
-.enemy div {
+.enemy > div:nth-child(n+2) {
   z-index: 2;
   align-items: center;
   box-sizing: border-box;
@@ -113,8 +114,8 @@ html, body {
 }
 
 #explosionImg {
-  width: 75%;
-  height: 75%;
+  width: 70%;
+  height: 70%;
 }
 
 .boat img {
@@ -138,6 +139,7 @@ html, body {
   width: 27px;
   height: 132px;
 }
+
 
 .imageHorizontal img {
   transform-origin: top;
