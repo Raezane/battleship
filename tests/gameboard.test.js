@@ -32,10 +32,10 @@ describe('ship placement and hit registration', () => {
   });
 
   test('gameboard should place ships correctly with given coordinates vertically and horizontally', () => {
-    testGameBoard.shipSetter(testShip, [4,7], [7,7])
+    testGameBoard.validateAndPlace(testShip, [4,7], [7,7])
     
     let testShip2 = ship(3);
-    testGameBoard.shipSetter(testShip2, [1,1], [1,3])
+    testGameBoard.validateAndPlace(testShip2, [1,1], [1,3])
 
     expect(testGameBoard.getGameBoard()).toEqual([
       ['u', 'u', 'u', 'u', 'u', null, null, null, null, null],
@@ -52,7 +52,7 @@ describe('ship placement and hit registration', () => {
   });
 
   test('gameboard should register missed attack properly', () => {
-    testGameBoard.shipSetter(testShip, [6,2], [8,2])
+    testGameBoard.validateAndPlace(testShip, [6,2], [8,2])
     testGameBoard.receiveAttack(2,5)
     testGameBoard.receiveAttack(8,3)
     
@@ -71,7 +71,7 @@ describe('ship placement and hit registration', () => {
   })
 
   test('gameboard should register hits to ship properly', () => {
-    testGameBoard.shipSetter(testShip, [6,2], [6,5]);
+    testGameBoard.validateAndPlace(testShip, [6,2], [6,5]);
     testGameBoard.receiveAttack(6,3);
     
     expect(testGameBoard.getGameBoard()).toEqual([
@@ -92,8 +92,8 @@ describe('ship placement and hit registration', () => {
   test("ships can't be placed on top of each other", () => {
     let testShip2 = ship(3);
 
-    testGameBoard.shipSetter(testShip, [2,3], [2,6]);
-    testGameBoard.shipSetter(testShip2, [1,4], [3,4])
+    testGameBoard.validateAndPlace(testShip, [2,3], [2,6]);
+    testGameBoard.validateAndPlace(testShip2, [1,4], [3,4])
 
     expect(testGameBoard.getGameBoard()).toEqual([
       [null, null, null, null, null, null, null, null, null, null],
@@ -114,14 +114,14 @@ describe('ship placement and hit registration', () => {
     let testShip3 = ship(3);
     let testShip4 = ship(3);
 
-    testGameBoard.shipSetter(testShip, [2,3], [2,6]);
-    testGameBoard.shipSetter(testShip2, [2,1], [4,1]);
+    testGameBoard.validateAndPlace(testShip, [2,3], [2,6]);
+    testGameBoard.validateAndPlace(testShip2, [2,1], [4,1]);
 
     //can't be placed because testShip is already placed above it
-    testGameBoard.shipSetter(testShip3, [3,4], [3,6]);
+    testGameBoard.validateAndPlace(testShip3, [3,4], [3,6]);
 
     //can't be placed because testShip2 is already placed next to it northeast
-    testGameBoard.shipSetter(testShip4, [5,0], [5,0]);
+    testGameBoard.validateAndPlace(testShip4, [5,0], [5,0]);
 
 
     expect(testGameBoard.getGameBoard()).toEqual([
@@ -142,8 +142,8 @@ describe('ship placement and hit registration', () => {
     let testShip = ship(3);
     let testShip2 = ship(2);
 
-    testGameBoard.shipSetter(testShip, [2,9], [4,9]);
-    testGameBoard.shipSetter(testShip2, [8,0], [9,0]);
+    testGameBoard.validateAndPlace(testShip, [2,9], [4,9]);
+    testGameBoard.validateAndPlace(testShip2, [8,0], [9,0]);
 
     expect(testGameBoard.getGameBoard()).toEqual([
       [null, null, null, null, null, null, null, null, null, null],
@@ -173,16 +173,16 @@ describe('ship placement and hit registration', () => {
     let testShip8 = ship(1);
     let testShip9 = ship(1);
 
-    testGameBoard.shipSetter(testShip0, [1,0], [1,3]);
-    testGameBoard.shipSetter(testShip1, [3,1], [5,1]);
-    testGameBoard.shipSetter(testShip2, [7,1], [9,1]);
-    testGameBoard.shipSetter(testShip3, [8,3], [8,4]);
-    testGameBoard.shipSetter(testShip4, [5,3], [6,3]);
-    testGameBoard.shipSetter(testShip5, [5,7], [5,8]);
-    testGameBoard.shipSetter(testShip6, [3,4], [3,4]);
-    testGameBoard.shipSetter(testShip7, [8,8], [8,8]);
-    testGameBoard.shipSetter(testShip8, [2,9], [2,9]);
-    testGameBoard.shipSetter(testShip9, [0,7], [0,7]); 
+    testGameBoard.validateAndPlace(testShip0, [1,0], [1,3]);
+    testGameBoard.validateAndPlace(testShip1, [3,1], [5,1]);
+    testGameBoard.validateAndPlace(testShip2, [7,1], [9,1]);
+    testGameBoard.validateAndPlace(testShip3, [8,3], [8,4]);
+    testGameBoard.validateAndPlace(testShip4, [5,3], [6,3]);
+    testGameBoard.validateAndPlace(testShip5, [5,7], [5,8]);
+    testGameBoard.validateAndPlace(testShip6, [3,4], [3,4]);
+    testGameBoard.validateAndPlace(testShip7, [8,8], [8,8]);
+    testGameBoard.validateAndPlace(testShip8, [2,9], [2,9]);
+    testGameBoard.validateAndPlace(testShip9, [0,7], [0,7]); 
 
     for (let row = 0; row < 10; row++) {
       for (let column = 0; column < 10; column++) {

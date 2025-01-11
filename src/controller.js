@@ -20,15 +20,17 @@ const gameController = function() {
 
   player.initiateBoard();
   player.playerBoard.createShips();
-  player.playerBoard.setCreatedShips();
+  player.playerBoard.setShipsRandomly();
 
   computer.initiateBoard();
   computer.playerBoard.createShips();
-  computer.playerBoard.setCreatedShips();
+  computer.playerBoard.setShipsRandomly();
+  console.log(player.playerBoard.getGameBoard());
   console.log(computer.playerBoard.getGameBoard());
+  console.log(computer.playerBoard.getPlacedShips())
 
-  display.setPlayerShips(player.playerBoard.getGameBoard());
-  display
+  display.setPlayerShips('subBoardPlayer', player.playerBoard.getPlacedShips());
+  //display.setPlayerShips('subBoardEnemy', computer.playerBoard.getPlacedShips());
 
   function startGame() {
 
@@ -42,21 +44,34 @@ const gameController = function() {
     let colInt = +col
     
     let whichGameBoard;
+    let subBoard;
 
     if (domBoard == 'player') {
-      domBoard = 'mainBoardPlayer'
+      domBoard = 'mainBoardPlayer';
+      subBoard = 'subBoardPlayer';
       whichGameBoard = player.playerBoard
       player.makeMove([rowInt, colInt]);
     } else {
-      domBoard = 'mainBoardEnemy'
+      domBoard = 'mainBoardEnemy';
+      subBoard = 'subBoardEnemy';
       whichGameBoard = computer.playerBoard
       computer.makeMove([rowInt, colInt]);
     }
+
+    let sunkenShipsStatus = whichGameBoard.getSunkenShips().length;
     
     whichGameBoard.receiveAttack(rowInt, colInt);
 
     let boardObj = whichGameBoard.getGameBoard();
+    let sunkenShipsUpdated = whichGameBoard.getSunkenShips().length;
+    
     console.log(boardObj)
+
+    if (sunkenShipsUpdated > sunkenShipsStatus) {
+      let shipsStatus = whichGameBoard.getPlacedShips();
+      display.setPlayerShips(subBoard, shipsStatus)
+    }
+
     display.refreshBoard(domBoard, boardObj);
   }
 
