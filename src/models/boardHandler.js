@@ -275,10 +275,17 @@ const boardHandler = function() {
 
     function checkIfSunk(thisShip) {
       if (thisShip.isSunk()) {
-        sunkenShips.push(thisShip);
+        let sunkenShip = getSunkenShip(thisShip);
+        sunkenShips.push(sunkenShip);
         return true
       };
     };
+
+    function getSunkenShip(shipObj) {
+      for (let obj of placedShips) {
+        if (obj.placedShip === shipObj) return obj
+      }
+    }
 
     // check if the attacked square is empty by checking if square holds just a null
     if (board[y][x] == null) {

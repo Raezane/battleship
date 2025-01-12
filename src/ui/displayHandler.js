@@ -59,7 +59,7 @@ const displayHandler = function() {
     controller.handleAttack(clickedBoard, row, col);
   };
 
-  function getProperShipImg(shipObject, shipLength) {
+  function getPlayerShipImg(shipObject, shipLength) {
     let isSunk = shipObject.isSunk();
 
     if (shipLength == 1) return shipImages.boat;
@@ -71,32 +71,13 @@ const displayHandler = function() {
     if (shipLength == 4 && isSunk) return shipImages.shipLargeDestroyed;
   }
 
-  function getDirectionAndLength(shipObj, board, row, col) {
-    /* before we may use row and column to get the surrounding coords, 
-    we need to parse them to number first because they both are still strings
-    at this moment when they've been fetched from dom as data attributes */
-    let rowInt = parseInt(row, 10);
-    let colInt = parseInt(col, 10);
-    let direction;
-    let shipLength = shipObj.getLength();
-    
-    if (shipLength > 1) {
-      let surrounding = getSurroundingArea([rowInt, colInt])
+  function getSunkenEnemyShipImg(shipLength) {
 
-      /* we'll also need to check if the received surroundingCoords are in bounds
-      before we check in which direction should the ship image be placed */
-      if (isInBounds(surrounding.east)) {
-        if (isShip(board[surrounding.east[0]][surrounding.east[1]])) {
-          direction = 'horizontal';
-        } else direction = 'vertical';
-      } 
-    } else {
-      // if the shipLength is only 1, we may set a random direction for it
-        direction = 'vertical';
-      };
-
-    return [direction, shipLength];
-  };
+    if (shipLength == 1) return shipImages.boat;
+    if (shipLength == 2) return shipImages.shipSmallDestroyed;
+    if (shipLength == 3) return shipImages.shipMediumDestroyed;
+    if (shipLength == 4) return shipImages.shipLargeDestroyed;
+  }
 
   const shipImages = 
   {
@@ -113,6 +94,8 @@ const displayHandler = function() {
     const ship = new Image();
     ship.src = shipImg;
 
+    let whichSubBoard = cell.parentElement.parentElement.classList[0];
+
     if (direction === 'horizontal') cell.classList.add('imageHorizontal');
     else cell.classList.add('imageVertical');
 
@@ -127,24 +110,37 @@ const displayHandler = function() {
     cell.append(ship);
   }
 
-  function setPlayerShips(whichSubBoard, placedShips) {
+  function getCorrectPlayerDomBoard(whichSubBoard) {
+    return whichSubBoard == 'subBoardPlayer' ? '.player' : '.enemy'
+  }
+
+  function setShips(whichSubBoard, placedShips) {
+
+    let domParent = getCorrectPlayerDomBoard(whichSubBoard)
 
     placedShips.forEach(shipObj => {
       console.log(shipObj)
       let row = shipObj.coords[0][0];
       let col = shipObj.coords[0][1];
-      let cell = document.querySelector(`.player .sub [row="${row}"][col="${col}"]`)
+      let cell = document.querySelector(`${domParent} .sub [row="${row}"][col="${col}"]`)
       //empty the dom cell from the previous ship image before inserting a new one
       cell.textContent = '';
 
       let shipLength = shipObj.placedShip.getLength();
       let direction = shipObj.direction == 1 ? 'horizontal' : 'vertical';
-      let shipImage = getProperShipImg(shipObj.placedShip, shipLength);
+
+      let shipImage;
+      if (domParent === '.player') {
+        shipImage = getPlayerShipImg(shipObj.placedShip, shipLength);
+      } else shipImage = getSunkenEnemyShipImg(shipLength);
 
       setShipImage(shipImage, cell, shipLength, direction);
-
     });
   };
+
+  function revealSunkenEnemyShip() {
+
+  }
 
   function setMissImage(cell) {
     const missImage = new Image();
@@ -177,7 +173,7 @@ const displayHandler = function() {
     }); 
   };
 
-  return {initiateDOM, attachListeners, setPlayerShips, refreshBoard}
+  return {initiateDOM, attachListeners, setShips, revealSunkenEnemyShip, refreshBoard}
 };
 
 export {displayHandler}
