@@ -29,8 +29,7 @@ const gameController = function() {
   console.log(computer.playerBoard.getGameBoard());
   console.log(computer.playerBoard.getPlacedShips())
 
-  display.setPlayerShips('subBoardPlayer', player.playerBoard.getPlacedShips());
-  //display.setPlayerShips('subBoardEnemy', computer.playerBoard.getPlacedShips());
+  display.setShips('subBoardPlayer', player.playerBoard.getPlacedShips());
 
   function startGame() {
 
@@ -68,9 +67,14 @@ const gameController = function() {
     console.log(boardObj)
 
     if (sunkenShipsUpdated > sunkenShipsStatus) {
-      let shipsStatus = whichGameBoard.getPlacedShips();
-      display.setPlayerShips(subBoard, shipsStatus)
-    }
+      if (domBoard == 'mainBoardPlayer') {
+        let shipsStatus = whichGameBoard.getPlacedShips();
+        display.setShips(subBoard, shipsStatus);
+      } else {
+        let onlySunkenShips = whichGameBoard.getSunkenShips();
+        display.setShips(subBoard, onlySunkenShips);
+      }
+    };
 
     display.refreshBoard(domBoard, boardObj);
   }
