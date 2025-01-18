@@ -1,4 +1,4 @@
-import { controller } from "../index.js";
+import { handleAttack } from "../controller.js";
 import { getSurroundingArea, getRandomNumber, isInBounds, isShip } from "../utilities.js";
 
 //ship models
@@ -18,29 +18,30 @@ const displayHandler = function() {
 
   //declare interactive dom elements in object
   let boardCells = {
-    'subBoardPlayer': null,
-    'mainBoardPlayer': null,
-    'subBoardEnemy': null,
-    'mainBoardEnemy': null
+    'subCellsPlayer': null,
+    'mainCellsPlayer': null,
+    'playerBoardParent': null,
+    'subCellsEnemy': null,
+    'mainCellsEnemy': null,
+    'enemyBoardParent': null
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
-    initiateDOM();
-    //initiateImages()
-  });
-
-  function initiateDOM() {
-    boardCells['subBoardPlayer'] = document.querySelectorAll('.player .sub > div');
-    boardCells['mainBoardPlayer'] = document.querySelectorAll('.player > div:nth-child(n+2)');
-    boardCells['subBoardEnemy'] = document.querySelectorAll('.enemy .sub > div');
-    boardCells['mainBoardEnemy'] = document.querySelectorAll('.enemy > div:nth-child(n+2)');
+  const initiateDOM = function() {
+    boardCells['subCellsPlayer'] = document.querySelectorAll('.player .sub > div');
+    boardCells['mainCellsPlayer'] = document.querySelectorAll('.player > div:nth-child(n+2)');
+    boardCells['playerBoardParent'] = document.querySelector('.player');
+    boardCells['subCellsEnemy'] = document.querySelectorAll('.enemy .sub > div');
+    boardCells['mainCellsEnemy'] = document.querySelectorAll('.enemy > div:nth-child(n+2)');
+    boardCells['enemyBoardParent'] = document.querySelector('.enemy');
   }
+
+  const getBoardCells = () => boardCells;
 
   /* function initiateImages() {
  
   } */
  
-  function attachListeners() {
+  const attachListeners = function() {
     
     function setBoardCellListeners(playerOrComp) {
       playerOrComp.forEach((cell) => {
@@ -48,18 +49,38 @@ const displayHandler = function() {
       });
     };
 
-    setBoardCellListeners(boardCells['mainBoardPlayer']);
-    setBoardCellListeners(boardCells['mainBoardEnemy']);
+    setBoardCellListeners(boardCells['mainCellsPlayer']);
+    setBoardCellListeners(boardCells['mainCellsEnemy']);
   };
 
-  function getClickedCell() {
+  let resolveClick;
+
+  const getResolveClick = () => resolveClick;
+
+  const setResolveClick = (resolve) => resolveClick = resolve;
+
+  const emulateEnemyClick = function(row, col) {
+    let cellToBeclicked = boardCells['playerBoardParent'].querySelector(`.player > [row="${row}"][col="${col}"]`);
+    cellToBeclicked.click();
+  }
+
+  const getClickedCell = function(event) {
+    console.log('Clicked cell:', this);
     let clickedBoard = this.parentNode.classList[0];
     let row = this.getAttribute('row');
     let col = this.getAttribute('col');
-    controller.handleAttack(clickedBoard, row, col);
+    handleAttack(clickedBoard, row, col);
+
+    if (clickedBoard == 'enemy') {
+      let clickedCell = event.target;
+      if (resolveClick) {
+        resolveClick(clickedCell);
+        resolveClick = null;
+      }
+    };
   };
 
-  function getPlayerShipImg(shipObject, shipLength) {
+  const getPlayerShipImg = function(shipObject, shipLength) {
     let isSunk = shipObject.isSunk();
 
     if (shipLength == 1) return shipImages.boat;
@@ -71,7 +92,7 @@ const displayHandler = function() {
     if (shipLength == 4 && isSunk) return shipImages.shipLargeDestroyed;
   }
 
-  function getSunkenEnemyShipImg(shipLength) {
+  const getSunkenEnemyShipImg = function(shipLength) {
 
     if (shipLength == 1) return shipImages.boat;
     if (shipLength == 2) return shipImages.shipSmallDestroyed;
@@ -90,11 +111,9 @@ const displayHandler = function() {
     shipLargeDestroyed: ship4B,
   }
 
-  function setShipImage(shipImg, cell, shipLength, direction) {
+  const setShipImage = function(shipImg, cell, shipLength, direction) {
     const ship = new Image();
     ship.src = shipImg;
-
-    let whichSubBoard = cell.parentElement.parentElement.classList[0];
 
     if (direction === 'horizontal') cell.classList.add('imageHorizontal');
     else cell.classList.add('imageVertical');
@@ -110,11 +129,11 @@ const displayHandler = function() {
     cell.append(ship);
   }
 
-  function getCorrectPlayerDomBoard(whichSubBoard) {
-    return whichSubBoard == 'subBoardPlayer' ? '.player' : '.enemy'
+  const getCorrectPlayerDomBoard = function(whichSubBoard) {
+    return whichSubBoard == 'subCellsPlayer' ? '.player' : '.enemy'
   }
 
-  function setShips(whichSubBoard, placedShips) {
+  const setShips = function(whichSubBoard, placedShips) {
 
     let domParent = getCorrectPlayerDomBoard(whichSubBoard)
 
@@ -138,25 +157,21 @@ const displayHandler = function() {
     });
   };
 
-  function revealSunkenEnemyShip() {
-
-  }
-
-  function setMissImage(cell) {
+  const setMissImage = function(cell) {
     const missImage = new Image();
     missImage.src = watersplash;
     missImage.id = 'watersplashImg'
     cell.append(missImage);
   }
 
-  function setHitImage(cell) {
+  const setHitImage = function(cell) {
     const hitImage = new Image();
     hitImage.src = explosion;
     hitImage.id = 'explosionImg'
     cell.append(hitImage);
   }
 
-  function refreshBoard(domBoard, boardArray) {
+  const refreshBoard = function(domBoard, boardArray) {
     console.log(boardCells[domBoard]);
     boardCells[domBoard].forEach((cell) => {
       cell.textContent = '';
@@ -173,7 +188,17 @@ const displayHandler = function() {
     }); 
   };
 
-  return {initiateDOM, attachListeners, setShips, revealSunkenEnemyShip, refreshBoard}
+  return {
+    initiateDOM, 
+    getBoardCells, 
+    attachListeners, 
+    getResolveClick, 
+    setResolveClick,
+    emulateEnemyClick, 
+    getClickedCell, 
+    setShips, 
+    refreshBoard
+  };
 };
 
 export {displayHandler}

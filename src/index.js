@@ -1,8 +1,6 @@
 
 import './normalize.scss';
 import './style.scss';
-import { gameController } from './controller.js';
+import { init } from './controller.js';
 
-let controller = gameController();
-
-export {controller}
+init()

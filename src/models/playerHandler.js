@@ -1,3 +1,4 @@
+import { getRandomNumber } from "../utilities";
 import { boardHandler } from "./boardHandler";
 
 const playerHandler = function() {
@@ -20,16 +21,11 @@ const playerHandler = function() {
     };
   };
 
-  const makeMove = function(coords) {
-    try {
-      const index = availableMoves.findIndex(arr => 
-        arr.length === coords.length && arr.every((val, i) => val === coords[i]));
-        
-      availableMoves.splice(index, 1);
-    } catch (error) {
-      console.log("can't select same tile twice")
-    }
-    
+  const makeMove = function() {
+    let randomIndex = getRandomNumber(availableMoves.length);
+    let fetchedCoords = availableMoves[randomIndex];
+    availableMoves.splice(randomIndex, 1);
+    return fetchedCoords;
   };
 
   return {playerBoard, initiateBoard, getAvailableMoves, createAvailableMoves, makeMove}
