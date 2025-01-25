@@ -5,6 +5,7 @@ const boardHandler = function() {
   let board = [];
   let createdShips = [];
   let placedShips = [];
+  let cellsHit = [];
   let sunkenShips = [];
 
   const markers = {
@@ -15,8 +16,13 @@ const boardHandler = function() {
   };
 
   const getGameBoard = () => board;
+
   const getCreatedShips = () => createdShips;
   const getPlacedShips = () => placedShips;
+
+  const getCellsHit = () => cellsHit;
+  const resetCellsHit = () => cellsHit = [];
+
   const getSunkenShips = () => sunkenShips;
 
   const areAllSunk = function() {
@@ -222,15 +228,18 @@ const boardHandler = function() {
 
     function attackMissed() {
       board[y][x] = markers.miss;
+      markCellAsTouched([y, x]);
     }
 
     function closeCall() {
       board[y][x] = [markers.shipSurrounding, markers.miss];
+      markCellAsTouched([y, x])
     };
 
     function attackHit() {
       board[y][x].hit();
       board[y][x] = [board[y][x], markers.hit];
+      markCellAsTouched([y, x])
 
       let surrounding = getSurroundingArea([y, x]);
       let diagonals = [surrounding.northEast, surrounding.southEast, surrounding.southWest, surrounding.northWest]
@@ -257,6 +266,7 @@ const boardHandler = function() {
       diagonals.forEach((cell) => {
         if (isInBounds(cell)) {
           board[cell[0]][cell[1]] = markers.hitSplash
+          markCellAsTouched(cell);
         };
       });
     };
@@ -268,7 +278,8 @@ const boardHandler = function() {
 
       combined.forEach((cell) => {
         if (isInBounds(cell) && (board[cell[0]][cell[1]] == markers.shipSurrounding)) {
-          board[cell[0]][cell[1]] = markers.hitSplash
+          board[cell[0]][cell[1]] = markers.hitSplash;
+          markCellAsTouched(cell);
         };
       });
     };
@@ -287,6 +298,12 @@ const boardHandler = function() {
       }
     }
 
+    function markCellAsTouched(cell) {
+      if (cellsHit.includes(cell) == false) {
+        cellsHit.push(cell);
+      };
+    }
+
     // check if the attacked square is empty by checking if square holds just a null
     if (board[y][x] == null) {
       attackMissed();
@@ -297,12 +314,25 @@ const boardHandler = function() {
     in other words, is the square a ship object. If so, then hit the ship */
     } else if (isShip(board[y][x])) {
       attackHit();
-    } 
+    };
   };
 
-  return {getGameBoard, getSunkenShips, areAllSunk, buildBoard, createShips, setShipsRandomly, getCreatedShips, getPlacedShips, getRandomCoords, validateAndPlace, receiveAttack}
-
-}
+  return {
+    getGameBoard, 
+    getSunkenShips, 
+    areAllSunk, 
+    buildBoard, 
+    createShips, 
+    setShipsRandomly, 
+    getCreatedShips,
+    getPlacedShips, 
+    getCellsHit,
+    resetCellsHit,
+    getRandomCoords, 
+    validateAndPlace, 
+    receiveAttack
+  };
+};
 
 let board = boardHandler();
 board.buildBoard();

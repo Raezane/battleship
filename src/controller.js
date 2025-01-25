@@ -33,53 +33,95 @@ const setShipImages = function() {
   display.setShips('subCellsPlayer', player.playerBoard.getPlacedShips());
 }
 
-const startGame = async function() {
+const startGame = function() {
 
-  let clickableEnemyBoard = display.getBoardCells()['mainCellsEnemy'];
-
-  let playerTurn;
-  let computerTurn;
+  let playerOne;
+  let playerTwo;
 
   let sunkenPlayerShips = player.playerBoard.getSunkenShips();
   let sunkenEnemyShips = computer.playerBoard.getSunkenShips()
   
   function setStarterPlayer() {
-    let whoseStarts = getRandomNumber(2);
-    if (whoseStarts == 0) {
-      playerTurn == true;
-      computerTurn == false;
+    let whoStarts = getRandomNumber(2);
+    if (whoStarts == 0) {
+      playerOne = playerTurn;
+      playerTwo = computerTurn;
+      display.hideEnemyTurnHeader();
+      display.hideTurnTitle();
     } else {
-      playerTurn == false;
-      computerTurn == true;
+      playerOne = computerTurn;
+      playerTwo = playerTurn;
+      display.hideYourTurnHeader();
+      display.hideTurnTitle();
+    }
+  };
+
+  function computerTurn() {
+
+    display.makePlayerBoardUnClickable();
+    display.makeEnemyBoardUnClickable();
+
+    function timeoutWrapper() {
+
+      display.makePlayerBoardClickable();
+
+      let [row, col] = computer.getMove();
+
+      display.emulateEnemyClick(row, col);
+
+      display.hideTurnTitle();
+      display.showTurnTitle();
+
+      let cellsHit = player.playerBoard.getCellsHit();
+
+      /* we remove the cell/cells from availableMoves which has/have been hit so that
+      less possible cells that can be attacked remain. */
+      computer.refreshAvailableMoves(cellsHit);
+
+      /* ..and then we reset the opponent's board's cellsHit array to empty so that the 
+      refreshAvailableMoves method in playerHandler module has less items to iterate through 
+      and thus the performance will be a bit better. */
+      player.playerBoard.resetCellsHit();
+
     };
-  };
-
-  function enemyTurn() {
-    let [row, col] = computer.makeMove();
-    display.emulateEnemyClick(row, col);
-
-  /*setTimeout(() => {
-    enemyTurn();
-  }, 1000); */
-  };
-
-  function playerTurnFunc() {
 
     return new Promise((resolve) => {
-      display.setResolveClick(resolve)
+      setTimeout(() => {
+        timeoutWrapper();
+        resolve();
+      }, 1000);
     });
 
   };
 
-  setStarterPlayer();
+  function playerTurn() {
+    
+    display.makePlayerBoardUnClickable();
+    display.makeEnemyBoardClickable();
+    
+    let clickPromise = new Promise((resolve) => {
+      display.setResolveClick(resolve);
+    });
 
-  while (sunkenPlayerShips.length < 10 && sunkenEnemyShips.length < 10) {
-    setTimeout(() => {
-      enemyTurn();
-    }, 1000);
-    await playerTurnFunc(clickableEnemyBoard);
-  }
-}
+    clickPromise.then(() => { 
+      display.hideTurnTitle();
+      display.showTurnTitle();
+    });
+
+    return clickPromise
+  };
+
+  async function gameLoop(playerOne, playerTwo) {
+    while (sunkenPlayerShips.length < 10 && sunkenEnemyShips.length < 10) {
+      await playerOne();
+      await playerTwo();
+    };
+  };
+
+  setStarterPlayer();
+  gameLoop(playerOne, playerTwo);
+
+};
 
 function handleAttack(domBoard, row, col) {
 
