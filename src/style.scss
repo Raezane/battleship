@@ -1,5 +1,6 @@
 html, body {
   height: 100%;
+  user-select: none;
 }
 
 .gametablecontainer {
@@ -156,3 +157,26 @@ html, body {
   padding-top: 20px;
 }
 
+.non-clickable {
+  pointer-events: none;
+}
+
+.invalidCellClick {
+  color: red;
+  font-size: 1em;
+  animation: pulsate 0.8s infinite ease-in-out;
+  transition: transform 0.5s ease;
+}
+
+@keyframes pulsate {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.hidetitle {
+  visibility: hidden;
+}

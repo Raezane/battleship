@@ -21,14 +21,31 @@ const playerHandler = function() {
     };
   };
 
-  const makeMove = function() {
+  const refreshAvailableMoves = function(cellsHit) {
+    cellsHit.forEach((coords) => {
+      let index = availableMoves.findIndex(
+        subArr => JSON.stringify(subArr) === JSON.stringify(coords)
+      );
+      if (index !== -1) {
+        availableMoves.splice(index, 1);
+      };
+    });
+  };
+
+  const getMove = function() {
     let randomIndex = getRandomNumber(availableMoves.length);
     let fetchedCoords = availableMoves[randomIndex];
-    availableMoves.splice(randomIndex, 1);
     return fetchedCoords;
   };
 
-  return {playerBoard, initiateBoard, getAvailableMoves, createAvailableMoves, makeMove}
-}
+  return {
+    playerBoard, 
+    initiateBoard, 
+    getAvailableMoves, 
+    createAvailableMoves, 
+    refreshAvailableMoves, 
+    getMove
+  };
+};
 
 export {playerHandler}

@@ -1,5 +1,4 @@
 import { handleAttack } from "../controller.js";
-import { getSurroundingArea, getRandomNumber, isInBounds, isShip } from "../utilities.js";
 
 //ship models
 import ship1 from "../assets/images/boat1.png";
@@ -16,17 +15,23 @@ import watersplash from "../assets/images/watersplash.png";
 
 const displayHandler = function() {
 
-  //declare interactive dom elements in object
   let boardCells = {
     'subCellsPlayer': null,
     'mainCellsPlayer': null,
     'playerBoardParent': null,
     'subCellsEnemy': null,
     'mainCellsEnemy': null,
-    'enemyBoardParent': null
+    'enemyBoardParent': null,
   }
 
-  const initiateDOM = function() {
+  let transformableTitles = {
+    'gameEndStatus': null,
+    'askNewRound': null,
+    'yourTurn': null,
+    'enemyTurn': null
+  }
+
+  const initiateBoardcells = function() {
     boardCells['subCellsPlayer'] = document.querySelectorAll('.player .sub > div');
     boardCells['mainCellsPlayer'] = document.querySelectorAll('.player > div:nth-child(n+2)');
     boardCells['playerBoardParent'] = document.querySelector('.player');
@@ -35,11 +40,36 @@ const displayHandler = function() {
     boardCells['enemyBoardParent'] = document.querySelector('.enemy');
   }
 
+  const initiateTitles = function() {
+    transformableTitles['gameEndStatus'] = document.querySelector('.upperheaders h2');
+    transformableTitles['askNewRound'] = document.querySelector('.upperheaders h3');
+    transformableTitles['yourTurn'] = document.querySelector('.yourturn');
+    transformableTitles['enemyTurn'] = document.querySelector('.enemyturn');
+  }
+
+  const initiateDOM = function() {
+    initiateBoardcells();
+    initiateTitles();
+  }
+
   const getBoardCells = () => boardCells;
 
-  /* function initiateImages() {
+  const makePlayerBoardClickable = function() {
+    boardCells['playerBoardParent'].classList.remove('non-clickable');
+  }
+
+  const makePlayerBoardUnClickable = function() {
+    boardCells['playerBoardParent'].classList.add('non-clickable');
+  }
+
+  const makeEnemyBoardClickable = function() {
+    boardCells['enemyBoardParent'].classList.remove('non-clickable');
+  }
+
+  const makeEnemyBoardUnClickable = function() {
+    boardCells['enemyBoardParent'].classList.add('non-clickable');
+  }
  
-  } */
  
   const attachListeners = function() {
     
@@ -64,20 +94,64 @@ const displayHandler = function() {
     cellToBeclicked.click();
   }
 
-  const getClickedCell = function(event) {
-    console.log('Clicked cell:', this);
+  const invalidClickNotify = function() {
+    transformableTitles['yourTurn'].textContent = 'Cell already struck! Choose another.'
+    transformableTitles['yourTurn'].classList.add('invalidCellClick');
+  }
+
+  const setDefaultTitle = function() {
+    transformableTitles['yourTurn'].textContent = 'Your turn!';
+    transformableTitles['yourTurn'].classList.remove('invalidCellClick');
+  }
+
+  let headerToBeHidden;
+  let headertoBeShown;
+
+  const hideTurnTitle = function() {
+    headerToBeHidden.classList.add('hidetitle');
+  }
+
+  const showTurnTitle = function() {
+    headertoBeShown.classList.remove('hidetitle');
+  }
+
+  const hideYourTurnHeader = function() {
+    headerToBeHidden = transformableTitles['yourTurn'];
+    headertoBeShown = transformableTitles['enemyTurn'];
+  }
+
+  const hideEnemyTurnHeader = function() {
+    headerToBeHidden = transformableTitles['enemyTurn'];
+    headertoBeShown = transformableTitles['yourTurn'];
+  }
+
+  const getClickedCell = function() {
+    /* first check if cell being clicked has already been clicked 
+    or struck - if it has, stop the click handling here and put forth
+    an error message for the player */
+    if (this.childNodes.length > 0) {
+      invalidClickNotify();
+      return
+    } else {
+      setDefaultTitle();
+      //hideTurnTitle(this.parentNode.previousElementSibling);
+    };
+
     let clickedBoard = this.parentNode.classList[0];
+
+    if (clickedBoard == 'enemy') {
+      if (resolveClick) {
+        hideYourTurnHeader();
+        resolveClick(this);
+        resolveClick = null;
+      }
+    } else {
+        hideEnemyTurnHeader();
+    };
+
     let row = this.getAttribute('row');
     let col = this.getAttribute('col');
     handleAttack(clickedBoard, row, col);
-
-    if (clickedBoard == 'enemy') {
-      let clickedCell = event.target;
-      if (resolveClick) {
-        resolveClick(clickedCell);
-        resolveClick = null;
-      }
-    };
   };
 
   const getPlayerShipImg = function(shipObject, shipLength) {
@@ -191,6 +265,14 @@ const displayHandler = function() {
   return {
     initiateDOM, 
     getBoardCells, 
+    makePlayerBoardClickable,
+    makePlayerBoardUnClickable,
+    makeEnemyBoardClickable,
+    makeEnemyBoardUnClickable,
+    hideTurnTitle,
+    showTurnTitle,
+    hideYourTurnHeader,
+    hideEnemyTurnHeader,
     attachListeners, 
     getResolveClick, 
     setResolveClick,
