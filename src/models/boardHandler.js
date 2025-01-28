@@ -1,5 +1,5 @@
 import {ship} from "./shipHandler.js";
-import { getSurroundingArea, getRandomNumber, isInBounds, isShip, HorizontalOrVertical, getCoordsCopy } from "../utilities.js";
+import { getSurroundingArea, getMarkers, getRandomNumber, isInBounds, isShip, HorizontalOrVertical, getCoordsCopy } from "../utilities.js";
 
 const boardHandler = function() {
   let board = [];
@@ -8,12 +8,8 @@ const boardHandler = function() {
   let cellsHit = [];
   let sunkenShips = [];
 
-  const markers = {
-    hit: 'x',
-    hitSplash: 's',
-    miss: 'o',
-    shipSurrounding: 'u',
-  };
+  //gameboard markers, like hit, miss and splashHits around ship when ship is struck
+  const markers = getMarkers();
 
   const getGameBoard = () => board;
 
@@ -314,7 +310,8 @@ const boardHandler = function() {
     in other words, is the square a ship object. If so, then hit the ship */
     } else if (isShip(board[y][x])) {
       attackHit();
-    };
+      return [y, x];
+    } return false
   };
 
   return {
