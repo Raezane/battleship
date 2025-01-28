@@ -31,6 +31,10 @@ const displayHandler = function() {
     'enemyTurn': null
   }
 
+  let otherElements = {
+    'gameTable': null
+  }
+
   const initiateBoardcells = function() {
     boardCells['subCellsPlayer'] = document.querySelectorAll('.player .sub > div');
     boardCells['mainCellsPlayer'] = document.querySelectorAll('.player > div:nth-child(n+2)');
@@ -47,12 +51,15 @@ const displayHandler = function() {
     transformableTitles['enemyTurn'] = document.querySelector('.enemyturn');
   }
 
+  const initiateOtherElements = function() {
+    otherElements['gameTable'] = document.querySelector('.gametablecontainer');
+  }
+
   const initiateDOM = function() {
     initiateBoardcells();
     initiateTitles();
+    initiateOtherElements();
   }
-
-  const getBoardCells = () => boardCells;
 
   const makePlayerBoardClickable = function() {
     boardCells['playerBoardParent'].classList.remove('non-clickable');
@@ -212,7 +219,7 @@ const displayHandler = function() {
     let domParent = getCorrectPlayerDomBoard(whichSubBoard)
 
     placedShips.forEach(shipObj => {
-      console.log(shipObj)
+      //console.log(shipObj)
       let row = shipObj.coords[0][0];
       let col = shipObj.coords[0][1];
       let cell = document.querySelector(`${domParent} .sub [row="${row}"][col="${col}"]`)
@@ -246,7 +253,7 @@ const displayHandler = function() {
   }
 
   const refreshBoard = function(domBoard, boardArray) {
-    console.log(boardCells[domBoard]);
+    //console.log(boardCells[domBoard]);
     boardCells[domBoard].forEach((cell) => {
       cell.textContent = '';
       let rowInt = cell.getAttribute('row');
@@ -263,8 +270,7 @@ const displayHandler = function() {
   };
 
   return {
-    initiateDOM, 
-    getBoardCells, 
+    initiateDOM,
     makePlayerBoardClickable,
     makePlayerBoardUnClickable,
     makeEnemyBoardClickable,

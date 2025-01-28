@@ -1,9 +1,11 @@
 import { playerHandler } from "./models/playerHandler.js";
 import { displayHandler } from "./ui/displayHandler.js";
 import { getRandomNumber } from "./utilities.js";
+import { computerIntelligence } from "./computerIntelligence.js";
 
 let player = playerHandler();
 let computer = playerHandler();
+let computerInt = computerIntelligence();
 
 const display = displayHandler();
 
@@ -17,17 +19,13 @@ const createBoardAndShips = function(participant) {
   participant.playerBoard.createShips();
 }
 
-const createMovesForPlayers = function (participant) {
+const createMovesForComputer = function (participant) {
   participant.createAvailableMoves();
 }
 
 const automateShipPlacement = function(participant) {
   participant.playerBoard.setShipsRandomly();
 }
-
-/*console.log(player.playerBoard.getGameBoard());
-console.log(computer.playerBoard.getGameBoard());
-console.log(computer.playerBoard.getPlacedShips()) */
 
 const setShipImages = function() {
   display.setShips('subCellsPlayer', player.playerBoard.getPlacedShips());
@@ -65,7 +63,15 @@ const startGame = function() {
 
       display.makePlayerBoardClickable();
 
-      let [row, col] = computer.getMove();
+      let wasLastAttackHit = computerInt.getStruckShipSurroundings();
+      let row, col;
+      
+      if (wasLastAttackHit.length == 0) {
+        [row, col] = computerInt.getMove();
+      } else {
+        let playerBoard = player.playerBoard.getGameBoard();
+        [row, col] = computerInt.getFirstOfStruckShipSurr(playerBoard);
+      }
 
       display.emulateEnemyClick(row, col);
 
@@ -76,7 +82,7 @@ const startGame = function() {
 
       /* we remove the cell/cells from availableMoves which has/have been hit so that
       less possible cells that can be attacked remain. */
-      computer.refreshAvailableMoves(cellsHit);
+      computerInt.refreshAvailableMoves(cellsHit);
 
       /* ..and then we reset the opponent's board's cellsHit array to empty so that the 
       refreshAvailableMoves method in playerHandler module has less items to iterate through 
@@ -145,15 +151,18 @@ function handleAttack(domBoard, row, col) {
 
   let sunkenShipsStatus = whichGameBoard.getSunkenShips().length;
   
-  whichGameBoard.receiveAttack(rowInt, colInt);
+  let coordsHit = whichGameBoard.receiveAttack(rowInt, colInt);
+  if (coordsHit && domBoard == 'mainCellsPlayer') {
+    let playerBoard = player.playerBoard.getGameBoard();
+    computerInt.addStruckShipSurroundings(coordsHit, playerBoard);
+  };
 
   let boardObj = whichGameBoard.getGameBoard();
   let sunkenShipsUpdated = whichGameBoard.getSunkenShips().length;
-  
-  console.log(boardObj)
 
   if (sunkenShipsUpdated > sunkenShipsStatus) {
     if (domBoard == 'mainCellsPlayer') {
+      computerInt.resetStruckShipSurroundings();
       let shipsStatus = whichGameBoard.getPlacedShips();
       display.setShips(subBoard, shipsStatus);
     } else {
@@ -170,8 +179,7 @@ const init = function() {
   activateDOMelements();
   createBoardAndShips(player);
   createBoardAndShips(computer);
-  createMovesForPlayers(player);
-  createMovesForPlayers(computer)
+  createMovesForComputer(computerInt)
   automateShipPlacement(player);
   automateShipPlacement(computer);
   setShipImages();

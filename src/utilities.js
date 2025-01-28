@@ -14,6 +14,16 @@ const getSurroundingArea = function(coords) {
   return surroundingArea
 }
 
+const getMarkers = function() {
+  const markers = {
+    hit: 'x',
+    hitSplash: 's',
+    miss: 'o',
+    shipSurrounding: 'u',
+  };
+  return markers
+}
+
 const getRandomNumber = function(num) {
   return Math.floor(Math.random() * num)
 }
@@ -39,6 +49,7 @@ const getCoordsCopy = (coords) => [...coords];
 
 export {
   getSurroundingArea,
+  getMarkers,
   getRandomNumber,
   isInBounds,
   isShip,
