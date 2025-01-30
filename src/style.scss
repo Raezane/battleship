@@ -18,21 +18,98 @@ html, body {
   left: 60px;
 }
 
+dialog,
 #gametable {
   height: 550px;
   width: 800px;
   min-width: max-content;
-  background-color: brown;
   border-radius: 10px;
-  //box-sizing: border-box;
-  padding: 10px;
   display: grid;
+}
+
+dialog {
+  padding: 30px;
+  box-sizing: border-box;
+  grid-template-columns: 400px auto;
+  grid-template-rows: 400px auto;
+  grid-auto-flow: column;
+
+  .placement {
+    display: grid;
+    grid-template-columns: repeat(10, 40px);
+    grid-auto-rows: 40px;
+    height: 400px;
+    width: 400px;
+    background-color: white;
+    justify-self: center;
+  }
+
+  .dialogbuttoncontainer {
+    box-sizing: border-box;
+    padding: 10px;
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-end;
+    
+  }
+
+  .placeableships {
+    display: grid;
+    grid-template-rows: 1fr 1fr 1fr 1fr;
+    place-items: center;
+    box-sizing: border-box;
+    padding: 10px;
+    height: 100%; 
+    width: 100%;
+    border: 1px solid rgba(130, 130, 130, 0.4);
+  }
+}
+
+.placeableships div {
+  max-width: 100%;
+  display: flex;
+  gap: 30px;
+}
+
+.dialogbuttoncontainer button {
+  height: 30px;
+  width: 150px;
+}
+
+.placement > div {
+  border: 1px solid rgba(130, 130, 130, 0.4);
+}
+
+.smallshiphorizontal,
+.mediumshiphorizontal,
+.bigshiphorizontal {
+  height: 30px;
+}
+
+.bigshiphorizontal {
+  width: 150px;
+}
+
+.mediumshiphorizontal {
+  width: 110px;
+}
+
+.smallshiphorizontal {
+  width: 70px;
+}
+
+.modalboat {
+  width: 30px;
+  height: 30px;
+}
+
+#gametable {
+  padding: 10px;
   grid-template-columns: repeat(4, 200px);
   grid-template-rows: 2fr 40px 10fr;
 
   .upperheaders {
     grid-area: 1 / 1 / 2 / 5;
-    background-color: beige;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -60,7 +137,6 @@ html, body {
   grid-area: 3 / 1 / 4 / 5;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 30px 400px;
-  background-color: aquamarine;
   display: grid;
   align-items: center;
   justify-items: center;
@@ -144,6 +220,9 @@ html, body {
 .imageHorizontal img {
   transform-origin: top;
   transform: rotate(-90deg) translate(-17px, -14px);
+}
+
+.imageHorizontal img {
   pointer-events: none;
 }
 
@@ -177,6 +256,6 @@ html, body {
   }
 }
 
-.hidetitle {
+.hide {
   visibility: hidden;
 }

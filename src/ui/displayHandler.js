@@ -32,7 +32,10 @@ const displayHandler = function() {
   }
 
   let otherElements = {
-    'gameTable': null
+    'gameTable': null,
+    'choicesParent': null,
+    'yesButton': null,
+    'noButton': null
   }
 
   const initiateBoardcells = function() {
@@ -52,7 +55,10 @@ const displayHandler = function() {
   }
 
   const initiateOtherElements = function() {
-    otherElements['gameTable'] = document.querySelector('.gametablecontainer');
+    otherElements['gameTable'] = document.querySelector('#gametable');
+    otherElements['choicesParent'] = document.querySelector('.choices');
+    otherElements['yesButton'] = document.querySelector('.choices button:first-child');
+    otherElements['noButton'] = document.querySelector('.choices button:nth-child(2)');
   }
 
   const initiateDOM = function() {
@@ -85,10 +91,42 @@ const displayHandler = function() {
         cell.addEventListener('click', getClickedCell)
       });
     };
-
     setBoardCellListeners(boardCells['mainCellsPlayer']);
     setBoardCellListeners(boardCells['mainCellsEnemy']);
   };
+
+  const removeBoardListeners = function() {
+    function setBoardCellListeners(playerOrComp) {
+      playerOrComp.forEach((cell) => {
+        cell.removeEventListener('click', getClickedCell)
+      });
+    };
+    setBoardCellListeners(boardCells['mainCellsPlayer']);
+    setBoardCellListeners(boardCells['mainCellsEnemy']);
+  }
+
+  const showGameResult = function(titlestring) {
+    transformableTitles['gameEndStatus'].textContent = titlestring;
+    transformableTitles['askNewRound'].textContent = 'New game?';
+  };
+
+  const toggleElementVisibility = function(callback) {
+    callback();
+  };
+
+  const toggleWinnerAndRetryHeader = function() {
+    transformableTitles['gameEndStatus'].classList.toggle('hide');
+    transformableTitles['askNewRound'].classList.toggle('hide');
+  }
+
+  const toggleNewGameButtons = function() {
+    otherElements['choicesParent'].classList.toggle('hide');
+  };
+
+  const toggleGameTable = function() {
+    otherElements['gameTable'].classList.toggle('hide');
+  };
+  
 
   let resolveClick;
 
@@ -114,12 +152,12 @@ const displayHandler = function() {
   let headerToBeHidden;
   let headertoBeShown;
 
-  const hideTurnTitle = function() {
-    headerToBeHidden.classList.add('hidetitle');
+  const addHideClass = function() {
+    headerToBeHidden.classList.add('hide');
   }
 
-  const showTurnTitle = function() {
-    headertoBeShown.classList.remove('hidetitle');
+  const removeHideClass = function() {
+    headertoBeShown.classList.remove('hide');
   }
 
   const hideYourTurnHeader = function() {
@@ -132,6 +170,11 @@ const displayHandler = function() {
     headertoBeShown = transformableTitles['yourTurn'];
   }
 
+  const hideBothTurnTitles = function( ) {
+    transformableTitles['enemyTurn'].classList.add('hide');
+    transformableTitles['yourTurn'].classList.add('hide');
+
+  }
   const getClickedCell = function() {
     /* first check if cell being clicked has already been clicked 
     or struck - if it has, stop the click handling here and put forth
@@ -141,7 +184,6 @@ const displayHandler = function() {
       return
     } else {
       setDefaultTitle();
-      //hideTurnTitle(this.parentNode.previousElementSibling);
     };
 
     let clickedBoard = this.parentNode.classList[0];
@@ -275,11 +317,18 @@ const displayHandler = function() {
     makePlayerBoardUnClickable,
     makeEnemyBoardClickable,
     makeEnemyBoardUnClickable,
-    hideTurnTitle,
-    showTurnTitle,
+    addHideClass,
+    removeHideClass,
     hideYourTurnHeader,
     hideEnemyTurnHeader,
+    hideBothTurnTitles,
     attachListeners, 
+    removeBoardListeners,
+    showGameResult,
+    toggleElementVisibility,
+    toggleWinnerAndRetryHeader,
+    toggleNewGameButtons,
+    toggleGameTable,
     getResolveClick, 
     setResolveClick,
     emulateEnemyClick, 

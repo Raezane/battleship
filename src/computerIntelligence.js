@@ -28,9 +28,9 @@ const computerIntelligence = function() {
     /* from all the possible directions from the hit the computer can hit next, we 
     remove the ones which are already struck/touched or out of bounds so that computer knows which cells 
     are available to strike*/
-    let filtered = getPossibleAdjacentMoves([north, east, south, west], playerBoard);
+    let adjacentMoves = getPossibleAdjacentMoves([north, east, south, west], playerBoard);
     /* then we randomize the order which the computer starts striking from the available adjacent cells */
-    let shuffled = _.shuffle(filtered);
+    let shuffled = _.shuffle(adjacentMoves);
     struckShipSurroundings = [...struckShipSurroundings, ...shuffled];
   };
 
@@ -68,16 +68,16 @@ const computerIntelligence = function() {
   };
 
   const getPossibleAdjacentMoves = function(directions, playerBoard) {
-    let filteredArr = [];
-    console.log(playerBoard)
-    directions.forEach((coords) => {
+    
+    const validCells = function(coords) {
       if (isInBounds(coords)) {
         let cell = playerBoard[coords[0]][coords[1]];
-        if (cell == markers.shipSurrounding || isShip(cell)) filteredArr.push(coords)
+        if (cell == markers.shipSurrounding || isShip(cell)) return coords
       };
-    });
-    return filteredArr
+    };
+    return directions.filter(validCells)
   };
+  
 
   return {
     getStruckShipCoords, 
