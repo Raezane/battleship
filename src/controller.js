@@ -14,6 +14,10 @@ const activateDOMelements = function() {
   display.attachListeners();
 };
 
+const toggleElementVisibility = function(callback) {
+  display.toggleElementVisibility(callback);
+}
+
 const createBoardAndShips = function(participant) {
   participant.initiateBoard();
   participant.playerBoard.createShips();
@@ -45,12 +49,12 @@ const startGame = function() {
       playerOne = playerTurn;
       playerTwo = computerTurn;
       display.hideEnemyTurnHeader();
-      display.hideTurnTitle();
+      display.addHideClass();
     } else {
       playerOne = computerTurn;
       playerTwo = playerTurn;
       display.hideYourTurnHeader();
-      display.hideTurnTitle();
+      display.addHideClass();
     }
   };
 
@@ -75,8 +79,8 @@ const startGame = function() {
 
       display.emulateEnemyClick(row, col);
 
-      display.hideTurnTitle();
-      display.showTurnTitle();
+      display.addHideClass();
+      display.removeHideClass();
 
       let cellsHit = player.playerBoard.getCellsHit();
 
@@ -95,7 +99,7 @@ const startGame = function() {
       setTimeout(() => {
         timeoutWrapper();
         resolve();
-      }, 1000);
+      }, 700);
     });
 
   };
@@ -110,24 +114,39 @@ const startGame = function() {
     });
 
     clickPromise.then(() => { 
-      display.hideTurnTitle();
-      display.showTurnTitle();
+      display.addHideClass();
+      display.removeHideClass();
     });
 
     return clickPromise
   };
 
   async function gameLoop(playerOne, playerTwo) {
-    while (sunkenPlayerShips.length < 10 && sunkenEnemyShips.length < 10) {
+    while (true) {
       await playerOne();
+      if (areAllShipsSunk()) break;
       await playerTwo();
+      if (areAllShipsSunk()) break;
     };
+    handleGameEnd(sunkenPlayerShips);
   };
+
+  function areAllShipsSunk() {
+    return sunkenPlayerShips.length == 10 || sunkenEnemyShips.length == 10
+  }
 
   setStarterPlayer();
   gameLoop(playerOne, playerTwo);
 
 };
+
+const handleGameEnd = function(sunkenPlayerShips) {
+  display.hideBothTurnTitles();
+  display.removeBoardListeners();
+  sunkenPlayerShips.length == 10 ? display.showGameResult('You lose!') : display.showGameResult('You win!')
+  toggleElementVisibility(display.toggleWinnerAndRetryHeader);
+  toggleElementVisibility(display.toggleNewGameButtons);
+} 
 
 function handleAttack(domBoard, row, col) {
 
@@ -177,6 +196,9 @@ function handleAttack(domBoard, row, col) {
 
 const init = function() {
   activateDOMelements();
+  toggleElementVisibility(display.toggleGameTable);
+  toggleElementVisibility(display.toggleWinnerAndRetryHeader);
+  toggleElementVisibility(display.toggleNewGameButtons);
   createBoardAndShips(player);
   createBoardAndShips(computer);
   createMovesForComputer(computerInt)
