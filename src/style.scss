@@ -61,8 +61,16 @@ dialog {
     padding: 10px;
     height: 100%; 
     width: 100%;
-    border: 1px solid rgba(130, 130, 130, 0.4);
+    //border: 1px solid rgba(130, 130, 130, 0.4);
   }
+}
+
+.validPlacement {
+  background-color: rgba(60, 255, 0, 0.374);
+}
+
+.invalidPlacement {
+  background-color: rgba(255, 0, 0, 0.374);
 }
 
 .placeableships div {
@@ -78,6 +86,10 @@ dialog {
 
 .placement > div {
   border: 1px solid rgba(130, 130, 130, 0.4);
+}
+
+.transparent {
+  opacity: 0
 }
 
 .smallshiphorizontal,
