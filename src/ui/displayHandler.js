@@ -41,19 +41,7 @@ const displayHandler = function() {
   let headerToBeHidden;
   let headertoBeShown;
 
-
-  let draggableShips = {
-    'bigShip': null,
-    'mediumShip1': null,
-    'mediumShip2': null,
-    'smallShip1': null,
-    'smallShip2': null,
-    'smallShip3': null,
-    'boat1': null,
-    'boat2': null,
-    'boat3': null,
-    'boat4': null,
-  }
+  let draggableShips = new Set();
 
   let boardCells = {
     'shipSetterBoard': null,
@@ -79,19 +67,19 @@ const displayHandler = function() {
     'noButton': null
   }
 
-  const getDraggableShips = () => draggableShips
+  const getDraggableShips = () => draggableShips;
 
   const initiateDraggableShips = function() {
-    draggableShips['bigShip'] = document.querySelector('.bigshiphorizontal');
-    draggableShips['mediumShip1'] = document.querySelector('.medium1');
-    draggableShips['mediumShip2'] = document.querySelector('.medium2');
-    draggableShips['smallShip1'] = document.querySelector('.small1');
-    draggableShips['smallShip2'] = document.querySelector('.small2');
-    draggableShips['smallShip3'] = document.querySelector('.small3');
-    draggableShips['boat1'] = document.querySelector('.boat1');
-    draggableShips['boat2'] = document.querySelector('.boat2');
-    draggableShips['boat3'] = document.querySelector('.boat3');
-    draggableShips['boat4'] = document.querySelector('.boat4');
+    draggableShips.add(document.querySelector('.big1'));
+    draggableShips.add(document.querySelector('.medium1'));
+    draggableShips.add(document.querySelector('.medium2'));
+    draggableShips.add(document.querySelector('.small1'));
+    draggableShips.add(document.querySelector('.small2'));
+    draggableShips.add(document.querySelector('.small3'));
+    draggableShips.add(document.querySelector('.boat1'));
+    draggableShips.add(document.querySelector('.boat2'));
+    draggableShips.add(document.querySelector('.boat3'));
+    draggableShips.add(document.querySelector('.boat4'));
   }
 
   const initiateBoardcells = function() {
@@ -196,18 +184,19 @@ const displayHandler = function() {
   const attachListeners = function() {
 
     function setImgAndDragStartLocation() {
-      for (const key in draggableShips) {
-        draggableShips[key].addEventListener('dragstart', (e) => {
+
+      draggableShips.forEach((ship) => {
+        ship.addEventListener('dragstart', (e) => {
           setDraggedElement(e);
           setImageAndMouseDownPosition(e);
           setMouseDownDistToImgEdges();
           e.target.classList.toggle('transparent');
         });
   
-        draggableShips[key].addEventListener('dragend', (e) => {
+        ship.addEventListener('dragend', (e) => {
           dragged.classList.toggle('transparent');
         });
-      };
+      });
     };
 
     function setImageTracker() {
@@ -256,9 +245,19 @@ const displayHandler = function() {
       document.addEventListener('dragend', (e) => {
         let isValidPlacement = document.querySelectorAll('.validPlacement');
         if (isValidPlacement.length > 0) {
+          /* we'll save the dragged ship image's original parent to a variable in case the placement 
+           is invalid and we need to return the image back to its previous position */
+          let savedParent = dragged.parentNode
           dragged.parentNode.removeChild(dragged);
           isValidPlacement[0].append(dragged);
-          let [x, y] = [dragged.parentNode.getAttribute('row'), dragged.parentNode.getAttribute('col'), ]
+          let shipFrontCoords = [dragged.parentNode.getAttribute('row'), dragged.parentNode.getAttribute('col')];
+          let shipRearCoords = [
+            isValidPlacement[isValidPlacement.length-1].getAttribute('row'), 
+            isValidPlacement[isValidPlacement.length-1].getAttribute('col')
+          ];
+          if (!handlePlacement(shipFrontCoords, shipRearCoords, dragged)) {
+            console.log('couldn"t place ship')
+          } else console.log('ship successfully placed')
         }
         boardCells['shipSetterBoardCells'].forEach((cell) => {
           removeValidityStyling(cell);
