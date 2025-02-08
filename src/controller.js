@@ -27,15 +27,14 @@ const createBoardAndShips = function(participant) {
 
 const mapDOMshipsToObjects = function(createdShips) {
   let domShips = display.getDraggableShips()
-  console.log(createdShips)
-  console.log(domShips)
 
-  for (let shipObj of createdShips) {
-    shipMapping.set(shipObj, domShips['bigShip'])
-  }
+  let i = 0;
 
-  console.log(shipMapping)
-}
+  for (let domShip of domShips) {
+    shipMapping.set(domShip, createdShips[i])
+    i += 1;
+  };
+};
 
 const createMovesForComputer = function (participant) {
   participant.createAvailableMoves();
@@ -162,14 +161,29 @@ const handleGameEnd = function(sunkenPlayerShips) {
   toggleElementVisibility(display.toggleNewGameButtons);
 } 
 
-const handlePlacement = function(row, col) {
-  //player.playerBoard.
+const handlePlacement = function(shipFrontCoords, shipRearCoords, draggedShipImg) {
+  /* first parse dom string coordinates to interegrs, which we may then
+  use in our boardhandler to evaluate ship placement validity and place it */
+  shipFrontCoords = shipFrontCoords.map(number => +number);
+  shipRearCoords = shipRearCoords.map(number => +number);
+  //we'll save a correct ship image to a variable..
+  let selector = '.' + draggedShipImg.classList[0]
+  //..which we'll then use as a map key to get a corresponding ship object
+  let shipObj = shipMapping.get(document.querySelector(selector))
+
+  /* and now we have all we need (ship's front and rear coords and the shipobject),
+  which we pass straight to boardHandler to place the ship to our internal gameboard */
+  if (!player.playerBoard.validateAndPlace(shipObj, shipFrontCoords, shipRearCoords)) {
+    return false;
+  } else return true
+  
+  console.log(player.playerBoard.getGameBoard())
 } 
 
 const handleAttack = function(domBoard, row, col) {
 
-  /* first convert dom data strings to integers, which the playerHandler 
-  and boardHandler can then use */
+  /* first convert dom data string numbers to integers, which the 
+  playerHandler and boardHandler can then use */
   let rowInt = +row
   let colInt = +col
   

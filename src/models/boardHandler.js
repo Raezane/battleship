@@ -97,8 +97,11 @@ const boardHandler = function() {
 
     let direction = HorizontalOrVertical(frontCoords, rearCoords)
     let isValid = validPlacement(direction, frontCoords, rearCoords);
-    if (isValid) setShip(direction, frontCoords, rearCoords, shipObj);
-    else return false
+    if (isValid) {
+      setShip(direction, frontCoords, rearCoords, shipObj);
+      return true
+    }
+    return false
 
   };
 
@@ -217,7 +220,7 @@ const boardHandler = function() {
           frontCoordsCopy[direction] += 1;    
           } else return false  
         };
-      return true;
+    return true;
   };
 
   const receiveAttack = function(y, x) {
@@ -331,7 +334,7 @@ const boardHandler = function() {
   };
 };
 
-let board = boardHandler();
+/*let board = boardHandler();
 board.buildBoard();
 board.createShips();
 let ship0 = ship(4);
@@ -342,7 +345,7 @@ board.validateAndPlace(ship0, [6,2], [6,5]);
 board.receiveAttack(6,2);
 board.receiveAttack(6,4);
 board.receiveAttack(6,5); */
-board.getGameBoard()
+//board.getGameBoard()
 //let rndCoords = board.getRandomCoords(ship0)
 //board.setCreatedShips()
 //board.getGameBoard()
