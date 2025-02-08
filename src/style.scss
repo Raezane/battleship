@@ -86,6 +86,15 @@ dialog {
 
 .placement > div {
   border: 1px solid rgba(130, 130, 130, 0.4);
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.placement > div > img {
+  position: absolute;
+  left: 5px;
+  z-index: 1;
 }
 
 .transparent {

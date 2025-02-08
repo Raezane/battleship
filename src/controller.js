@@ -9,6 +9,8 @@ let computerInt = computerIntelligence();
 
 const display = displayHandler();
 
+let shipMapping = new Map();
+
 const activateDOMelements = function() {
   display.initiateDOM();
   display.attachListeners();
@@ -21,6 +23,18 @@ const toggleElementVisibility = function(callback) {
 const createBoardAndShips = function(participant) {
   participant.initiateBoard();
   participant.playerBoard.createShips();
+}
+
+const mapDOMshipsToObjects = function(createdShips) {
+  let domShips = display.getDraggableShips()
+  console.log(createdShips)
+  console.log(domShips)
+
+  for (let shipObj of createdShips) {
+    shipMapping.set(shipObj, domShips['bigShip'])
+  }
+
+  console.log(shipMapping)
 }
 
 const createMovesForComputer = function (participant) {
@@ -148,7 +162,11 @@ const handleGameEnd = function(sunkenPlayerShips) {
   toggleElementVisibility(display.toggleNewGameButtons);
 } 
 
-function handleAttack(domBoard, row, col) {
+const handlePlacement = function(row, col) {
+  //player.playerBoard.
+} 
+
+const handleAttack = function(domBoard, row, col) {
 
   /* first convert dom data strings to integers, which the playerHandler 
   and boardHandler can then use */
@@ -200,12 +218,13 @@ const init = function() {
   toggleElementVisibility(display.toggleWinnerAndRetryHeader);
   toggleElementVisibility(display.toggleNewGameButtons);
   createBoardAndShips(player);
-  createBoardAndShips(computer);
+  mapDOMshipsToObjects(player.playerBoard.getCreatedShips())
+  /*createBoardAndShips(computer);
   createMovesForComputer(computerInt)
   automateShipPlacement(player);
   automateShipPlacement(computer);
   setShipImages();
-  startGame();
+  startGame(); */
 }
 
-export {init, handleAttack}
+export {init, handleAttack, handlePlacement}

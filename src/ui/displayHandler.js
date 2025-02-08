@@ -1,4 +1,4 @@
-import { handleAttack } from "../controller.js";
+import {handlePlacement, handleAttack } from "../controller.js";
 
 //ship models
 import ship1 from "../assets/images/boat1.png";
@@ -53,7 +53,6 @@ const displayHandler = function() {
     'boat2': null,
     'boat3': null,
     'boat4': null,
-
   }
 
   let boardCells = {
@@ -79,6 +78,8 @@ const displayHandler = function() {
     'yesButton': null,
     'noButton': null
   }
+
+  const getDraggableShips = () => draggableShips
 
   const initiateDraggableShips = function() {
     draggableShips['bigShip'] = document.querySelector('.bigshiphorizontal');
@@ -177,9 +178,22 @@ const displayHandler = function() {
     );
   };
 
-  const attachListeners = function() {
+  const currentPlacementInvalid = function(cell) {
+    cell.classList.remove('validPlacement');
+    cell.classList.add('invalidPlacement');
+  }
 
-    let cellArray = [];
+  const currentPlacementValid = function(cell) {
+    cell.classList.remove('invalidPlacement');
+    cell.classList.add('validPlacement');
+  }
+
+  const removeValidityStyling = function(cell) {
+    cell.classList.remove('invalidPlacement');
+    cell.classList.remove('validPlacement');
+  }
+
+  const attachListeners = function() {
 
     function setImgAndDragStartLocation() {
       for (const key in draggableShips) {
@@ -197,6 +211,10 @@ const displayHandler = function() {
     };
 
     function setImageTracker() {
+
+      let setShipArea = [];
+      let allIntercectingCells = [];
+
       document.addEventListener('dragover', (e) => {
         setCursorTracker(e);
         setImgLivePosition();
@@ -206,29 +224,49 @@ const displayHandler = function() {
 
           let cellPos = cell.getBoundingClientRect();
           if (doesImgAndCellIntercect(cellPos)) {
-            if (!cellArray.includes(cell) && cellArray.length < shipSize) {
-              cellArray.push(cell);
-            };
-            if (cellArray.length < shipSize) {
-              cellArray.forEach((cell) => cell.classList.add('invalidPlacement'))
+            
+            if (!allIntercectingCells.includes(cell)) allIntercectingCells.push(cell)
+            
+            if (setShipArea.length < shipSize) {
+              setShipArea.push(cell);
+              currentPlacementInvalid(cell);
             }
-            if (cellArray.length == shipSize) {
-              cellArray.forEach((cell) => cell.classList.remove('invalidPlacement'));
-              cellArray.forEach((cell) => cell.classList.add('validPlacement'));
-              };
-            } else {
-              cellArray.pop();
-              cell.classList.remove('invalidPlacement');
-              cell.classList.remove('validPlacement');
+            
+            if (setShipArea.length == shipSize) {
+              setShipArea.forEach((cell) => {
+                currentPlacementValid(cell)
+              });
             }
 
+            if (allIntercectingCells.length > shipSize) {
+              allIntercectingCells.forEach((cell) => {
+                currentPlacementInvalid(cell);
+              });
+            };
+
+        } else {
+            let index = allIntercectingCells.indexOf(cell);
+            if (index !== -1) allIntercectingCells.splice(index, 1);
+            removeValidityStyling(cell)
+            setShipArea.pop();
+          };
         });
+      });
+
+      document.addEventListener('dragend', (e) => {
+        let isValidPlacement = document.querySelectorAll('.validPlacement');
+        if (isValidPlacement.length > 0) {
+          dragged.parentNode.removeChild(dragged);
+          isValidPlacement[0].append(dragged);
+          let [x, y] = [dragged.parentNode.getAttribute('row'), dragged.parentNode.getAttribute('col'), ]
+        }
+        boardCells['shipSetterBoardCells'].forEach((cell) => {
+          removeValidityStyling(cell);
+        });
+
       });
     };
 
-    function setModalBoardCellListeners(modalCells) {
-
-    };
 
     function setBoardCellListeners(playerOrComp) {
       playerOrComp.forEach((cell) => {
@@ -238,7 +276,6 @@ const displayHandler = function() {
 
     setImgAndDragStartLocation();
     setImageTracker();
-    setModalBoardCellListeners(boardCells['shipSetterBoardCells']);
     setBoardCellListeners(boardCells['mainCellsPlayer']);
     setBoardCellListeners(boardCells['mainCellsEnemy']);
   };
@@ -315,8 +352,8 @@ const displayHandler = function() {
   const hideBothTurnTitles = function( ) {
     transformableTitles['enemyTurn'].classList.add('hide');
     transformableTitles['yourTurn'].classList.add('hide');
-
   }
+
   const getClickedCell = function() {
     /* first check if cell being clicked has already been clicked 
     or struck - if it has, stop the click handling here and put forth
@@ -453,6 +490,7 @@ const displayHandler = function() {
 
   return {
     initiateDOM,
+    getDraggableShips,
     makePlayerBoardClickable,
     makePlayerBoardUnClickable,
     makeEnemyBoardClickable,
