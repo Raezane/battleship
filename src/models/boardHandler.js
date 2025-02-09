@@ -47,16 +47,16 @@ const boardHandler = function() {
     let currentShip = 0
     while (currentShip < 10) {
       let coords = getRandomCoords(createdShips[currentShip]);
-      let direction = HorizontalOrVertical(coords[0], coords[1]);
-      let areCoordsValid = validPlacement(direction, coords[0], coords[1])
+      //let direction = HorizontalOrVertical(coords[0], coords[1]);
+      let areCoordsValid = validPlacement(coords[0], coords[1])
       if (areCoordsValid) {
         createdShips[currentShip] = {
           createdShip: createdShips[currentShip], 
           coords: [coords[0], coords[1]],
-          direction: direction
+          //direction: direction
         }
         setShip(
-          createdShips[currentShip].direction, 
+          //createdShips[currentShip].direction, 
           createdShips[currentShip].coords[0], 
           createdShips[currentShip].coords[1], 
           createdShips[currentShip].createdShip
@@ -95,22 +95,23 @@ const boardHandler = function() {
 
   const validateAndPlace = function(shipObj, frontCoords, rearCoords) {
 
-    let direction = HorizontalOrVertical(frontCoords, rearCoords)
-    let isValid = validPlacement(direction, frontCoords, rearCoords);
+    let isValid = validPlacement(frontCoords, rearCoords);
     if (isValid) {
-      setShip(direction, frontCoords, rearCoords, shipObj);
+      setShip(frontCoords, rearCoords, shipObj);
       return true
     }
     return false
 
   };
 
-  const setShip = function(direction, frontCoords, rearCoords, shipObj) {
+  const setShip = function(frontCoords, rearCoords, shipObj) {
 
     /* first check if the selected area for the ship to be placed is not
     already occupied. We'll create copy of the actual coordinates here so 
     that the iterator won't modify the original ones */
     let frontCoordsCopy = getCoordsCopy(frontCoords)
+
+    let direction = HorizontalOrVertical(frontCoords, rearCoords);
 
     placedShips.push({placedShip: shipObj, coords: [frontCoords, rearCoords], direction})
 
@@ -183,7 +184,7 @@ const boardHandler = function() {
     };
   };
 
-  const validPlacement = function(direction, frontCoords, rearCoords) {
+  const validPlacement = function(frontCoords, rearCoords) {
 
     let frontCoordsCopy = getCoordsCopy(frontCoords)
 
@@ -191,35 +192,19 @@ const boardHandler = function() {
       return ((frontCoords[0] == rearCoords[0] && frontCoords[1] < rearCoords[1])
             || (frontCoords[1] == rearCoords[1] && frontCoords[0] < rearCoords[0])
             || (frontCoords[1] == rearCoords[1] && frontCoords[0] == rearCoords[0])
-      )
-    }
+      );
+    };
 
-    function isSurroundingClear() {
-
-      let surrounding = getSurroundingArea(frontCoordsCopy)
-
-      for (const key in surrounding) {
-        let [row, col] = surrounding[key]
-        try {
-          if (isShip(board[row][col])) return false
-        } catch (error) {
-          /* if the current value is undefined (outside bounds), this catch-block catches it without 
-          crashing the app */ 
-          console.log(`the current value is outside board bounds and thus undefined`)
-        }
-      } return true
-    }
+    function bothEndsAreNull() {
+      return board[frontCoordsCopy[0]][frontCoordsCopy[1]] == null &&
+      board[rearCoords[0]][rearCoords[1]] == null
+    };
 
     if (IsCoordsFormCorrect() == false) return false
     if (isInBounds(frontCoords) == false) return false
     if (isInBounds(rearCoords) == false) return false
+    if (!bothEndsAreNull()) return false
 
-    while (frontCoordsCopy[direction] <= rearCoords[direction]) {
-        // check by iterating if the area where ship is placed is null and there aren't ships straight next to it.
-        if (board[frontCoordsCopy[0]][frontCoordsCopy[1]] == null && isSurroundingClear()) {
-          frontCoordsCopy[direction] += 1;    
-          } else return false  
-        };
     return true;
   };
 
@@ -330,6 +315,8 @@ const boardHandler = function() {
     resetCellsHit,
     getRandomCoords, 
     validateAndPlace, 
+    setShip,
+    validPlacement,
     receiveAttack
   };
 };

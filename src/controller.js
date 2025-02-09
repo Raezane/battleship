@@ -161,6 +161,16 @@ const handleGameEnd = function(sunkenPlayerShips) {
   toggleElementVisibility(display.toggleNewGameButtons);
 } 
 
+const currentAreaAvailable = function(shipFrontCoords, shipRearCoords) {
+  /* first parse dom string coordinates to interegrs, which we may then
+  use in our boardhandler to evaluate ship placement validity */
+  shipFrontCoords = shipFrontCoords.map(number => +number);
+  shipRearCoords = shipRearCoords.map(number => +number);
+
+  return player.playerBoard.validPlacement(shipFrontCoords, shipRearCoords)
+
+} 
+
 const handlePlacement = function(shipFrontCoords, shipRearCoords, draggedShipImg) {
   /* first parse dom string coordinates to interegrs, which we may then
   use in our boardhandler to evaluate ship placement validity and place it */
@@ -173,9 +183,7 @@ const handlePlacement = function(shipFrontCoords, shipRearCoords, draggedShipImg
 
   /* and now we have all we need (ship's front and rear coords and the shipobject),
   which we pass straight to boardHandler to place the ship to our internal gameboard */
-  if (!player.playerBoard.validateAndPlace(shipObj, shipFrontCoords, shipRearCoords)) {
-    return false;
-  } else return true
+  player.playerBoard.setShip(shipFrontCoords, shipRearCoords, shipObj)
   
   console.log(player.playerBoard.getGameBoard())
 } 
@@ -241,4 +249,4 @@ const init = function() {
   startGame(); */
 }
 
-export {init, handleAttack, handlePlacement}
+export {init, handleAttack, currentAreaAvailable, handlePlacement}
