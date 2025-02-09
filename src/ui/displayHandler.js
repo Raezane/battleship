@@ -1,4 +1,4 @@
-import {handlePlacement, handleAttack } from "../controller.js";
+import {currentAreaAvailable, handlePlacement, handleAttack } from "../controller.js";
 
 //ship models
 import ship1 from "../assets/images/boat1.png";
@@ -166,12 +166,12 @@ const displayHandler = function() {
     );
   };
 
-  const currentPlacementInvalid = function(cell) {
+  const shipCurrentlyOutOfBounds = function(cell) {
     cell.classList.remove('validPlacement');
     cell.classList.add('invalidPlacement');
   }
 
-  const currentPlacementValid = function(cell) {
+  const shipCurrentlyInBounds = function(cell) {
     cell.classList.remove('invalidPlacement');
     cell.classList.add('validPlacement');
   }
@@ -218,18 +218,30 @@ const displayHandler = function() {
             
             if (setShipArea.length < shipSize) {
               setShipArea.push(cell);
-              currentPlacementInvalid(cell);
+              shipCurrentlyOutOfBounds(cell);
             }
             
             if (setShipArea.length == shipSize) {
-              setShipArea.forEach((cell) => {
-                currentPlacementValid(cell)
-              });
-            }
+              setShipArea.forEach((cell) => shipCurrentlyInBounds(cell))
+
+              let cellsToBePlacedUpon = document.querySelectorAll('.validPlacement');
+              console.log(cellsToBePlacedUpon)
+              let shipFrontCoords = [
+                cellsToBePlacedUpon[0].getAttribute('row'), 
+                cellsToBePlacedUpon[0].getAttribute('col')
+              ];
+              let shipRearCoords = [
+                cellsToBePlacedUpon[cellsToBePlacedUpon.length-1].getAttribute('row'), 
+                cellsToBePlacedUpon[cellsToBePlacedUpon.length-1].getAttribute('col')
+              ];
+              if (!currentAreaAvailable(shipFrontCoords, shipRearCoords)) {
+                setShipArea.forEach((cell) => shipCurrentlyOutOfBounds(cell));
+              } else setShipArea.forEach((cell) => shipCurrentlyInBounds(cell));
+            };
 
             if (allIntercectingCells.length > shipSize) {
               allIntercectingCells.forEach((cell) => {
-                currentPlacementInvalid(cell);
+                shipCurrentlyOutOfBounds(cell);
               });
             };
 
@@ -243,21 +255,22 @@ const displayHandler = function() {
       });
 
       document.addEventListener('dragend', (e) => {
-        let isValidPlacement = document.querySelectorAll('.validPlacement');
-        if (isValidPlacement.length > 0) {
+        let cellsToBePlacedUpon = document.querySelectorAll('.validPlacement');
+        if (cellsToBePlacedUpon.length > 0) {
           /* we'll save the dragged ship image's original parent to a variable in case the placement 
            is invalid and we need to return the image back to its previous position */
           let savedParent = dragged.parentNode
           dragged.parentNode.removeChild(dragged);
-          isValidPlacement[0].append(dragged);
-          let shipFrontCoords = [dragged.parentNode.getAttribute('row'), dragged.parentNode.getAttribute('col')];
+          cellsToBePlacedUpon[0].append(dragged);
+          let shipFrontCoords = [
+            dragged.parentNode.getAttribute('row'), 
+            dragged.parentNode.getAttribute('col')];
           let shipRearCoords = [
-            isValidPlacement[isValidPlacement.length-1].getAttribute('row'), 
-            isValidPlacement[isValidPlacement.length-1].getAttribute('col')
+            cellsToBePlacedUpon[cellsToBePlacedUpon.length-1].getAttribute('row'), 
+            cellsToBePlacedUpon[cellsToBePlacedUpon.length-1].getAttribute('col')
           ];
-          if (!handlePlacement(shipFrontCoords, shipRearCoords, dragged)) {
-            console.log('couldn"t place ship')
-          } else console.log('ship successfully placed')
+          handlePlacement(shipFrontCoords, shipRearCoords, dragged)
+
         }
         boardCells['shipSetterBoardCells'].forEach((cell) => {
           removeValidityStyling(cell);
