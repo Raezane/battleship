@@ -91,7 +91,7 @@ dialog {
   position: relative;
 }
 
-.placement > div > img {
+.placement > div > .horizontal {
   position: absolute;
   left: 5px;
   z-index: 1;
@@ -101,23 +101,51 @@ dialog {
   opacity: 0
 }
 
-.smallshiphorizontal,
-.mediumshiphorizontal,
-.big1 {
+.horizontal.bigship,
+.horizontal.mediumship,
+.horizontal.smallship {
   height: 30px;
 }
 
-.big1 {
+.horizontal.big1 {
   width: 150px;
 }
 
-.mediumshiphorizontal {
+.horizontal.mediumship {
   width: 110px;
 }
 
-.smallshiphorizontal {
+.horizontal.smallship {
   width: 70px;
 }
+
+
+.placement > div > .vertical {
+  position: absolute;
+  top: 5px;
+  left: 4px;
+  z-index: 1;
+}
+
+.vertical.bigship,
+.vertical.mediumship,
+.vertical.smallship {
+  width: 30px;
+}
+
+.vertical.big1 {
+  height: 150px;
+}
+
+.vertical.mediumship {
+  height: 110px;
+}
+
+.vertical.smallship {
+  height: 70px;
+}
+
+
 
 .modalboat {
   width: 30px;

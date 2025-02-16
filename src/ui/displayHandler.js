@@ -1,4 +1,4 @@
-import {currentAreaAvailable, handlePlacement, handleAttack } from "../controller.js";
+import {currentAreaAvailable, handlePlacement, handleTurn, handleAttack } from "../controller.js";
 
 //ship models
 import ship1 from "../assets/images/boat1.png";
@@ -41,7 +41,8 @@ const displayHandler = function() {
   let headerToBeHidden;
   let headertoBeShown;
 
-  let draggableShips = new Set();
+  let horizontalDraggableShips = new Set();
+  let verticalDraggableShips = {}
 
   let boardCells = {
     'shipSetterBoard': null,
@@ -67,19 +68,64 @@ const displayHandler = function() {
     'noButton': null
   }
 
-  const getDraggableShips = () => draggableShips;
+  const gethorizontalDraggableShips = () => horizontalDraggableShips;
+  const getVerticalDraggableShips = () => verticalDraggableShips;
 
-  const initiateDraggableShips = function() {
-    draggableShips.add(document.querySelector('.big1'));
-    draggableShips.add(document.querySelector('.medium1'));
-    draggableShips.add(document.querySelector('.medium2'));
-    draggableShips.add(document.querySelector('.small1'));
-    draggableShips.add(document.querySelector('.small2'));
-    draggableShips.add(document.querySelector('.small3'));
-    draggableShips.add(document.querySelector('.boat1'));
-    draggableShips.add(document.querySelector('.boat2'));
-    draggableShips.add(document.querySelector('.boat3'));
-    draggableShips.add(document.querySelector('.boat4'));
+  const initiateHorizontalDraggableShips = function() {
+    horizontalDraggableShips.add(document.querySelector('.big1'));
+    horizontalDraggableShips.add(document.querySelector('.medium1'));
+    horizontalDraggableShips.add(document.querySelector('.medium2'));
+    horizontalDraggableShips.add(document.querySelector('.small1'));
+    horizontalDraggableShips.add(document.querySelector('.small2'));
+    horizontalDraggableShips.add(document.querySelector('.small3'));
+    horizontalDraggableShips.add(document.querySelector('.boat1'));
+    horizontalDraggableShips.add(document.querySelector('.boat2'));
+    horizontalDraggableShips.add(document.querySelector('.boat3'));
+    horizontalDraggableShips.add(document.querySelector('.boat4'));
+  }
+
+  const createVerticalDraggableShips = function() {
+
+    const bigShipVertical = new Image();
+    bigShipVertical.src = ship4A;
+    bigShipVertical.classList.add('bigship', 'vertical', 'big1');
+    bigShipVertical.setAttribute('data-shipsize', 4)
+    verticalDraggableShips['big1'] = bigShipVertical
+
+    const mediumShipVertical1 = new Image();
+    mediumShipVertical1.src = ship3A;
+    mediumShipVertical1.classList.add('mediumship', 'vertical', 'medium1');
+    mediumShipVertical1.setAttribute('data-shipsize', 3)
+    verticalDraggableShips['medium1'] = mediumShipVertical1
+
+
+    const mediumShipVertical2 = new Image();
+    mediumShipVertical2.src = ship3A;
+    mediumShipVertical2.classList.add('mediumship', 'vertical', 'medium2');
+    mediumShipVertical1.setAttribute('data-shipsize', 3)
+    verticalDraggableShips['medium2'] = mediumShipVertical2
+
+
+    const smallShipVertical1 = new Image();
+    smallShipVertical1.src = ship2A;
+    smallShipVertical1.classList.add('smallship', 'vertical', 'small1');
+    smallShipVertical1.setAttribute('data-shipsize', 2)
+    verticalDraggableShips['small1'] = smallShipVertical1
+
+
+    const smallShipVertical2 = new Image();
+    smallShipVertical2.src = ship2A;
+    smallShipVertical2.classList.add('smallship', 'vertical', 'small2');
+    smallShipVertical1.setAttribute('data-shipsize', 2)
+    verticalDraggableShips['small2'] = smallShipVertical2
+
+
+    const smallShipVertical3 = new Image();
+    smallShipVertical3.src = ship2A;
+    smallShipVertical3.classList.add('smallship', 'vertical', 'small3');
+    smallShipVertical3.setAttribute('data-shipsize', 2)
+    verticalDraggableShips['small3'] = smallShipVertical3
+
   }
 
   const initiateBoardcells = function() {
@@ -107,8 +153,9 @@ const displayHandler = function() {
   }
 
   const initiateDOM = function() {
-    initiateDraggableShips();
+    initiateHorizontalDraggableShips();
     initiateBoardcells();
+    createVerticalDraggableShips();
     initiateTitles();
     initiateOtherElements();
   }
@@ -181,10 +228,35 @@ const displayHandler = function() {
     cell.classList.remove('validPlacement');
   }
 
+  //JATKA TÄSTÄ
+    //JATKA TÄSTÄ
+      //JATKA TÄSTÄ
+        //JATKA TÄSTÄ
+          //JATKA TÄSTÄ
+            //JATKA TÄSTÄ
+              //JATKA TÄSTÄ
+                //JATKA TÄSTÄ
+                  //JATKA TÄSTÄ
+                    //JATKA TÄSTÄ
+                      //JATKA TÄSTÄ
+                        //JATKA TÄSTÄ
+                          //JATKA TÄSTÄ
+                            //JATKA TÄSTÄ
+                              //JATKA TÄSTÄ
+                              
+  const turnShip = function(e) {
+    let startCoords 
+    console.log(e.target.parentnode)
+    console.log(verticalDraggableShips)
+  } 
+
   const attachListeners = function() {
 
     function setImgAndDragStartLocation() {
-
+      //convert verticalShipImgsObject to an array so we may iterate it
+      let verticalShipValues = Object.values(verticalDraggableShips);
+      let draggableShips = new Set([...horizontalDraggableShips, ...verticalShipValues])
+      
       draggableShips.forEach((ship) => {
         ship.addEventListener('dragstart', (e) => {
           setDraggedElement(e);
@@ -201,31 +273,36 @@ const displayHandler = function() {
 
     function setImageTracker() {
 
-      let setShipArea = [];
-      let allIntercectingCells = [];
+      let intercectingCells = [];
+      let shipSize;
 
       document.addEventListener('dragover', (e) => {
         setCursorTracker(e);
         setImgLivePosition();
-        let shipSize = dragged.dataset.shipsize
+        shipSize = dragged.dataset.shipsize
 
         boardCells['shipSetterBoardCells'].forEach((cell) => {
 
           let cellPos = cell.getBoundingClientRect();
           if (doesImgAndCellIntercect(cellPos)) {
             
-            if (!allIntercectingCells.includes(cell)) allIntercectingCells.push(cell)
-            
-            if (setShipArea.length < shipSize) {
-              setShipArea.push(cell);
-              shipCurrentlyOutOfBounds(cell);
+            if (!intercectingCells.includes(cell)) {
+              intercectingCells.push(cell);
             }
+
+            if (intercectingCells.length > shipSize || intercectingCells.length < shipSize ) {
+              intercectingCells.forEach((cell) => {
+                shipCurrentlyOutOfBounds(cell);
+              });
+            };
+
+            //console.log(intercectingCells)
             
-            if (setShipArea.length == shipSize) {
-              setShipArea.forEach((cell) => shipCurrentlyInBounds(cell))
+            if (intercectingCells.length == shipSize) {
+              intercectingCells.forEach((cell) => shipCurrentlyInBounds(cell))
 
               let cellsToBePlacedUpon = document.querySelectorAll('.validPlacement');
-              console.log(cellsToBePlacedUpon)
+              
               let shipFrontCoords = [
                 cellsToBePlacedUpon[0].getAttribute('row'), 
                 cellsToBePlacedUpon[0].getAttribute('col')
@@ -235,21 +312,14 @@ const displayHandler = function() {
                 cellsToBePlacedUpon[cellsToBePlacedUpon.length-1].getAttribute('col')
               ];
               if (!currentAreaAvailable(shipFrontCoords, shipRearCoords)) {
-                setShipArea.forEach((cell) => shipCurrentlyOutOfBounds(cell));
-              } else setShipArea.forEach((cell) => shipCurrentlyInBounds(cell));
-            };
-
-            if (allIntercectingCells.length > shipSize) {
-              allIntercectingCells.forEach((cell) => {
-                shipCurrentlyOutOfBounds(cell);
-              });
+                intercectingCells.forEach((cell) => shipCurrentlyOutOfBounds(cell));
+              } else intercectingCells.forEach((cell) => shipCurrentlyInBounds(cell));
             };
 
         } else {
-            let index = allIntercectingCells.indexOf(cell);
-            if (index !== -1) allIntercectingCells.splice(index, 1);
+            let index = intercectingCells.indexOf(cell);
+            if (index !== -1) intercectingCells.splice(index, 1);
             removeValidityStyling(cell)
-            setShipArea.pop();
           };
         });
       });
@@ -257,11 +327,10 @@ const displayHandler = function() {
       document.addEventListener('dragend', (e) => {
         let cellsToBePlacedUpon = document.querySelectorAll('.validPlacement');
         if (cellsToBePlacedUpon.length > 0) {
-          /* we'll save the dragged ship image's original parent to a variable in case the placement 
-           is invalid and we need to return the image back to its previous position */
-          let savedParent = dragged.parentNode
+          
           dragged.parentNode.removeChild(dragged);
           cellsToBePlacedUpon[0].append(dragged);
+
           let shipFrontCoords = [
             dragged.parentNode.getAttribute('row'), 
             dragged.parentNode.getAttribute('col')];
@@ -275,7 +344,8 @@ const displayHandler = function() {
         boardCells['shipSetterBoardCells'].forEach((cell) => {
           removeValidityStyling(cell);
         });
-
+        //no need to turn boat, because it will only take one cell
+        if (shipSize > 1) dragged.addEventListener('click', handleTurn)
       });
     };
 
@@ -502,7 +572,8 @@ const displayHandler = function() {
 
   return {
     initiateDOM,
-    getDraggableShips,
+    gethorizontalDraggableShips,
+    getVerticalDraggableShips,
     makePlayerBoardClickable,
     makePlayerBoardUnClickable,
     makeEnemyBoardClickable,

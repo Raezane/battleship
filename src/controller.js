@@ -26,8 +26,7 @@ const createBoardAndShips = function(participant) {
 }
 
 const mapDOMshipsToObjects = function(createdShips) {
-  let domShips = display.getDraggableShips()
-
+  let domShips = display.gethorizontalDraggableShips()
   let i = 0;
 
   for (let domShip of domShips) {
@@ -177,7 +176,7 @@ const handlePlacement = function(shipFrontCoords, shipRearCoords, draggedShipImg
   shipFrontCoords = shipFrontCoords.map(number => +number);
   shipRearCoords = shipRearCoords.map(number => +number);
   //we'll save a correct ship image to a variable..
-  let selector = '.' + draggedShipImg.classList[0]
+  let selector = '.' + draggedShipImg.classList[2]
   //..which we'll then use as a map key to get a corresponding ship object
   let shipObj = shipMapping.get(document.querySelector(selector))
 
@@ -187,6 +186,30 @@ const handlePlacement = function(shipFrontCoords, shipRearCoords, draggedShipImg
   
   console.log(player.playerBoard.getGameBoard())
 } 
+
+const handleTurn = function(e) {
+
+  let parent = e.target.parentNode;
+  //let frontCoords = parent.getatt
+
+
+  let verticalShips = display.getVerticalDraggableShips();
+
+
+  let currentDirection = e.target.classList[1];
+  let currentShipDOMobj = e.target.classList[2];
+  let replacingShipImg = verticalShips[currentShipDOMobj]
+  console.log(parent)
+  parent.textContent = ''
+  parent.append(replacingShipImg)
+
+  
+  /* let shioObj = player.playerBoard.getPlacedShips()
+  let direction = e.target
+  let shipLength = e.target.dataset.shipsize
+  let shipFrontCoords = [e.target.parentNode.getAttribute('row'), e.target.parentNode.getAttribute('col')]; 
+  console.log(shioObj) */
+}
 
 const handleAttack = function(domBoard, row, col) {
 
@@ -249,4 +272,4 @@ const init = function() {
   startGame(); */
 }
 
-export {init, handleAttack, currentAreaAvailable, handlePlacement}
+export {init, handleAttack, handleTurn, currentAreaAvailable, handlePlacement}
