@@ -1,12 +1,18 @@
 import {ship} from "./shipHandler.js";
 import { getSurroundingArea, getMarkers, getRandomNumber, isInBounds, isShip, HorizontalOrVertical, getCoordsCopy } from "../utilities.js";
+import some from "lodash/some";
+import isEqual from "lodash/isEqual";
 
 const boardHandler = function() {
+  
   let board = [];
+
   let createdShips = [];
   let placedShips = [];
-  let cellsHit = [];
   let sunkenShips = [];
+
+  let sharedSurroundingCells = [];
+  let cellsHit = [];
 
   //gameboard markers, like hit, miss and splashHits around ship when ship is struck
   const markers = getMarkers();
@@ -15,11 +21,12 @@ const boardHandler = function() {
 
   const getCreatedShips = () => createdShips;
   const getPlacedShips = () => placedShips;
+  const getSunkenShips = () => sunkenShips;
 
   const getCellsHit = () => cellsHit;
   const resetCellsHit = () => cellsHit = [];
+  const getSharedSurroundingCells = () => sharedSurroundingCells;
 
-  const getSunkenShips = () => sunkenShips;
 
   const areAllSunk = function() {
     if (sunkenShips.length >= 10) return true
@@ -104,28 +111,50 @@ const boardHandler = function() {
 
   };
 
+  const findPlacedShip = function(placedShips, shipObj) {
+    return placedShips.find(ship => ship.placedShip == shipObj)
+  }
+
+  const nullifyCurrentShipArea = function(playerBoardObj, shipObj) {
+    shipObj.shipArea.forEach((cell) => playerBoardObj[cell[0]][cell[1]] = null)
+  };
+   
+  const emptyShipSurrounding = function(playerBoardObj, shipObj) {
+    shipObj.shipSurroundingCells.forEach((cell) => {
+      playerBoardObj[cell[0]][cell[1]] = null;
+    });
+  };
+
+  const updatePlacedShipValues = function(isInPlacedShips, frontCoords, rearCoords, shipArea, shipSurroundingCells) {
+    isInPlacedShips.coords = [frontCoords, rearCoords],
+    isInPlacedShips.shipArea = shipArea,
+    isInPlacedShips.shipSurroundingCells = shipSurroundingCells
+  }
+
   const setShip = function(frontCoords, rearCoords, shipObj) {
 
-    /* first check if the selected area for the ship to be placed is not
-    already occupied. We'll create copy of the actual coordinates here so 
+    /* We'll create copy of the actual coordinates here so 
     that the iterator won't modify the original ones */
     let frontCoordsCopy = getCoordsCopy(frontCoords)
 
     let direction = HorizontalOrVertical(frontCoords, rearCoords);
 
-    placedShips.push({placedShip: shipObj, coords: [frontCoords, rearCoords], direction})
-
-    let surrounding = getSurroundingArea(frontCoords)
+    let currentSurrounding = getSurroundingArea(frontCoordsCopy);
+    let rearCoordsSurrounding = getSurroundingArea(rearCoords);
+    let shipArea = [];
+    let shipSurroundingCells = [];
 
     if (direction == 0) {
-      setNorthernSurrounding(surrounding.north, surrounding.northEast, surrounding.northWest)
-      placeSidesAndPartOfShip(0, surrounding.west, surrounding.east)
-      setSouthernSurrounding(surrounding.south, surrounding.southEast, surrounding.southWest)
+      shipSurroundingCells.push(currentSurrounding.north, currentSurrounding.northEast, currentSurrounding.northWest)
+      placeSidesAndPartOfShip(0, currentSurrounding.west, currentSurrounding.east)
+      shipSurroundingCells.push(rearCoordsSurrounding.south, rearCoordsSurrounding.southEast, rearCoordsSurrounding.southWest)
     } else {
-      setWesternSurrounding(surrounding.west, surrounding.northWest, surrounding.southWest)
-      placeSidesAndPartOfShip(1, surrounding.north, surrounding.south)
-      setEasternSurrounding(surrounding.east, surrounding.northEast, surrounding.southEast)
+      shipSurroundingCells.push(currentSurrounding.west, currentSurrounding.northWest, currentSurrounding.southWest)
+      placeSidesAndPartOfShip(1, currentSurrounding.north, currentSurrounding.south)
+      shipSurroundingCells.push(rearCoordsSurrounding.east, rearCoordsSurrounding.northEast, rearCoordsSurrounding.southEast)
     }
+
+    directionIterator(shipSurroundingCells)
 
     function placeSidesAndPartOfShip(axis, side1, side2) {
       let side1coordsCopy = getCoordsCopy(side1);
@@ -133,55 +162,47 @@ const boardHandler = function() {
       while (frontCoordsCopy[direction] <= rearCoords[direction]) {
 
         if (isInBounds(side1coordsCopy)) {
-          board[side1coordsCopy[0]][side1coordsCopy[1]] = markers.shipSurrounding
+          shipSurroundingCells.push([side1coordsCopy[0], side1coordsCopy[1]])
           side1coordsCopy[axis] += 1
         }
 
         board[frontCoordsCopy[0]][frontCoordsCopy[1]] = shipObj
+        shipArea.push([frontCoordsCopy[0], frontCoordsCopy[1]])
         frontCoordsCopy[direction] += 1
 
         if (isInBounds(side2coordsCopy)) {
-          board[side2coordsCopy[0]][side2coordsCopy[1]] = markers.shipSurrounding
+          shipSurroundingCells.push([side2coordsCopy[0], side2coordsCopy[1]])
           side2coordsCopy[axis] += 1 
-        }
-      }
-    }
-
-    function setNorthernSurrounding(...surroundings) {
-      directionIterator(surroundings)
-    }
-
-    function setSouthernSurrounding(...surroundings) {
-      let southernCoords = 
-      [
-        [frontCoordsCopy[direction], surroundings[0][1]], 
-        [frontCoordsCopy[direction], surroundings[1][1]],
-        [frontCoordsCopy[direction], surroundings[2][1]],
-      ] 
-
-      directionIterator(southernCoords)
-    }
-
-    function setWesternSurrounding(...surroundings) {
-      directionIterator(surroundings)
-    }
-
-    function setEasternSurrounding(...surroundings) {
-      let easternCoords = [
-        [surroundings[0][0], frontCoordsCopy[direction]], 
-        [surroundings[1][0], frontCoordsCopy[direction]],
-        [surroundings[2][0], frontCoordsCopy[direction]]
-      ]
-      directionIterator(easternCoords)
+        };
+      };
     };
 
     function directionIterator(surroundings) {
       surroundings.forEach(coords => {
         if (isInBounds(coords)) {
-          board[coords[0]][coords[1]] = markers.shipSurrounding
+          /* check if the current area is already some other shipObject's shipsurrounding area - if it is, 
+          append to sharedSurroundingCells for us to access later when changing a ship position in
+          ship placement modal */
+          if (board[coords[0]][coords[1]] == markers.shipSurrounding) {
+            sharedSurroundingCells.push(coords)
+          } else board[coords[0]][coords[1]] = markers.shipSurrounding
         };
       });
     };
+
+    let isInPlacedShips = findPlacedShip(placedShips, shipObj)
+    if (!isInPlacedShips) {
+      placedShips.push(
+        {
+          placedShip: shipObj, 
+          coords: [frontCoords, rearCoords], 
+          direction, 
+          shipArea,
+          shipSurroundingCells
+        });
+        //console.log('ei löydy')
+    }
+      else updatePlacedShipValues(isInPlacedShips, frontCoords, rearCoords, shipArea, shipSurroundingCells)
   };
 
   const validPlacement = function(frontCoords, rearCoords) {
@@ -195,17 +216,17 @@ const boardHandler = function() {
       );
     };
 
-    function bothEndsAreNull() {
-      return board[frontCoordsCopy[0]][frontCoordsCopy[1]] == null &&
-      board[rearCoords[0]][rearCoords[1]] == null
-    };
-
     if (IsCoordsFormCorrect() == false) return false
     if (isInBounds(frontCoords) == false) return false
     if (isInBounds(rearCoords) == false) return false
-    if (!bothEndsAreNull()) return false
+    if (!cellIsNull(frontCoordsCopy)) return false
+    if (!cellIsNull(rearCoords)) return false
 
     return true;
+  };
+
+  function cellIsNull(cellCoords) {
+    return board[cellCoords[0]][cellCoords[1]] == null
   };
 
   const receiveAttack = function(y, x) {
@@ -313,10 +334,15 @@ const boardHandler = function() {
     getPlacedShips, 
     getCellsHit,
     resetCellsHit,
+    getSharedSurroundingCells,
     getRandomCoords, 
     validateAndPlace, 
+    findPlacedShip,
+    nullifyCurrentShipArea,
+    emptyShipSurrounding,
     setShip,
     validPlacement,
+    cellIsNull,
     receiveAttack
   };
 };
@@ -326,8 +352,9 @@ board.buildBoard();
 board.createShips();
 let ship0 = ship(4);
 let ship1 = ship(4);
-board.validateAndPlace(ship1, [1,8], [4,8]);
-board.validateAndPlace(ship0, [6,2], [6,5]);
+board.validateAndPlace(ship1, [1,3], [1,6]);
+board.validateAndPlace(ship0, [3,4], [3,6]);
+board.getPlacedShips()
 /*board.receiveAttack(6,3);
 board.receiveAttack(6,2);
 board.receiveAttack(6,4);
