@@ -244,11 +244,14 @@ const displayHandler = function() {
                             //JATKA TÄSTÄ
                               //JATKA TÄSTÄ
                               
-  const turnShip = function(e) {
-    let startCoords 
-    console.log(e.target.parentnode)
-    console.log(verticalDraggableShips)
+  const turnShip = function(shipImgParent, replacingShipImg) {
+    shipImgParent.textContent = ''
+    shipImgParent.append(replacingShipImg)
   } 
+
+  const invalidPlacementText = function() {
+    console.log('ei voi asettaa tähän')
+  }
 
   const attachListeners = function() {
 
@@ -304,12 +307,12 @@ const displayHandler = function() {
               let cellsToBePlacedUpon = document.querySelectorAll('.validPlacement');
               
               let shipFrontCoords = [
-                cellsToBePlacedUpon[0].getAttribute('row'), 
-                cellsToBePlacedUpon[0].getAttribute('col')
+                cellsToBePlacedUpon[0].dataset.row, 
+                cellsToBePlacedUpon[0].dataset.col
               ];
               let shipRearCoords = [
-                cellsToBePlacedUpon[cellsToBePlacedUpon.length-1].getAttribute('row'), 
-                cellsToBePlacedUpon[cellsToBePlacedUpon.length-1].getAttribute('col')
+                cellsToBePlacedUpon[cellsToBePlacedUpon.length-1].dataset.row, 
+                cellsToBePlacedUpon[cellsToBePlacedUpon.length-1].dataset.col
               ];
               if (!currentAreaAvailable(shipFrontCoords, shipRearCoords)) {
                 intercectingCells.forEach((cell) => shipCurrentlyOutOfBounds(cell));
@@ -327,18 +330,24 @@ const displayHandler = function() {
       document.addEventListener('dragend', (e) => {
         let cellsToBePlacedUpon = document.querySelectorAll('.validPlacement');
         if (cellsToBePlacedUpon.length > 0) {
-          
-          dragged.parentNode.removeChild(dragged);
+
+          /* at this point the area where the ship is about to be placed is valid, so we 
+          save the former parent to a variable which we then use in controller to also update
+          the internal game state */
+          let formerParent = dragged.parentNode
+
+          formerParent.removeChild(dragged);
           cellsToBePlacedUpon[0].append(dragged);
 
           let shipFrontCoords = [
-            dragged.parentNode.getAttribute('row'), 
-            dragged.parentNode.getAttribute('col')];
-          let shipRearCoords = [
-            cellsToBePlacedUpon[cellsToBePlacedUpon.length-1].getAttribute('row'), 
-            cellsToBePlacedUpon[cellsToBePlacedUpon.length-1].getAttribute('col')
+            dragged.parentNode.dataset.row, 
+            dragged.parentNode.dataset.col,
           ];
-          handlePlacement(shipFrontCoords, shipRearCoords, dragged)
+          let shipRearCoords = [
+            cellsToBePlacedUpon[cellsToBePlacedUpon.length-1].dataset.row, 
+            cellsToBePlacedUpon[cellsToBePlacedUpon.length-1].dataset.col
+          ];
+          handlePlacement(formerParent, shipFrontCoords, shipRearCoords, dragged)
 
         }
         boardCells['shipSetterBoardCells'].forEach((cell) => {
@@ -459,8 +468,8 @@ const displayHandler = function() {
         hideEnemyTurnHeader();
     };
 
-    let row = this.getAttribute('row');
-    let col = this.getAttribute('col');
+    let row = this.dataset.row;
+    let col = this.dataset.col;
     handleAttack(clickedBoard, row, col);
   };
 
@@ -557,8 +566,8 @@ const displayHandler = function() {
   const refreshBoard = function(domBoard, boardArray) {
     boardCells[domBoard].forEach((cell) => {
       cell.textContent = '';
-      let rowInt = cell.getAttribute('row');
-      let colInt = cell.getAttribute('col'); 
+      let rowInt = cell.dataset.row;
+      let colInt = cell.dataset.col; 
       if (boardArray[rowInt][colInt] == 's' || boardArray[rowInt][colInt] == 'o') {
         setMissImage(cell)
       }
@@ -583,6 +592,8 @@ const displayHandler = function() {
     hideYourTurnHeader,
     hideEnemyTurnHeader,
     hideBothTurnTitles,
+    turnShip,
+    invalidPlacementText,
     attachListeners, 
     removeBoardListeners,
     showGameResult,

@@ -1,11 +1,13 @@
 import { playerHandler } from "./models/playerHandler.js";
 import { displayHandler } from "./ui/displayHandler.js";
-import { getRandomNumber } from "./utilities.js";
+import { getRandomNumber, isInBounds } from "./utilities.js";
 import { computerIntelligence } from "./computerIntelligence.js";
 
 let player = playerHandler();
 let computer = playerHandler();
 let computerInt = computerIntelligence();
+
+let playerBoardObj = player.playerBoard.getGameBoard();
 
 const display = displayHandler();
 
@@ -85,8 +87,7 @@ const startGame = function() {
       if (wasLastAttackHit.length == 0) {
         [row, col] = computerInt.getMove();
       } else {
-        let playerBoard = player.playerBoard.getGameBoard();
-        [row, col] = computerInt.getFirstOfStruckShipSurr(playerBoard);
+        [row, col] = computerInt.getFirstOfStruckShipSurr(playerBoardObj);
       }
 
       display.emulateEnemyClick(row, col);
@@ -170,8 +171,26 @@ const currentAreaAvailable = function(shipFrontCoords, shipRearCoords) {
 
 } 
 
-const handlePlacement = function(shipFrontCoords, shipRearCoords, draggedShipImg) {
-  /* first parse dom string coordinates to interegrs, which we may then
+const handlePlacement = function(formerShipParentCell, shipFrontCoords, shipRearCoords, draggedShipImg) {
+  
+  /* check if the former grandparent of the ship is a cell and not the initial 
+  area where the ships are being dragged originally from*/
+  if (!formerShipParentCell.parentNode.classList.contains('placeableships')) {
+  
+    let selector = '.' + draggedShipImg.classList[2];
+    let shipObj = shipMapping.get(document.querySelector(selector))
+    
+    let placedShips = player.playerBoard.getPlacedShips();
+    let placedShipObj = player.playerBoard.findPlacedShip(placedShips, shipObj);
+
+    player.playerBoard.nullifyCurrentShipArea(playerBoardObj, placedShipObj)
+    player.playerBoard.emptyShipSurrounding(playerBoardObj, placedShipObj);
+
+    //let placedShips = player.playerBoard.getPlacedShips();
+    //let placedShipObj = player.playerBoard.findPlacedShip(placedShips, shipObj);
+  }
+  
+  /* parse dom string coordinates to integers, which we may then
   use in our boardhandler to evaluate ship placement validity and place it */
   shipFrontCoords = shipFrontCoords.map(number => +number);
   shipRearCoords = shipRearCoords.map(number => +number);
@@ -182,28 +201,46 @@ const handlePlacement = function(shipFrontCoords, shipRearCoords, draggedShipImg
 
   /* and now we have all we need (ship's front and rear coords and the shipobject),
   which we pass straight to boardHandler to place the ship to our internal gameboard */
-  player.playerBoard.setShip(shipFrontCoords, shipRearCoords, shipObj)
+  player.playerBoard.setShip(shipFrontCoords, shipRearCoords, shipObj);
   
   console.log(player.playerBoard.getGameBoard())
 } 
 
 const handleTurn = function(e) {
 
-  let parent = e.target.parentNode;
-  //let frontCoords = parent.getatt
-
-
   let verticalShips = display.getVerticalDraggableShips();
+  let parent = e.target.parentNode;
 
+  //turn strings to int with '+'prefix
+  let frontCoords = [+parent.dataset.row, +parent.dataset.col];
+  let shipLength = +(e.target.dataset.shipsize);
+  let rearCoords;
 
   let currentDirection = e.target.classList[1];
+
+  if (currentDirection === 'horizontal') {
+    rearCoords = [frontCoords[0] + shipLength-1, frontCoords[1]]
+  } else rearCoords = [frontCoords[0], frontCoords[1] + shipLength-1]
+
   let currentShipDOMobj = e.target.classList[2];
   let replacingShipImg = verticalShips[currentShipDOMobj]
-  console.log(parent)
-  parent.textContent = ''
-  parent.append(replacingShipImg)
 
+  let selector = '.' + currentShipDOMobj
+  let shipObj = shipMapping.get(document.querySelector(selector))
+
+  if (isInBounds(rearCoords)) {
+
+    let placedShips = player.playerBoard.getPlacedShips();
+    let placedShipObj = player.playerBoard.findPlacedShip(placedShips, shipObj);
   
+    player.playerBoard.emptyShipSurrounding(playerBoardObj, placedShipObj);
+    
+    if (player.playerBoard.cellIsNull(rearCoords)) {
+      display.turnShip(parent, replacingShipImg) 
+    } else display.invalidPlacementText()
+
+  } else display.invalidPlacementText()
+
   /* let shioObj = player.playerBoard.getPlacedShips()
   let direction = e.target
   let shipLength = e.target.dataset.shipsize
@@ -235,8 +272,7 @@ const handleAttack = function(domBoard, row, col) {
   
   let coordsHit = whichGameBoard.receiveAttack(rowInt, colInt);
   if (coordsHit && domBoard == 'mainCellsPlayer') {
-    let playerBoard = player.playerBoard.getGameBoard();
-    computerInt.addStruckShipSurroundings(coordsHit, playerBoard);
+    computerInt.addStruckShipSurroundings(coordsHit, playerBoardObj);
   };
 
   let boardObj = whichGameBoard.getGameBoard();
