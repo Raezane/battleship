@@ -11,7 +11,7 @@ const boardHandler = function() {
   let placedShips = [];
   let sunkenShips = [];
 
-  let sharedSurroundingCells = [];
+  let sharedSurroundingCells = new Map();
   let cellsHit = [];
 
   //gameboard markers, like hit, miss and splashHits around ship when ship is struck
@@ -121,7 +121,13 @@ const boardHandler = function() {
    
   const emptyShipSurrounding = function(playerBoardObj, shipObj) {
     shipObj.shipSurroundingCells.forEach((cell) => {
-      playerBoardObj[cell[0]][cell[1]] = null;
+      let strCell = JSON.stringify(cell);
+      if (sharedSurroundingCells.has(strCell)) {
+        sharedSurroundingCells.set(strCell, sharedSurroundingCells.get(strCell) -1)
+        if (sharedSurroundingCells.get(strCell) == 1) {
+          sharedSurroundingCells.delete(strCell)
+        }
+      } else playerBoardObj[cell[0]][cell[1]] = null;
     });
   };
 
@@ -139,20 +145,37 @@ const boardHandler = function() {
 
     let direction = HorizontalOrVertical(frontCoords, rearCoords);
 
-    let currentSurrounding = getSurroundingArea(frontCoordsCopy);
-    let rearCoordsSurrounding = getSurroundingArea(rearCoords);
     let shipArea = [];
     let shipSurroundingCells = [];
 
+    let currentSurrounding = getSurroundingArea(frontCoordsCopy);
+    let rearCoordsSurrounding = getSurroundingArea(rearCoords);
+
     if (direction == 0) {
-      shipSurroundingCells.push(currentSurrounding.north, currentSurrounding.northEast, currentSurrounding.northWest)
-      placeSidesAndPartOfShip(0, currentSurrounding.west, currentSurrounding.east)
-      shipSurroundingCells.push(rearCoordsSurrounding.south, rearCoordsSurrounding.southEast, rearCoordsSurrounding.southWest)
+      shipSurroundingCells = (Object.values([
+        currentSurrounding.north, 
+        currentSurrounding.northEast, 
+        currentSurrounding.northWest,
+        rearCoordsSurrounding.south, 
+        rearCoordsSurrounding.southEast, 
+        rearCoordsSurrounding.southWest
+      ]).filter(cell => isInBounds(cell)))
+
+      placeSidesAndPartOfShip(0, currentSurrounding.west, currentSurrounding.east);
+
     } else {
-      shipSurroundingCells.push(currentSurrounding.west, currentSurrounding.northWest, currentSurrounding.southWest)
+        shipSurroundingCells = (Object.values([
+          currentSurrounding.west, 
+          currentSurrounding.northWest, 
+          currentSurrounding.southWest,
+          rearCoordsSurrounding.east, 
+          rearCoordsSurrounding.northEast, 
+          rearCoordsSurrounding.southEast
+        ]).filter(cell => isInBounds(cell)))
+
       placeSidesAndPartOfShip(1, currentSurrounding.north, currentSurrounding.south)
-      shipSurroundingCells.push(rearCoordsSurrounding.east, rearCoordsSurrounding.northEast, rearCoordsSurrounding.southEast)
-    }
+    
+    };
 
     directionIterator(shipSurroundingCells)
 
@@ -179,14 +202,19 @@ const boardHandler = function() {
 
     function directionIterator(surroundings) {
       surroundings.forEach(coords => {
-        if (isInBounds(coords)) {
-          /* check if the current area is already some other shipObject's shipsurrounding area - if it is, 
-          append to sharedSurroundingCells for us to access later when changing a ship position in
-          ship placement modal */
-          if (board[coords[0]][coords[1]] == markers.shipSurrounding) {
-            sharedSurroundingCells.push(coords)
-          } else board[coords[0]][coords[1]] = markers.shipSurrounding
-        };
+        /* check if the current area is already some other shipObject's shipsurrounding area - if it is, 
+        append to sharedSurroundingCells for us to access later when changing a ship position in
+        ship placement modal */
+        if (board[coords[0]][coords[1]] == markers.shipSurrounding) {
+          //turn the coords to string first so we may use the array correctly as a key
+          let strCoords = JSON.stringify(coords);
+          if (!sharedSurroundingCells.has(strCoords)) {
+            sharedSurroundingCells.set(strCoords, 2);
+          } else sharedSurroundingCells.set(strCoords, sharedSurroundingCells.get(strCoords) +1)
+        } else board[coords[0]][coords[1]] = markers.shipSurrounding
+
+        console.log(sharedSurroundingCells)
+        console.log(sharedSurroundingCells.get(coords))
       });
     };
 
