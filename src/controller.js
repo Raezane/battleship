@@ -28,13 +28,22 @@ const createBoardAndShips = function(participant) {
 }
 
 const mapDOMshipsToObjects = function(createdShips) {
-  let domShips = display.gethorizontalDraggableShips()
+  let horizontalShips = display.getHorizontalDraggableShips();
+  let verticalShips = display.getVerticalDraggableShips();
   let i = 0;
 
-  for (let domShip of domShips) {
-    shipMapping.set(domShip, createdShips[i])
-    i += 1;
+  function mapper(shipImages) {
+    for (let domShip of shipImages) {
+      shipMapping.set(domShip[1], createdShips[i])
+      i += 1;
+    };
+    i = 0;
   };
+
+  mapper(horizontalShips);
+  mapper(verticalShips);
+  console.log(shipMapping)
+
 };
 
 const createMovesForComputer = function (participant) {
@@ -171,33 +180,26 @@ const currentAreaAvailable = function(shipFrontCoords, shipRearCoords) {
 
 } 
 
-const handlePlacement = function(formerShipParentCell, shipFrontCoords, shipRearCoords, draggedShipImg) {
+const clearCurrentArea = function(draggedShipImg) {
   
-  /* check if the former grandparent of the ship is a cell and not the initial 
-  area where the ships are being dragged originally from*/
-  if (!formerShipParentCell.parentNode.classList.contains('placeableships')) {
-  
-    let selector = '.' + draggedShipImg.classList[2];
-    let shipObj = shipMapping.get(document.querySelector(selector))
+    let shipObj = shipMapping.get(draggedShipImg)
     
     let placedShips = player.playerBoard.getPlacedShips();
     let placedShipObj = player.playerBoard.findPlacedShip(placedShips, shipObj);
 
-    player.playerBoard.nullifyCurrentShipArea(playerBoardObj, placedShipObj)
+    player.playerBoard.nullifyCurrentShipArea(playerBoardObj, placedShipObj);
     player.playerBoard.emptyShipSurrounding(playerBoardObj, placedShipObj);
 
-    //let placedShips = player.playerBoard.getPlacedShips();
-    //let placedShipObj = player.playerBoard.findPlacedShip(placedShips, shipObj);
-  }
+}
+
+const handlePlacement = function(shipFrontCoords, shipRearCoords, draggedShipImg) {
   
   /* parse dom string coordinates to integers, which we may then
   use in our boardhandler to evaluate ship placement validity and place it */
   shipFrontCoords = shipFrontCoords.map(number => +number);
   shipRearCoords = shipRearCoords.map(number => +number);
-  //we'll save a correct ship image to a variable..
-  let selector = '.' + draggedShipImg.classList[2]
-  //..which we'll then use as a map key to get a corresponding ship object
-  let shipObj = shipMapping.get(document.querySelector(selector))
+
+  let shipObj = shipMapping.get(draggedShipImg);
 
   /* and now we have all we need (ship's front and rear coords and the shipobject),
   which we pass straight to boardHandler to place the ship to our internal gameboard */
@@ -208,45 +210,48 @@ const handlePlacement = function(formerShipParentCell, shipFrontCoords, shipRear
 
 const handleTurn = function(e) {
 
-  let verticalShips = display.getVerticalDraggableShips();
+  if (e.target.dataset.shipsize < 2) return
+
   let parent = e.target.parentNode;
 
   //turn strings to int with '+'prefix
   let frontCoords = [+parent.dataset.row, +parent.dataset.col];
   let shipLength = +(e.target.dataset.shipsize);
-  let rearCoords;
 
+  let currentRearCoords;
+  let newRearCoords;
+
+  let replacingShipImg;
+  
+  let shipKey = e.target.classList[2];
   let currentDirection = e.target.classList[1];
 
   if (currentDirection === 'horizontal') {
-    rearCoords = [frontCoords[0] + shipLength-1, frontCoords[1]]
-  } else rearCoords = [frontCoords[0], frontCoords[1] + shipLength-1]
+    currentRearCoords = [frontCoords[0], frontCoords[1] + shipLength-1];
+    newRearCoords = [frontCoords[0] + shipLength-1, frontCoords[1]];
+    replacingShipImg = display.getVerticalDraggableShips().get(shipKey);
+  } else {
+    currentRearCoords = [frontCoords[0] + shipLength-1, frontCoords[1]];
+    newRearCoords = [frontCoords[0], frontCoords[1] + shipLength-1];
+    replacingShipImg = display.getHorizontalDraggableShips().get(shipKey);
+  }
 
-  let currentShipDOMobj = e.target.classList[2];
-  let replacingShipImg = verticalShips[currentShipDOMobj]
+  if (isInBounds(newRearCoords)) {
 
-  let selector = '.' + currentShipDOMobj
-  let shipObj = shipMapping.get(document.querySelector(selector))
-
-  if (isInBounds(rearCoords)) {
-
-    let placedShips = player.playerBoard.getPlacedShips();
-    let placedShipObj = player.playerBoard.findPlacedShip(placedShips, shipObj);
-  
-    player.playerBoard.emptyShipSurrounding(playerBoardObj, placedShipObj);
+    let shipObj = shipMapping.get(e.target);
     
-    if (player.playerBoard.cellIsNull(rearCoords)) {
-      display.turnShip(parent, replacingShipImg) 
-    } else display.invalidPlacementText()
+    clearCurrentArea(e.target);
+    
+    if (player.playerBoard.cellIsNull(newRearCoords)) {
+      player.playerBoard.setShip(frontCoords, newRearCoords, shipObj);
+      display.turnShip(parent, replacingShipImg);
+    } else {
+      player.playerBoard.setShip(frontCoords, currentRearCoords, shipObj);
+      display.invalidPlacementText()
+    } console.log(player.playerBoard.getGameBoard())
 
   } else display.invalidPlacementText()
-
-  /* let shioObj = player.playerBoard.getPlacedShips()
-  let direction = e.target
-  let shipLength = e.target.dataset.shipsize
-  let shipFrontCoords = [e.target.parentNode.getAttribute('row'), e.target.parentNode.getAttribute('col')]; 
-  console.log(shioObj) */
-}
+};
 
 const handleAttack = function(domBoard, row, col) {
 
@@ -299,7 +304,7 @@ const init = function() {
   toggleElementVisibility(display.toggleWinnerAndRetryHeader);
   toggleElementVisibility(display.toggleNewGameButtons);
   createBoardAndShips(player);
-  mapDOMshipsToObjects(player.playerBoard.getCreatedShips())
+  mapDOMshipsToObjects(player.playerBoard.getCreatedShips());
   /*createBoardAndShips(computer);
   createMovesForComputer(computerInt)
   automateShipPlacement(player);
@@ -308,4 +313,4 @@ const init = function() {
   startGame(); */
 }
 
-export {init, handleAttack, handleTurn, currentAreaAvailable, handlePlacement}
+export {init, handleAttack, currentAreaAvailable, clearCurrentArea, handlePlacement, handleTurn}

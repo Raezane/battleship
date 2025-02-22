@@ -1,4 +1,4 @@
-import {currentAreaAvailable, handlePlacement, handleTurn, handleAttack } from "../controller.js";
+import {currentAreaAvailable, clearCurrentArea, handlePlacement, handleTurn, handleAttack } from "../controller.js";
 
 //ship models
 import ship1 from "../assets/images/boat1.png";
@@ -41,90 +41,51 @@ const displayHandler = function() {
   let headerToBeHidden;
   let headertoBeShown;
 
-  let horizontalDraggableShips = new Set();
-  let verticalDraggableShips = {}
+  let horizontalDraggableShips = new Map();
+  let verticalDraggableShips = new Map();
 
-  let boardCells = {
-    'shipSetterBoard': null,
-    'subCellsPlayer': null,
-    'mainCellsPlayer': null,
-    'playerBoardParent': null,
-    'subCellsEnemy': null,
-    'mainCellsEnemy': null,
-    'enemyBoardParent': null,
-  }
+  let boardCells = {}
 
-  let transformableTitles = {
-    'gameEndStatus': null,
-    'askNewRound': null,
-    'yourTurn': null,
-    'enemyTurn': null
-  }
+  let transformableTitles = {}
 
-  let otherElements = {
-    'gameTable': null,
-    'choicesParent': null,
-    'yesButton': null,
-    'noButton': null
-  }
+  let otherElements = {}
 
-  const gethorizontalDraggableShips = () => horizontalDraggableShips;
+  const getHorizontalDraggableShips = () => horizontalDraggableShips;
   const getVerticalDraggableShips = () => verticalDraggableShips;
 
-  const initiateHorizontalDraggableShips = function() {
-    horizontalDraggableShips.add(document.querySelector('.big1'));
-    horizontalDraggableShips.add(document.querySelector('.medium1'));
-    horizontalDraggableShips.add(document.querySelector('.medium2'));
-    horizontalDraggableShips.add(document.querySelector('.small1'));
-    horizontalDraggableShips.add(document.querySelector('.small2'));
-    horizontalDraggableShips.add(document.querySelector('.small3'));
-    horizontalDraggableShips.add(document.querySelector('.boat1'));
-    horizontalDraggableShips.add(document.querySelector('.boat2'));
-    horizontalDraggableShips.add(document.querySelector('.boat3'));
-    horizontalDraggableShips.add(document.querySelector('.boat4'));
+  const addShipImagesToSet = function(setToAddTo, direction) {
+    setToAddTo.set('big1', document.querySelector(`${direction}.big1`));
+    setToAddTo.set('medium1', document.querySelector(`${direction}.medium1`));
+    setToAddTo.set('medium2', document.querySelector(`${direction}.medium2`));
+    setToAddTo.set('small1', document.querySelector(`${direction}.small1`));
+    setToAddTo.set('small2', document.querySelector(`${direction}.small2`));
+    setToAddTo.set('small3', document.querySelector(`${direction}.small3`));
+    setToAddTo.set('boat1', document.querySelector(`.boat1`));
+    setToAddTo.set('boat2', document.querySelector(`.boat2`));
+    setToAddTo.set('boat3', document.querySelector(`.boat3`));
+    setToAddTo.set('boat4', document.querySelector(`.boat4`));
   }
 
   const createVerticalDraggableShips = function() {
 
-    const bigShipVertical = new Image();
-    bigShipVertical.src = ship4A;
-    bigShipVertical.classList.add('bigship', 'vertical', 'big1');
-    bigShipVertical.setAttribute('data-shipsize', 4)
-    verticalDraggableShips['big1'] = bigShipVertical
+    function verticalDraggableShipCreator(imgSource, class1, class3, shipsizeInt) {
+      
+      let shipImage = new Image();
+      shipImage.src = imgSource;
+      shipImage.classList.add(class1, 'vertical', class3);
+      shipImage.setAttribute('data-shipsize', shipsizeInt);
+      shipImage.classList.toggle('removeElement');
 
-    const mediumShipVertical1 = new Image();
-    mediumShipVertical1.src = ship3A;
-    mediumShipVertical1.classList.add('mediumship', 'vertical', 'medium1');
-    mediumShipVertical1.setAttribute('data-shipsize', 3)
-    verticalDraggableShips['medium1'] = mediumShipVertical1
+      otherElements['placeableShips'].append(shipImage);
 
+    }
 
-    const mediumShipVertical2 = new Image();
-    mediumShipVertical2.src = ship3A;
-    mediumShipVertical2.classList.add('mediumship', 'vertical', 'medium2');
-    mediumShipVertical1.setAttribute('data-shipsize', 3)
-    verticalDraggableShips['medium2'] = mediumShipVertical2
-
-
-    const smallShipVertical1 = new Image();
-    smallShipVertical1.src = ship2A;
-    smallShipVertical1.classList.add('smallship', 'vertical', 'small1');
-    smallShipVertical1.setAttribute('data-shipsize', 2)
-    verticalDraggableShips['small1'] = smallShipVertical1
-
-
-    const smallShipVertical2 = new Image();
-    smallShipVertical2.src = ship2A;
-    smallShipVertical2.classList.add('smallship', 'vertical', 'small2');
-    smallShipVertical1.setAttribute('data-shipsize', 2)
-    verticalDraggableShips['small2'] = smallShipVertical2
-
-
-    const smallShipVertical3 = new Image();
-    smallShipVertical3.src = ship2A;
-    smallShipVertical3.classList.add('smallship', 'vertical', 'small3');
-    smallShipVertical3.setAttribute('data-shipsize', 2)
-    verticalDraggableShips['small3'] = smallShipVertical3
+    verticalDraggableShipCreator(ship4A, 'bigship', 'big1', 4);
+    verticalDraggableShipCreator(ship3A, 'mediumship', 'medium1', 3);
+    verticalDraggableShipCreator(ship3A, 'mediumship', 'medium2', 3);
+    verticalDraggableShipCreator(ship2A, 'smallship', 'small1', 2);
+    verticalDraggableShipCreator(ship2A, 'smallship', 'small2', 2);
+    verticalDraggableShipCreator(ship2A, 'smallship', 'small3', 2);
 
   }
 
@@ -146,6 +107,7 @@ const displayHandler = function() {
   }
 
   const initiateOtherElements = function() {
+    otherElements['placeableShips'] = document.querySelector('.placeableships');
     otherElements['gameTable'] = document.querySelector('#gametable');
     otherElements['choicesParent'] = document.querySelector('.choices');
     otherElements['yesButton'] = document.querySelector('.choices button:first-child');
@@ -153,11 +115,12 @@ const displayHandler = function() {
   }
 
   const initiateDOM = function() {
-    initiateHorizontalDraggableShips();
     initiateBoardcells();
-    createVerticalDraggableShips();
     initiateTitles();
     initiateOtherElements();
+    addShipImagesToSet(horizontalDraggableShips, '.horizontal');
+    createVerticalDraggableShips();
+    addShipImagesToSet(verticalDraggableShips, '.vertical');
   }
 
   const makePlayerBoardClickable = function() {
@@ -176,8 +139,8 @@ const displayHandler = function() {
     boardCells['enemyBoardParent'].classList.add('non-clickable');
   }
 
-  const setDraggedElement = function(e) {
-    dragged = e.target;
+  const setDraggedElement = function(img) {
+    dragged = img;
   };
 
   const setImageAndMouseDownPosition = function(e) {
@@ -227,57 +190,50 @@ const displayHandler = function() {
     cell.classList.remove('invalidPlacement');
     cell.classList.remove('validPlacement');
   }
-
-  //JATKA TÄSTÄ
-    //JATKA TÄSTÄ
-      //JATKA TÄSTÄ
-        //JATKA TÄSTÄ
-          //JATKA TÄSTÄ
-            //JATKA TÄSTÄ
-              //JATKA TÄSTÄ
-                //JATKA TÄSTÄ
-                  //JATKA TÄSTÄ
-                    //JATKA TÄSTÄ
-                      //JATKA TÄSTÄ
-                        //JATKA TÄSTÄ
-                          //JATKA TÄSTÄ
-                            //JATKA TÄSTÄ
-                              //JATKA TÄSTÄ
                               
   const turnShip = function(shipImgParent, replacingShipImg) {
-    shipImgParent.textContent = ''
-    shipImgParent.append(replacingShipImg)
+    shipImgParent.textContent = '';
+    shipImgParent.append(replacingShipImg);
+    replacingShipImg.classList.remove('removeElement');
   } 
 
   const invalidPlacementText = function() {
-    console.log('ei voi asettaa tähän')
+    console.log('ei voi asettaa tähän');
   }
 
   const attachListeners = function() {
 
+    let shipSize;
+
     function setImgAndDragStartLocation() {
-      //convert verticalShipImgsObject to an array so we may iterate it
-      let verticalShipValues = Object.values(verticalDraggableShips);
-      let draggableShips = new Set([...horizontalDraggableShips, ...verticalShipValues])
-      
+
+      let draggableShips = new Set([...horizontalDraggableShips, ...verticalDraggableShips])
+
       draggableShips.forEach((ship) => {
-        ship.addEventListener('dragstart', (e) => {
-          setDraggedElement(e);
+        ship[1].addEventListener('dragstart', (e) => {
+          setDraggedElement(e.target);
           setImageAndMouseDownPosition(e);
           setMouseDownDistToImgEdges();
           e.target.classList.toggle('transparent');
+          let formerParent = dragged.parentNode
+          /* check if the former grandparent of the ship is a cell and not the initial 
+          area where the ships are being dragged originally from*/
+          if (!formerParent.parentNode.classList.contains('placeableships')){
+            clearCurrentArea(dragged);
+          };
         });
   
-        ship.addEventListener('dragend', (e) => {
+        ship[1].addEventListener('dragend', (e) => {
           dragged.classList.toggle('transparent');
         });
+
+        ship[1].addEventListener('click', handleTurn)
       });
     };
 
     function setImageTracker() {
 
       let intercectingCells = [];
-      let shipSize;
 
       document.addEventListener('dragover', (e) => {
         setCursorTracker(e);
@@ -298,8 +254,6 @@ const displayHandler = function() {
                 shipCurrentlyOutOfBounds(cell);
               });
             };
-
-            //console.log(intercectingCells)
             
             if (intercectingCells.length == shipSize) {
               intercectingCells.forEach((cell) => shipCurrentlyInBounds(cell))
@@ -347,14 +301,12 @@ const displayHandler = function() {
             cellsToBePlacedUpon[cellsToBePlacedUpon.length-1].dataset.row, 
             cellsToBePlacedUpon[cellsToBePlacedUpon.length-1].dataset.col
           ];
-          handlePlacement(formerParent, shipFrontCoords, shipRearCoords, dragged)
+          handlePlacement(shipFrontCoords, shipRearCoords, dragged)
 
         }
         boardCells['shipSetterBoardCells'].forEach((cell) => {
           removeValidityStyling(cell);
         });
-        //no need to turn boat, because it will only take one cell
-        if (shipSize > 1) dragged.addEventListener('click', handleTurn)
       });
     };
 
@@ -581,7 +533,7 @@ const displayHandler = function() {
 
   return {
     initiateDOM,
-    gethorizontalDraggableShips,
+    getHorizontalDraggableShips,
     getVerticalDraggableShips,
     makePlayerBoardClickable,
     makePlayerBoardUnClickable,
