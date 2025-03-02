@@ -13,6 +13,8 @@ const display = displayHandler();
 
 let shipMapping = new Map();
 
+const getShipMapping = () => shipMapping;
+
 const activateDOMelements = function() {
   display.initiateDOM();
   display.attachListeners();
@@ -42,7 +44,6 @@ const mapDOMshipsToObjects = function(createdShips) {
 
   mapper(horizontalShips);
   mapper(verticalShips);
-  console.log(shipMapping)
 
 };
 
@@ -54,11 +55,11 @@ const automateShipPlacement = function(participant) {
   participant.playerBoard.setShipsRandomly();
 }
 
-const setShipImages = function() {
-  display.setShips('subCellsPlayer', player.playerBoard.getPlacedShips());
+const setShipImages = function(participantSubCells) {
+  display.setShips(participantSubCells, player.playerBoard.getPlacedShips());
 }
 
-const startGame = function() {
+const initGameLoop = function() {
 
   let playerOne;
   let playerTwo;
@@ -177,7 +178,6 @@ const currentAreaAvailable = function(shipFrontCoords, shipRearCoords) {
   shipRearCoords = shipRearCoords.map(number => +number);
 
   return player.playerBoard.validPlacement(shipFrontCoords, shipRearCoords)
-
 } 
 
 const clearCurrentArea = function(draggedShipImg) {
@@ -204,12 +204,13 @@ const handlePlacement = function(shipFrontCoords, shipRearCoords, draggedShipImg
   /* and now we have all we need (ship's front and rear coords and the shipobject),
   which we pass straight to boardHandler to place the ship to our internal gameboard */
   player.playerBoard.setShip(shipFrontCoords, shipRearCoords, shipObj);
-  
-  console.log(player.playerBoard.getGameBoard())
+  console.log(player.playerBoard.getPlacedShips())
 } 
 
 const handleTurn = function(e) {
 
+  /* if the clicked ship (ship being turn) is a boat, we don't need to turn that 
+  because it takes only one cell. If it's a boat, stop processing here. */
   if (e.target.dataset.shipsize < 2) return
 
   let parent = e.target.parentNode;
@@ -293,10 +294,38 @@ const handleAttack = function(domBoard, row, col) {
       display.setShips(subBoard, onlySunkenShips);
     }
   };
-
   display.refreshBoard(domBoard, boardObj);
+};
+
+const setShipsAuto = function() {
+  automateShipPlacement(player);
+  console.log(player.playerBoard.getGameBoard());
+  setShipImages('shipSetterCells');
 }
 
+const startGame = function() {
+  let setShips = player.playerBoard.getPlacedShips();
+  if (setShips.length < 10) {
+    console.log('kaikkia laivoja ei vielä asetettu')
+    return
+  };
+
+  display.hideModal();
+  toggleElementVisibility(display.toggleGameTable);
+  createBoardAndShips(computer);
+  createMovesForComputer(computerInt);
+  automateShipPlacement(computer);
+  setShipImages('subCellsPlayer');
+  initGameLoop();
+};
+
+const takeNewRound = function() {
+  location.reload();
+}
+
+const redirect = function() {
+  window.location.href = "https://github.com";
+}
 
 const init = function() {
   activateDOMelements();
@@ -305,12 +334,18 @@ const init = function() {
   toggleElementVisibility(display.toggleNewGameButtons);
   createBoardAndShips(player);
   mapDOMshipsToObjects(player.playerBoard.getCreatedShips());
-  /*createBoardAndShips(computer);
-  createMovesForComputer(computerInt)
-  automateShipPlacement(player);
-  automateShipPlacement(computer);
-  setShipImages();
-  startGame(); */
-}
+};
 
-export {init, handleAttack, currentAreaAvailable, clearCurrentArea, handlePlacement, handleTurn}
+export {
+  init, 
+  startGame, 
+  takeNewRound, 
+  redirect, 
+  getShipMapping,
+  handleAttack, 
+  setShipsAuto,
+  currentAreaAvailable, 
+  clearCurrentArea, 
+  handlePlacement, 
+  handleTurn
+}
