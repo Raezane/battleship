@@ -1,4 +1,15 @@
-import {currentAreaAvailable, clearCurrentArea, handlePlacement, handleTurn, handleAttack } from "../controller.js";
+import {
+  currentAreaAvailable, 
+  clearCurrentArea, 
+  handlePlacement, 
+  handleTurn, 
+  handleAttack,
+  setShipsAuto,
+  startGame, 
+  takeNewRound,
+  redirect,
+  getShipMapping
+ } from "../controller.js";
 
 //ship models
 import ship1 from "../assets/images/boat1.png";
@@ -43,6 +54,7 @@ const displayHandler = function() {
 
   let horizontalDraggableShips = new Map();
   let verticalDraggableShips = new Map();
+  let allDraggableShips;
 
   let boardCells = {}
 
@@ -77,8 +89,7 @@ const displayHandler = function() {
       shipImage.classList.toggle('removeElement');
 
       otherElements['placeableShips'].append(shipImage);
-
-    }
+    };
 
     verticalDraggableShipCreator(ship4A, 'bigship', 'big1', 4);
     verticalDraggableShipCreator(ship3A, 'mediumship', 'medium1', 3);
@@ -87,10 +98,10 @@ const displayHandler = function() {
     verticalDraggableShipCreator(ship2A, 'smallship', 'small2', 2);
     verticalDraggableShipCreator(ship2A, 'smallship', 'small3', 2);
 
-  }
+  };
 
   const initiateBoardcells = function() {
-    boardCells['shipSetterBoardCells'] = document.querySelectorAll('.placement div');
+    boardCells['shipSetterCells'] = document.querySelectorAll('.placement div');
     boardCells['subCellsPlayer'] = document.querySelectorAll('.player .sub > div');
     boardCells['mainCellsPlayer'] = document.querySelectorAll('.player > div:nth-child(n+2)');
     boardCells['playerBoardParent'] = document.querySelector('.player');
@@ -107,6 +118,9 @@ const displayHandler = function() {
   }
 
   const initiateOtherElements = function() {
+    otherElements['shipSetterModal'] = document.querySelector('dialog');
+    otherElements['playButton'] = document.querySelector('.play > button');
+    otherElements['setShipsButton'] = document.querySelector('.setship > button')
     otherElements['placeableShips'] = document.querySelector('.placeableships');
     otherElements['gameTable'] = document.querySelector('#gametable');
     otherElements['choicesParent'] = document.querySelector('.choices');
@@ -121,6 +135,7 @@ const displayHandler = function() {
     addShipImagesToSet(horizontalDraggableShips, '.horizontal');
     createVerticalDraggableShips();
     addShipImagesToSet(verticalDraggableShips, '.vertical');
+    allDraggableShips = new Set([...horizontalDraggableShips, ...verticalDraggableShips]);
   }
 
   const makePlayerBoardClickable = function() {
@@ -205,20 +220,18 @@ const displayHandler = function() {
 
     let shipSize;
 
-    function setImgAndDragStartLocation() {
+    function createInteractivityForShips() {
 
-      let draggableShips = new Set([...horizontalDraggableShips, ...verticalDraggableShips])
-
-      draggableShips.forEach((ship) => {
+      allDraggableShips.forEach((ship) => {
         ship[1].addEventListener('dragstart', (e) => {
           setDraggedElement(e.target);
           setImageAndMouseDownPosition(e);
           setMouseDownDistToImgEdges();
           e.target.classList.toggle('transparent');
           let formerParent = dragged.parentNode
-          /* check if the former grandparent of the ship is a cell and not the initial 
-          area where the ships are being dragged originally from*/
-          if (!formerParent.parentNode.classList.contains('placeableships')){
+          /* check if the former parent of the ship is a cell and not the initial 
+          area where the ships are being dragged originally from */
+          if (!formerParent.classList.contains('shipimgdiv')){
             clearCurrentArea(dragged);
           };
         });
@@ -240,7 +253,7 @@ const displayHandler = function() {
         setImgLivePosition();
         shipSize = dragged.dataset.shipsize
 
-        boardCells['shipSetterBoardCells'].forEach((cell) => {
+        boardCells['shipSetterCells'].forEach((cell) => {
 
           let cellPos = cell.getBoundingClientRect();
           if (doesImgAndCellIntercect(cellPos)) {
@@ -276,7 +289,7 @@ const displayHandler = function() {
         } else {
             let index = intercectingCells.indexOf(cell);
             if (index !== -1) intercectingCells.splice(index, 1);
-            removeValidityStyling(cell)
+            removeValidityStyling(cell);
           };
         });
       });
@@ -285,12 +298,6 @@ const displayHandler = function() {
         let cellsToBePlacedUpon = document.querySelectorAll('.validPlacement');
         if (cellsToBePlacedUpon.length > 0) {
 
-          /* at this point the area where the ship is about to be placed is valid, so we 
-          save the former parent to a variable which we then use in controller to also update
-          the internal game state */
-          let formerParent = dragged.parentNode
-
-          formerParent.removeChild(dragged);
           cellsToBePlacedUpon[0].append(dragged);
 
           let shipFrontCoords = [
@@ -304,12 +311,21 @@ const displayHandler = function() {
           handlePlacement(shipFrontCoords, shipRearCoords, dragged)
 
         }
-        boardCells['shipSetterBoardCells'].forEach((cell) => {
+        boardCells['shipSetterCells'].forEach((cell) => {
           removeValidityStyling(cell);
         });
       });
     };
 
+    function setDialogButtonListeners() {
+      otherElements['playButton'].addEventListener('click', startGame);
+      otherElements['setShipsButton'].addEventListener('click', setShipsAuto);
+    };
+
+    function setRetryGameButtons() {
+      otherElements['yesButton'].addEventListener('click', takeNewRound);
+      otherElements['noButton'].addEventListener('click', redirect);
+    }
 
     function setBoardCellListeners(playerOrComp) {
       playerOrComp.forEach((cell) => {
@@ -317,11 +333,17 @@ const displayHandler = function() {
       });
     };
 
-    setImgAndDragStartLocation();
+    createInteractivityForShips();
     setImageTracker();
+    setDialogButtonListeners();
+    setRetryGameButtons();
     setBoardCellListeners(boardCells['mainCellsPlayer']);
     setBoardCellListeners(boardCells['mainCellsEnemy']);
   };
+
+  const hideModal = function() {
+    otherElements['shipSetterModal'].classList.add('removeElement')
+  }
 
   const removeBoardListeners = function() {
     function setBoardCellListeners(playerOrComp) {
@@ -360,7 +382,7 @@ const displayHandler = function() {
   const setResolveClick = (resolve) => resolveClick = resolve;
 
   const emulateEnemyClick = function(row, col) {
-    let cellToBeclicked = boardCells['playerBoardParent'].querySelector(`.player > [row="${row}"][col="${col}"]`);
+    let cellToBeclicked = boardCells['playerBoardParent'].querySelector(`.player > [data-row="${row}"][data-col="${col}"]`);
     cellToBeclicked.click();
   }
 
@@ -425,6 +447,39 @@ const displayHandler = function() {
     handleAttack(clickedBoard, row, col);
   };
 
+  const relocateModalShipImgs = function(placedShipObj, cell, shipLength, direction) {
+    
+    let shipMapping = getShipMapping()
+    console.log(shipMapping)
+    console.log(placedShipObj)
+    //console.log(direction)
+    
+    function findCorrectShipImg() {
+      for (let [domShipImg, shipObj] of shipMapping) {
+        if (placedShipObj === shipObj) {
+          if (domShipImg.classList[1] == direction || domShipImg.classList[0] == 'modalboat') {
+            return domShipImg
+          } else domShipImg.classList.add('removeElement')
+        }
+      }
+    }
+
+    let shipImgToRelocate = findCorrectShipImg();
+    shipImgToRelocate.classList.remove('removeElement')
+    cell.append(shipImgToRelocate)
+  }
+
+  const shipImages = 
+  {
+    boat: ship1, 
+    shipSmall: ship2A,
+    shipSmallDestroyed: ship2B,
+    shipMedium: ship3A,
+    shipMediumDestroyed: ship3B,
+    shipLarge: ship4A,
+    shipLargeDestroyed: ship4B,
+  }
+
   const getPlayerShipImg = function(shipObject, shipLength) {
     let isSunk = shipObject.isSunk();
 
@@ -443,17 +498,6 @@ const displayHandler = function() {
     if (shipLength == 2) return shipImages.shipSmallDestroyed;
     if (shipLength == 3) return shipImages.shipMediumDestroyed;
     if (shipLength == 4) return shipImages.shipLargeDestroyed;
-  }
-
-  const shipImages = 
-  {
-    boat: ship1, 
-    shipSmall: ship2A,
-    shipSmallDestroyed: ship2B,
-    shipMedium: ship3A,
-    shipMediumDestroyed: ship3B,
-    shipLarge: ship4A,
-    shipLargeDestroyed: ship4B,
   }
 
   const setShipImage = function(shipImg, cell, shipLength, direction) {
@@ -475,17 +519,19 @@ const displayHandler = function() {
   }
 
   const getCorrectPlayerDomBoard = function(whichSubBoard) {
-    return whichSubBoard == 'subCellsPlayer' ? '.player' : '.enemy'
+    if (whichSubBoard == 'shipSetterCells') return '.placement';
+    if (whichSubBoard == 'subCellsPlayer') return '.player .sub';
+    if (whichSubBoard == 'subCellsEnemy') return '.enemy .sub';
   }
 
   const setShips = function(whichSubBoard, placedShips) {
 
     let domParent = getCorrectPlayerDomBoard(whichSubBoard)
-
+    console.log(placedShips)
     placedShips.forEach(shipObj => {
       let row = shipObj.coords[0][0];
       let col = shipObj.coords[0][1];
-      let cell = document.querySelector(`${domParent} .sub [row="${row}"][col="${col}"]`)
+      let cell = document.querySelector(`${domParent} [data-row="${row}"][data-col="${col}"]`)
       //empty the dom cell from the previous ship image before inserting a new one
       cell.textContent = '';
 
@@ -493,11 +539,17 @@ const displayHandler = function() {
       let direction = shipObj.direction == 1 ? 'horizontal' : 'vertical';
 
       let shipImage;
-      if (domParent === '.player') {
-        shipImage = getPlayerShipImg(shipObj.placedShip, shipLength);
-      } else shipImage = getSunkenEnemyShipImg(shipLength);
-
-      setShipImage(shipImage, cell, shipLength, direction);
+      if (domParent === '.placement') {
+        relocateModalShipImgs(shipObj.placedShip, cell, shipLength, direction);
+        //shipImage = getPlayerShipImg(shipObj.placedShip, shipLength);
+        //setShipImage(shipImage, cell, shipLength, direction);
+      } else if (domParent === '.player .sub') {
+          shipImage = getPlayerShipImg(shipObj.placedShip, shipLength);
+          setShipImage(shipImage, cell, shipLength, direction);
+      } else {
+          shipImage = getSunkenEnemyShipImg(shipLength);
+          setShipImage(shipImage, cell, shipLength, direction);
+      }
     });
   };
 
@@ -533,6 +585,7 @@ const displayHandler = function() {
 
   return {
     initiateDOM,
+    hideModal,
     getHorizontalDraggableShips,
     getVerticalDraggableShips,
     makePlayerBoardClickable,

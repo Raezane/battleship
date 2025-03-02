@@ -1,7 +1,13 @@
 import {ship} from "./shipHandler.js";
-import { getSurroundingArea, getMarkers, getRandomNumber, isInBounds, isShip, HorizontalOrVertical, getCoordsCopy } from "../utilities.js";
-import some from "lodash/some";
-import isEqual from "lodash/isEqual";
+import {
+  getSurroundingArea, 
+  getMarkers, 
+  getRandomNumber,
+  isInBounds, 
+  isShip, 
+  HorizontalOrVertical, 
+  getCoordsCopy 
+} from "../utilities.js";
 
 const boardHandler = function() {
   
@@ -54,16 +60,13 @@ const boardHandler = function() {
     let currentShip = 0
     while (currentShip < 10) {
       let coords = getRandomCoords(createdShips[currentShip]);
-      //let direction = HorizontalOrVertical(coords[0], coords[1]);
       let areCoordsValid = validPlacement(coords[0], coords[1])
       if (areCoordsValid) {
         createdShips[currentShip] = {
           createdShip: createdShips[currentShip], 
           coords: [coords[0], coords[1]],
-          //direction: direction
         }
-        setShip(
-          //createdShips[currentShip].direction, 
+        setShip( 
           createdShips[currentShip].coords[0], 
           createdShips[currentShip].coords[1], 
           createdShips[currentShip].createdShip
@@ -131,9 +134,10 @@ const boardHandler = function() {
     });
   };
 
-  const updatePlacedShipValues = function(isInPlacedShips, frontCoords, rearCoords, shipArea, shipSurroundingCells) {
+  const updatePlacedShipValues = function(isInPlacedShips, frontCoords, rearCoords, direction, shipArea, shipSurroundingCells) {
     isInPlacedShips.coords = [frontCoords, rearCoords],
     isInPlacedShips.shipArea = shipArea,
+    isInPlacedShips.direction = direction,
     isInPlacedShips.shipSurroundingCells = shipSurroundingCells
   }
 
@@ -212,9 +216,6 @@ const boardHandler = function() {
             sharedSurroundingCells.set(strCoords, 2);
           } else sharedSurroundingCells.set(strCoords, sharedSurroundingCells.get(strCoords) +1)
         } else board[coords[0]][coords[1]] = markers.shipSurrounding
-
-        console.log(sharedSurroundingCells)
-        console.log(sharedSurroundingCells.get(coords))
       });
     };
 
@@ -228,9 +229,10 @@ const boardHandler = function() {
           shipArea,
           shipSurroundingCells
         });
-        //console.log('ei löydy')
     }
-      else updatePlacedShipValues(isInPlacedShips, frontCoords, rearCoords, shipArea, shipSurroundingCells)
+      else updatePlacedShipValues(isInPlacedShips, frontCoords, rearCoords, direction, shipArea, shipSurroundingCells);
+      console.log(placedShips)
+  
   };
 
   const validPlacement = function(frontCoords, rearCoords) {
