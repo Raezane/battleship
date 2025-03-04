@@ -26,13 +26,16 @@ const boardHandler = function() {
   const getGameBoard = () => board;
 
   const getCreatedShips = () => createdShips;
+
   const getPlacedShips = () => placedShips;
+  const emptyPlacedShips = () => placedShips = [];
+
   const getSunkenShips = () => sunkenShips;
 
   const getCellsHit = () => cellsHit;
   const resetCellsHit = () => cellsHit = [];
   const getSharedSurroundingCells = () => sharedSurroundingCells;
-
+  const emptySurroundingCells = () => sharedSurroundingCells = new Map();
 
   const areAllSunk = function() {
     if (sunkenShips.length >= 10) return true
@@ -51,6 +54,10 @@ const boardHandler = function() {
     };
   };
 
+  const emptyBoard = function() {
+    board.forEach(row => row.fill(null));
+  };
+
   const createShips = function() {
     let shipLengths = [4, 3, 3, 2, 2, 2, 1, 1, 1, 1];
     shipLengths.forEach(shipLength => createdShips.push(ship(shipLength)));
@@ -62,15 +69,7 @@ const boardHandler = function() {
       let coords = getRandomCoords(createdShips[currentShip]);
       let areCoordsValid = validPlacement(coords[0], coords[1])
       if (areCoordsValid) {
-        createdShips[currentShip] = {
-          createdShip: createdShips[currentShip], 
-          coords: [coords[0], coords[1]],
-        }
-        setShip( 
-          createdShips[currentShip].coords[0], 
-          createdShips[currentShip].coords[1], 
-          createdShips[currentShip].createdShip
-        );
+        setShip(coords[0], coords[1], createdShips[currentShip]);
         currentShip += 1
       };
     };
@@ -115,7 +114,7 @@ const boardHandler = function() {
   };
 
   const findPlacedShip = function(placedShips, shipObj) {
-    return placedShips.find(ship => ship.placedShip == shipObj)
+    return placedShips.find(ship => ship.placedShip === shipObj)
   }
 
   const nullifyCurrentShipArea = function(playerBoardObj, shipObj) {
@@ -231,8 +230,6 @@ const boardHandler = function() {
         });
     }
       else updatePlacedShipValues(isInPlacedShips, frontCoords, rearCoords, direction, shipArea, shipSurroundingCells);
-      console.log(placedShips)
-  
   };
 
   const validPlacement = function(frontCoords, rearCoords) {
@@ -358,10 +355,13 @@ const boardHandler = function() {
     getSunkenShips, 
     areAllSunk, 
     buildBoard, 
+    emptyBoard,
+    emptySurroundingCells,
     createShips, 
     setShipsRandomly, 
     getCreatedShips,
     getPlacedShips, 
+    emptyPlacedShips,
     getCellsHit,
     resetCellsHit,
     getSharedSurroundingCells,

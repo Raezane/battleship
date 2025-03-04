@@ -72,10 +72,14 @@ const displayHandler = function() {
     setToAddTo.set('small1', document.querySelector(`${direction}.small1`));
     setToAddTo.set('small2', document.querySelector(`${direction}.small2`));
     setToAddTo.set('small3', document.querySelector(`${direction}.small3`));
-    setToAddTo.set('boat1', document.querySelector(`.boat1`));
-    setToAddTo.set('boat2', document.querySelector(`.boat2`));
-    setToAddTo.set('boat3', document.querySelector(`.boat3`));
-    setToAddTo.set('boat4', document.querySelector(`.boat4`));
+
+    //only add boats to horizontal set, because we don't need to turn them
+    if (direction === '.horizontal') {
+      setToAddTo.set('boat1', document.querySelector(`.boat1`));
+      setToAddTo.set('boat2', document.querySelector(`.boat2`));
+      setToAddTo.set('boat3', document.querySelector(`.boat3`));
+      setToAddTo.set('boat4', document.querySelector(`.boat4`));
+    }
   }
 
   const createVerticalDraggableShips = function() {
@@ -221,6 +225,9 @@ const displayHandler = function() {
     let shipSize;
 
     function createInteractivityForShips() {
+
+      console.log(horizontalDraggableShips)
+      console.log(verticalDraggableShips)
 
       allDraggableShips.forEach((ship) => {
         ship[1].addEventListener('dragstart', (e) => {
@@ -450,9 +457,6 @@ const displayHandler = function() {
   const relocateModalShipImgs = function(placedShipObj, cell, shipLength, direction) {
     
     let shipMapping = getShipMapping()
-    console.log(shipMapping)
-    console.log(placedShipObj)
-    //console.log(direction)
     
     function findCorrectShipImg() {
       for (let [domShipImg, shipObj] of shipMapping) {
@@ -524,10 +528,22 @@ const displayHandler = function() {
     if (whichSubBoard == 'subCellsEnemy') return '.enemy .sub';
   }
 
+  const removeShipImgs = function(placedShips) {
+    placedShips.forEach(shipObj => {
+      let cell = getCell(shipObj)
+      cell.textContent = ''
+    });
+  };
+
+  const getCell = function(shipObj) {
+    let row = shipObj.coords[0][0];
+    let col = shipObj.coords[0][1];
+    return document.querySelector(`.placement [data-row="${row}"][data-col="${col}"]`);
+  }
+
   const setShips = function(whichSubBoard, placedShips) {
 
     let domParent = getCorrectPlayerDomBoard(whichSubBoard)
-    console.log(placedShips)
     placedShips.forEach(shipObj => {
       let row = shipObj.coords[0][0];
       let col = shipObj.coords[0][1];
@@ -541,8 +557,6 @@ const displayHandler = function() {
       let shipImage;
       if (domParent === '.placement') {
         relocateModalShipImgs(shipObj.placedShip, cell, shipLength, direction);
-        //shipImage = getPlayerShipImg(shipObj.placedShip, shipLength);
-        //setShipImage(shipImage, cell, shipLength, direction);
       } else if (domParent === '.player .sub') {
           shipImage = getPlayerShipImg(shipObj.placedShip, shipLength);
           setShipImage(shipImage, cell, shipLength, direction);
@@ -610,6 +624,7 @@ const displayHandler = function() {
     setResolveClick,
     emulateEnemyClick, 
     getClickedCell, 
+    removeShipImgs,
     setShips, 
     refreshBoard
   };
