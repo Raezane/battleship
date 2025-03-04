@@ -51,10 +51,6 @@ const createMovesForComputer = function (participant) {
   participant.createAvailableMoves();
 }
 
-const automateShipPlacement = function(participant) {
-  participant.playerBoard.setShipsRandomly();
-}
-
 const setShipImages = function(participantSubCells) {
   display.setShips(participantSubCells, player.playerBoard.getPlacedShips());
 }
@@ -182,6 +178,7 @@ const currentAreaAvailable = function(shipFrontCoords, shipRearCoords) {
 
 const clearCurrentArea = function(draggedShipImg) {
   
+    console.log(shipMapping)
     let shipObj = shipMapping.get(draggedShipImg)
     
     let placedShips = player.playerBoard.getPlacedShips();
@@ -204,7 +201,7 @@ const handlePlacement = function(shipFrontCoords, shipRearCoords, draggedShipImg
   /* and now we have all we need (ship's front and rear coords and the shipobject),
   which we pass straight to boardHandler to place the ship to our internal gameboard */
   player.playerBoard.setShip(shipFrontCoords, shipRearCoords, shipObj);
-  console.log(player.playerBoard.getPlacedShips())
+  console.log(playerBoardObj)
 } 
 
 const handleTurn = function(e) {
@@ -249,7 +246,7 @@ const handleTurn = function(e) {
     } else {
       player.playerBoard.setShip(frontCoords, currentRearCoords, shipObj);
       display.invalidPlacementText()
-    } console.log(player.playerBoard.getGameBoard())
+    } console.log(playerBoardObj)
 
   } else display.invalidPlacementText()
 };
@@ -298,8 +295,12 @@ const handleAttack = function(domBoard, row, col) {
 };
 
 const setShipsAuto = function() {
-  automateShipPlacement(player);
-  console.log(player.playerBoard.getGameBoard());
+  display.removeShipImgs(player.playerBoard.getPlacedShips());
+  player.playerBoard.emptyBoard();
+  player.playerBoard.emptyPlacedShips();
+  player.playerBoard.emptySurroundingCells();
+  player.playerBoard.setShipsRandomly();
+  console.log(playerBoardObj);
   setShipImages('shipSetterCells');
 }
 
@@ -314,7 +315,7 @@ const startGame = function() {
   toggleElementVisibility(display.toggleGameTable);
   createBoardAndShips(computer);
   createMovesForComputer(computerInt);
-  automateShipPlacement(computer);
+  computer.playerBoard.setShipsRandomly();
   setShipImages('subCellsPlayer');
   initGameLoop();
 };
