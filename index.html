@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <h1 class="title">Battleship</h1>
+  <div class="gametablecontainer">
+    <dialog>
+      <div class="placement board">
+        <div data-row="0" data-col="0"></div>
+        <div data-row="0" data-col="1"></div>
+        <div data-row="0" data-col="2"></div>
+        <div data-row="0" data-col="3"></div>
+        <div data-row="0" data-col="4"></div>
+        <div data-row="0" data-col="5"></div>
+        <div data-row="0" data-col="6"></div>
+        <div data-row="0" data-col="7"></div>
+        <div data-row="0" data-col="8"></div>
+        <div data-row="0" data-col="9"></div>
+        <div data-row="1" data-col="0"></div>
+        <div data-row="1" data-col="1"></div>
+        <div data-row="1" data-col="2"></div>
+        <div data-row="1" data-col="3"></div>
+        <div data-row="1" data-col="4"></div>
+        <div data-row="1" data-col="5"></div>
+        <div data-row="1" data-col="6"></div>
+        <div data-row="1" data-col="7"></div>
+        <div data-row="1" data-col="8"></div>
+        <div data-row="1" data-col="9"></div>
+        <div data-row="2" data-col="0"></div>
+        <div data-row="2" data-col="1"></div>
+        <div data-row="2" data-col="2"></div>
+        <div data-row="2" data-col="3"></div>
+        <div data-row="2" data-col="4"></div>
+        <div data-row="2" data-col="5"></div>
+        <div data-row="2" data-col="6"></div>
+        <div data-row="2" data-col="7"></div>
+        <div data-row="2" data-col="8"></div>
+        <div data-row="2" data-col="9"></div>
+        <div data-row="3" data-col="0"></div>
+        <div data-row="3" data-col="1"></div>
+        <div data-row="3" data-col="2"></div>
+        <div data-row="3" data-col="3"></div>
+        <div data-row="3" data-col="4"></div>
+        <div data-row="3" data-col="5"></div>
+        <div data-row="3" data-col="6"></div>
+        <div data-row="3" data-col="7"></div>
+        <div data-row="3" data-col="8"></div>
+        <div data-row="3" data-col="9"></div>
+        <div data-row="4" data-col="0"></div>
+        <div data-row="4" data-col="1"></div>
+        <div data-row="4" data-col="2"></div>
+        <div data-row="4" data-col="3"></div>
+        <div data-row="4" data-col="4"></div>
+        <div data-row="4" data-col="5"></div>
+        <div data-row="4" data-col="6"></div>
+        <div data-row="4" data-col="7"></div>
+        <div data-row="4" data-col="8"></div>
+        <div data-row="4" data-col="9"></div>
+        <div data-row="5" data-col="0"></div>
+        <div data-row="5" data-col="1"></div>
+        <div data-row="5" data-col="2"></div>
+        <div data-row="5" data-col="3"></div>
+        <div data-row="5" data-col="4"></div>
+        <div data-row="5" data-col="5"></div>
+        <div data-row="5" data-col="6"></div>
+        <div data-row="5" data-col="7"></div>
+        <div data-row="5" data-col="8"></div>
+        <div data-row="5" data-col="9"></div>
+        <div data-row="6" data-col="0"></div>
+        <div data-row="6" data-col="1"></div>
+        <div data-row="6" data-col="2"></div>
+        <div data-row="6" data-col="3"></div>
+        <div data-row="6" data-col="4"></div>
+        <div data-row="6" data-col="5"></div>
+        <div data-row="6" data-col="6"></div>
+        <div data-row="6" data-col="7"></div>
+        <div data-row="6" data-col="8"></div>
+        <div data-row="6" data-col="9"></div>
+        <div data-row="7" data-col="0"></div>
+        <div data-row="7" data-col="1"></div>
+        <div data-row="7" data-col="2"></div>
+        <div data-row="7" data-col="3"></div>
+        <div data-row="7" data-col="4"></div>
+        <div data-row="7" data-col="5"></div>
+        <div data-row="7" data-col="6"></div>
+        <div data-row="7" data-col="7"></div>
+        <div data-row="7" data-col="8"></div>
+        <div data-row="7" data-col="9"></div>
+        <div data-row="8" data-col="0"></div>
+        <div data-row="8" data-col="1"></div>
+        <div data-row="8" data-col="2"></div>
+        <div data-row="8" data-col="3"></div>
+        <div data-row="8" data-col="4"></div>
+        <div data-row="8" data-col="5"></div>
+        <div data-row="8" data-col="6"></div>
+        <div data-row="8" data-col="7"></div>
+        <div data-row="8" data-col="8"></div>
+        <div data-row="8" data-col="9"></div>
+        <div data-row="9" data-col="0"></div>
+        <div data-row="9" data-col="1"></div>
+        <div data-row="9" data-col="2"></div>
+        <div data-row="9" data-col="3"></div>
+        <div data-row="9" data-col="4"></div>
+        <div data-row="9" data-col="5"></div>
+        <div data-row="9" data-col="6"></div>
+        <div data-row="9" data-col="7"></div>
+        <div data-row="9" data-col="8"></div>
+        <div data-row="9" data-col="9"></div>
+      </div>
+      <div class="play dialogbuttoncontainer">
+        <h3 class="informtext"></h3>
+        <button>Play!</button>
+      </div>
+      <div class="placeableships">
+        <div>
+          <div class="shipimgdiv">
+            <img src="../src/assets/images/ship_large_body_horizontal.png" alt="bigshiphorizontal" class="bigship horizontal big1" data-shipsize="4">
+          </div>
+        </div>
+        <div>
+          <div class="shipimgdiv">
+            <img src="../src/assets/images/ship_medium_body_horizontal.png" alt="mediumshiphorizontal" class="mediumship horizontal medium1" data-shipsize="3">
+          </div>
+          <div class="shipimgdiv">
+            <img src="../src/assets/images/ship_medium_body_horizontal.png" alt="mediumshiphorizontal" class="mediumship horizontal medium2" data-shipsize="3">
+          </div>
+        </div>
+        <div>
+          <div class="shipimgdiv">
+            <img src="../src/assets/images/ship_small_body_horizontal.png" alt="smallshiphorizontal" class="smallship horizontal small1" data-shipsize="2">
+          </div>
+          <div class="shipimgdiv">
+            <img src="../src/assets/images/ship_small_body_horizontal.png" alt="smallshiphorizontal" class="smallship horizontal small2" data-shipsize="2">
+          </div>
+          <div class="shipimgdiv">
+            <img src="../src/assets/images/ship_small_body_horizontal.png" alt="smallshiphorizontal" class="smallship horizontal small3" data-shipsize="2">
+          </div>
+        </div>
+        <div>
+          <div class="shipimgdiv">
+            <img src="../src/assets/images/boat1.png" alt="modalboat" class="modalboat boat1" data-shipsize="1">
+          </div>
+          <div class="shipimgdiv">
+            <img src="../src/assets/images/boat1.png" alt="modalboat" class="modalboat boat2" data-shipsize="1">
+          </div>
+          <div class="shipimgdiv">
+            <img src="../src/assets/images/boat1.png" alt="modalboat" class="modalboat boat3" data-shipsize="1">
+          </div>
+          <div class="shipimgdiv">
+            <img src="../src/assets/images/boat1.png" alt="modalboat" class="modalboat boat4" data-shipsize="1">
+          </div>
+        </div>
+      </div>
+      <div class="setship dialogbuttoncontainer">
+        <h3 class="informtext positive">Place ships by dragging or click below</h3>
+        <button>Auto set Ships</button>
+      </div>
+    </dialog>
+    <div id="gametable">
+      <div class="upperheaders">
+        <h2>You win!</h2>
+        <h3>Play again?</h3>
+      </div>
+      <div class="choices">
+        <button>yes</button>
+        <button>no</button>
+      </div>
+      <div class="boardscontainer">
+        <h2 class="enemyturn turnheader">Enemy's turn!</h2>
+        <div class="player board">
+          <div class="sub board">
+            <div data-row="0" data-col="0"></div>
+            <div data-row="0" data-col="1"></div>
+            <div data-row="0" data-col="2"></div>
+            <div data-row="0" data-col="3"></div>
+            <div data-row="0" data-col="4"></div>
+            <div data-row="0" data-col="5"></div>
+            <div data-row="0" data-col="6"></div>
+            <div data-row="0" data-col="7"></div>
+            <div data-row="0" data-col="8"></div>
+            <div data-row="0" data-col="9"></div>
+            <div data-row="1" data-col="0"></div>
+            <div data-row="1" data-col="1"></div>
+            <div data-row="1" data-col="2"></div>
+            <div data-row="1" data-col="3"></div>
+            <div data-row="1" data-col="4"></div>
+            <div data-row="1" data-col="5"></div>
+            <div data-row="1" data-col="6"></div>
+            <div data-row="1" data-col="7"></div>
+            <div data-row="1" data-col="8"></div>
+            <div data-row="1" data-col="9"></div>
+            <div data-row="2" data-col="0"></div>
+            <div data-row="2" data-col="1"></div>
+            <div data-row="2" data-col="2"></div>
+            <div data-row="2" data-col="3"></div>
+            <div data-row="2" data-col="4"></div>
+            <div data-row="2" data-col="5"></div>
+            <div data-row="2" data-col="6"></div>
+            <div data-row="2" data-col="7"></div>
+            <div data-row="2" data-col="8"></div>
+            <div data-row="2" data-col="9"></div>
+            <div data-row="3" data-col="0"></div>
+            <div data-row="3" data-col="1"></div>
+            <div data-row="3" data-col="2"></div>
+            <div data-row="3" data-col="3"></div>
+            <div data-row="3" data-col="4"></div>
+            <div data-row="3" data-col="5"></div>
+            <div data-row="3" data-col="6"></div>
+            <div data-row="3" data-col="7"></div>
+            <div data-row="3" data-col="8"></div>
+            <div data-row="3" data-col="9"></div>
+            <div data-row="4" data-col="0"></div>
+            <div data-row="4" data-col="1"></div>
+            <div data-row="4" data-col="2"></div>
+            <div data-row="4" data-col="3"></div>
+            <div data-row="4" data-col="4"></div>
+            <div data-row="4" data-col="5"></div>
+            <div data-row="4" data-col="6"></div>
+            <div data-row="4" data-col="7"></div>
+            <div data-row="4" data-col="8"></div>
+            <div data-row="4" data-col="9"></div>
+            <div data-row="5" data-col="0"></div>
+            <div data-row="5" data-col="1"></div>
+            <div data-row="5" data-col="2"></div>
+            <div data-row="5" data-col="3"></div>
+            <div data-row="5" data-col="4"></div>
+            <div data-row="5" data-col="5"></div>
+            <div data-row="5" data-col="6"></div>
+            <div data-row="5" data-col="7"></div>
+            <div data-row="5" data-col="8"></div>
+            <div data-row="5" data-col="9"></div>
+            <div data-row="6" data-col="0"></div>
+            <div data-row="6" data-col="1"></div>
+            <div data-row="6" data-col="2"></div>
+            <div data-row="6" data-col="3"></div>
+            <div data-row="6" data-col="4"></div>
+            <div data-row="6" data-col="5"></div>
+            <div data-row="6" data-col="6"></div>
+            <div data-row="6" data-col="7"></div>
+            <div data-row="6" data-col="8"></div>
+            <div data-row="6" data-col="9"></div>
+            <div data-row="7" data-col="0"></div>
+            <div data-row="7" data-col="1"></div>
+            <div data-row="7" data-col="2"></div>
+            <div data-row="7" data-col="3"></div>
+            <div data-row="7" data-col="4"></div>
+            <div data-row="7" data-col="5"></div>
+            <div data-row="7" data-col="6"></div>
+            <div data-row="7" data-col="7"></div>
+            <div data-row="7" data-col="8"></div>
+            <div data-row="7" data-col="9"></div>
+            <div data-row="8" data-col="0"></div>
+            <div data-row="8" data-col="1"></div>
+            <div data-row="8" data-col="2"></div>
+            <div data-row="8" data-col="3"></div>
+            <div data-row="8" data-col="4"></div>
+            <div data-row="8" data-col="5"></div>
+            <div data-row="8" data-col="6"></div>
+            <div data-row="8" data-col="7"></div>
+            <div data-row="8" data-col="8"></div>
+            <div data-row="8" data-col="9"></div>
+            <div data-row="9" data-col="0"></div>
+            <div data-row="9" data-col="1"></div>
+            <div data-row="9" data-col="2"></div>
+            <div data-row="9" data-col="3"></div>
+            <div data-row="9" data-col="4"></div>
+            <div data-row="9" data-col="5"></div>
+            <div data-row="9" data-col="6"></div>
+            <div data-row="9" data-col="7"></div>
+            <div data-row="9" data-col="8"></div>
+            <div data-row="9" data-col="9"></div>
+          </div>
+          <div data-row="0" data-col="0"></div>
+          <div data-row="0" data-col="1"></div>
+          <div data-row="0" data-col="2"></div>
+          <div data-row="0" data-col="3"></div>
+          <div data-row="0" data-col="4"></div>
+          <div data-row="0" data-col="5"></div>
+          <div data-row="0" data-col="6"></div>
+          <div data-row="0" data-col="7"></div>
+          <div data-row="0" data-col="8"></div>
+          <div data-row="0" data-col="9"></div>
+          <div data-row="1" data-col="0"></div>
+          <div data-row="1" data-col="1"></div>
+          <div data-row="1" data-col="2"></div>
+          <div data-row="1" data-col="3"></div>
+          <div data-row="1" data-col="4"></div>
+          <div data-row="1" data-col="5"></div>
+          <div data-row="1" data-col="6"></div>
+          <div data-row="1" data-col="7"></div>
+          <div data-row="1" data-col="8"></div>
+          <div data-row="1" data-col="9"></div>
+          <div data-row="2" data-col="0"></div>
+          <div data-row="2" data-col="1"></div>
+          <div data-row="2" data-col="2"></div>
+          <div data-row="2" data-col="3"></div>
+          <div data-row="2" data-col="4"></div>
+          <div data-row="2" data-col="5"></div>
+          <div data-row="2" data-col="6"></div>
+          <div data-row="2" data-col="7"></div>
+          <div data-row="2" data-col="8"></div>
+          <div data-row="2" data-col="9"></div>
+          <div data-row="3" data-col="0"></div>
+          <div data-row="3" data-col="1"></div>
+          <div data-row="3" data-col="2"></div>
+          <div data-row="3" data-col="3"></div>
+          <div data-row="3" data-col="4"></div>
+          <div data-row="3" data-col="5"></div>
+          <div data-row="3" data-col="6"></div>
+          <div data-row="3" data-col="7"></div>
+          <div data-row="3" data-col="8"></div>
+          <div data-row="3" data-col="9"></div>
+          <div data-row="4" data-col="0"></div>
+          <div data-row="4" data-col="1"></div>
+          <div data-row="4" data-col="2"></div>
+          <div data-row="4" data-col="3"></div>
+          <div data-row="4" data-col="4"></div>
+          <div data-row="4" data-col="5"></div>
+          <div data-row="4" data-col="6"></div>
+          <div data-row="4" data-col="7"></div>
+          <div data-row="4" data-col="8"></div>
+          <div data-row="4" data-col="9"></div>
+          <div data-row="5" data-col="0"></div>
+          <div data-row="5" data-col="1"></div>
+          <div data-row="5" data-col="2"></div>
+          <div data-row="5" data-col="3"></div>
+          <div data-row="5" data-col="4"></div>
+          <div data-row="5" data-col="5"></div>
+          <div data-row="5" data-col="6"></div>
+          <div data-row="5" data-col="7"></div>
+          <div data-row="5" data-col="8"></div>
+          <div data-row="5" data-col="9"></div>
+          <div data-row="6" data-col="0"></div>
+          <div data-row="6" data-col="1"></div>
+          <div data-row="6" data-col="2"></div>
+          <div data-row="6" data-col="3"></div>
+          <div data-row="6" data-col="4"></div>
+          <div data-row="6" data-col="5"></div>
+          <div data-row="6" data-col="6"></div>
+          <div data-row="6" data-col="7"></div>
+          <div data-row="6" data-col="8"></div>
+          <div data-row="6" data-col="9"></div>
+          <div data-row="7" data-col="0"></div>
+          <div data-row="7" data-col="1"></div>
+          <div data-row="7" data-col="2"></div>
+          <div data-row="7" data-col="3"></div>
+          <div data-row="7" data-col="4"></div>
+          <div data-row="7" data-col="5"></div>
+          <div data-row="7" data-col="6"></div>
+          <div data-row="7" data-col="7"></div>
+          <div data-row="7" data-col="8"></div>
+          <div data-row="7" data-col="9"></div>
+          <div data-row="8" data-col="0"></div>
+          <div data-row="8" data-col="1"></div>
+          <div data-row="8" data-col="2"></div>
+          <div data-row="8" data-col="3"></div>
+          <div data-row="8" data-col="4"></div>
+          <div data-row="8" data-col="5"></div>
+          <div data-row="8" data-col="6"></div>
+          <div data-row="8" data-col="7"></div>
+          <div data-row="8" data-col="8"></div>
+          <div data-row="8" data-col="9"></div>
+          <div data-row="9" data-col="0"></div>
+          <div data-row="9" data-col="1"></div>
+          <div data-row="9" data-col="2"></div>
+          <div data-row="9" data-col="3"></div>
+          <div data-row="9" data-col="4"></div>
+          <div data-row="9" data-col="5"></div>
+          <div data-row="9" data-col="6"></div>
+          <div data-row="9" data-col="7"></div>
+          <div data-row="9" data-col="8"></div>
+          <div data-row="9" data-col="9"></div>
+        </div>
+        <h2 class="yourturn turnheader">Your turn!</h2>
+        <div class="enemy board">
+          <div class="sub board">
+            <div data-row="0" data-col="0"></div>
+            <div data-row="0" data-col="1"></div>
+            <div data-row="0" data-col="2"></div>
+            <div data-row="0" data-col="3"></div>
+            <div data-row="0" data-col="4"></div>
+            <div data-row="0" data-col="5"></div>
+            <div data-row="0" data-col="6"></div>
+            <div data-row="0" data-col="7"></div>
+            <div data-row="0" data-col="8"></div>
+            <div data-row="0" data-col="9"></div>
+            <div data-row="1" data-col="0"></div>
+            <div data-row="1" data-col="1"></div>
+            <div data-row="1" data-col="2"></div>
+            <div data-row="1" data-col="3"></div>
+            <div data-row="1" data-col="4"></div>
+            <div data-row="1" data-col="5"></div>
+            <div data-row="1" data-col="6"></div>
+            <div data-row="1" data-col="7"></div>
+            <div data-row="1" data-col="8"></div>
+            <div data-row="1" data-col="9"></div>
+            <div data-row="2" data-col="0"></div>
+            <div data-row="2" data-col="1"></div>
+            <div data-row="2" data-col="2"></div>
+            <div data-row="2" data-col="3"></div>
+            <div data-row="2" data-col="4"></div>
+            <div data-row="2" data-col="5"></div>
+            <div data-row="2" data-col="6"></div>
+            <div data-row="2" data-col="7"></div>
+            <div data-row="2" data-col="8"></div>
+            <div data-row="2" data-col="9"></div>
+            <div data-row="3" data-col="0"></div>
+            <div data-row="3" data-col="1"></div>
+            <div data-row="3" data-col="2"></div>
+            <div data-row="3" data-col="3"></div>
+            <div data-row="3" data-col="4"></div>
+            <div data-row="3" data-col="5"></div>
+            <div data-row="3" data-col="6"></div>
+            <div data-row="3" data-col="7"></div>
+            <div data-row="3" data-col="8"></div>
+            <div data-row="3" data-col="9"></div>
+            <div data-row="4" data-col="0"></div>
+            <div data-row="4" data-col="1"></div>
+            <div data-row="4" data-col="2"></div>
+            <div data-row="4" data-col="3"></div>
+            <div data-row="4" data-col="4"></div>
+            <div data-row="4" data-col="5"></div>
+            <div data-row="4" data-col="6"></div>
+            <div data-row="4" data-col="7"></div>
+            <div data-row="4" data-col="8"></div>
+            <div data-row="4" data-col="9"></div>
+            <div data-row="5" data-col="0"></div>
+            <div data-row="5" data-col="1"></div>
+            <div data-row="5" data-col="2"></div>
+            <div data-row="5" data-col="3"></div>
+            <div data-row="5" data-col="4"></div>
+            <div data-row="5" data-col="5"></div>
+            <div data-row="5" data-col="6"></div>
+            <div data-row="5" data-col="7"></div>
+            <div data-row="5" data-col="8"></div>
+            <div data-row="5" data-col="9"></div>
+            <div data-row="6" data-col="0"></div>
+            <div data-row="6" data-col="1"></div>
+            <div data-row="6" data-col="2"></div>
+            <div data-row="6" data-col="3"></div>
+            <div data-row="6" data-col="4"></div>
+            <div data-row="6" data-col="5"></div>
+            <div data-row="6" data-col="6"></div>
+            <div data-row="6" data-col="7"></div>
+            <div data-row="6" data-col="8"></div>
+            <div data-row="6" data-col="9"></div>
+            <div data-row="7" data-col="0"></div>
+            <div data-row="7" data-col="1"></div>
+            <div data-row="7" data-col="2"></div>
+            <div data-row="7" data-col="3"></div>
+            <div data-row="7" data-col="4"></div>
+            <div data-row="7" data-col="5"></div>
+            <div data-row="7" data-col="6"></div>
+            <div data-row="7" data-col="7"></div>
+            <div data-row="7" data-col="8"></div>
+            <div data-row="7" data-col="9"></div>
+            <div data-row="8" data-col="0"></div>
+            <div data-row="8" data-col="1"></div>
+            <div data-row="8" data-col="2"></div>
+            <div data-row="8" data-col="3"></div>
+            <div data-row="8" data-col="4"></div>
+            <div data-row="8" data-col="5"></div>
+            <div data-row="8" data-col="6"></div>
+            <div data-row="8" data-col="7"></div>
+            <div data-row="8" data-col="8"></div>
+            <div data-row="8" data-col="9"></div>
+            <div data-row="9" data-col="0"></div>
+            <div data-row="9" data-col="1"></div>
+            <div data-row="9" data-col="2"></div>
+            <div data-row="9" data-col="3"></div>
+            <div data-row="9" data-col="4"></div>
+            <div data-row="9" data-col="5"></div>
+            <div data-row="9" data-col="6"></div>
+            <div data-row="9" data-col="7"></div>
+            <div data-row="9" data-col="8"></div>
+            <div data-row="9" data-col="9"></div>
+          </div>
+          <div data-row="0" data-col="0"></div>
+          <div data-row="0" data-col="1"></div>
+          <div data-row="0" data-col="2"></div>
+          <div data-row="0" data-col="3"></div>
+          <div data-row="0" data-col="4"></div>
+          <div data-row="0" data-col="5"></div>
+          <div data-row="0" data-col="6"></div>
+          <div data-row="0" data-col="7"></div>
+          <div data-row="0" data-col="8"></div>
+          <div data-row="0" data-col="9"></div>
+          <div data-row="1" data-col="0"></div>
+          <div data-row="1" data-col="1"></div>
+          <div data-row="1" data-col="2"></div>
+          <div data-row="1" data-col="3"></div>
+          <div data-row="1" data-col="4"></div>
+          <div data-row="1" data-col="5"></div>
+          <div data-row="1" data-col="6"></div>
+          <div data-row="1" data-col="7"></div>
+          <div data-row="1" data-col="8"></div>
+          <div data-row="1" data-col="9"></div>
+          <div data-row="2" data-col="0"></div>
+          <div data-row="2" data-col="1"></div>
+          <div data-row="2" data-col="2"></div>
+          <div data-row="2" data-col="3"></div>
+          <div data-row="2" data-col="4"></div>
+          <div data-row="2" data-col="5"></div>
+          <div data-row="2" data-col="6"></div>
+          <div data-row="2" data-col="7"></div>
+          <div data-row="2" data-col="8"></div>
+          <div data-row="2" data-col="9"></div>
+          <div data-row="3" data-col="0"></div>
+          <div data-row="3" data-col="1"></div>
+          <div data-row="3" data-col="2"></div>
+          <div data-row="3" data-col="3"></div>
+          <div data-row="3" data-col="4"></div>
+          <div data-row="3" data-col="5"></div>
+          <div data-row="3" data-col="6"></div>
+          <div data-row="3" data-col="7"></div>
+          <div data-row="3" data-col="8"></div>
+          <div data-row="3" data-col="9"></div>
+          <div data-row="4" data-col="0"></div>
+          <div data-row="4" data-col="1"></div>
+          <div data-row="4" data-col="2"></div>
+          <div data-row="4" data-col="3"></div>
+          <div data-row="4" data-col="4"></div>
+          <div data-row="4" data-col="5"></div>
+          <div data-row="4" data-col="6"></div>
+          <div data-row="4" data-col="7"></div>
+          <div data-row="4" data-col="8"></div>
+          <div data-row="4" data-col="9"></div>
+          <div data-row="5" data-col="0"></div>
+          <div data-row="5" data-col="1"></div>
+          <div data-row="5" data-col="2"></div>
+          <div data-row="5" data-col="3"></div>
+          <div data-row="5" data-col="4"></div>
+          <div data-row="5" data-col="5"></div>
+          <div data-row="5" data-col="6"></div>
+          <div data-row="5" data-col="7"></div>
+          <div data-row="5" data-col="8"></div>
+          <div data-row="5" data-col="9"></div>
+          <div data-row="6" data-col="0"></div>
+          <div data-row="6" data-col="1"></div>
+          <div data-row="6" data-col="2"></div>
+          <div data-row="6" data-col="3"></div>
+          <div data-row="6" data-col="4"></div>
+          <div data-row="6" data-col="5"></div>
+          <div data-row="6" data-col="6"></div>
+          <div data-row="6" data-col="7"></div>
+          <div data-row="6" data-col="8"></div>
+          <div data-row="6" data-col="9"></div>
+          <div data-row="7" data-col="0"></div>
+          <div data-row="7" data-col="1"></div>
+          <div data-row="7" data-col="2"></div>
+          <div data-row="7" data-col="3"></div>
+          <div data-row="7" data-col="4"></div>
+          <div data-row="7" data-col="5"></div>
+          <div data-row="7" data-col="6"></div>
+          <div data-row="7" data-col="7"></div>
+          <div data-row="7" data-col="8"></div>
+          <div data-row="7" data-col="9"></div>
+          <div data-row="8" data-col="0"></div>
+          <div data-row="8" data-col="1"></div>
+          <div data-row="8" data-col="2"></div>
+          <div data-row="8" data-col="3"></div>
+          <div data-row="8" data-col="4"></div>
+          <div data-row="8" data-col="5"></div>
+          <div data-row="8" data-col="6"></div>
+          <div data-row="8" data-col="7"></div>
+          <div data-row="8" data-col="8"></div>
+          <div data-row="8" data-col="9"></div>
+          <div data-row="9" data-col="0"></div>
+          <div data-row="9" data-col="1"></div>
+          <div data-row="9" data-col="2"></div>
+          <div data-row="9" data-col="3"></div>
+          <div data-row="9" data-col="4"></div>
+          <div data-row="9" data-col="5"></div>
+          <div data-row="9" data-col="6"></div>
+          <div data-row="9" data-col="7"></div>
+          <div data-row="9" data-col="8"></div>
+          <div data-row="9" data-col="9"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+<script defer src="/battleship/main.js"></script></body>
+</html>
