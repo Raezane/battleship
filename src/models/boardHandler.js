@@ -377,39 +377,4 @@ const boardHandler = function() {
   };
 };
 
-/*let board = boardHandler();
-board.buildBoard();
-board.createShips();
-let ship0 = ship(4);
-let ship1 = ship(4);
-board.validateAndPlace(ship1, [1,3], [1,6]);
-board.validateAndPlace(ship0, [3,4], [3,6]);
-board.getPlacedShips()
-/*board.receiveAttack(6,3);
-board.receiveAttack(6,2);
-board.receiveAttack(6,4);
-board.receiveAttack(6,5); */
-//board.getGameBoard()
-//let rndCoords = board.getRandomCoords(ship0)
-//board.setCreatedShips()
-//board.getGameBoard()
-/* board.getShips();
-let ship0 = ship(4);
-let ship1 = ship(3);
-let ship2 = ship(3);
-let ship3 = ship(1);
-let rndCoords = board.getRandomCoords(ship2)
-board.shipSetter(ship0, [1,0], [1,3]);
-board.shipSetter(ship1, [3,1], [5,1]);
-board.shipSetter(ship2, rndCoords[0], rndCoords[1]);
-board.shipSetter(ship3, [0,7], [0,7]);
-board.getGameBoard()
-board.receiveAttack(0,7)
-board.receiveAttack(4,1)
-board.receiveAttack(8,3)
-board.receiveAttack(6,6)
-board.getGameBoard()
-ship1.getHits() */
-
-
 export {boardHandler}

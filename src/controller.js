@@ -20,10 +20,6 @@ const activateDOMelements = function() {
   display.attachListeners();
 };
 
-const toggleElementVisibility = function(callback) {
-  display.toggleElementVisibility(callback);
-}
-
 const createBoardAndShips = function(participant) {
   participant.initiateBoard();
   participant.playerBoard.createShips();
@@ -51,10 +47,6 @@ const createMovesForComputer = function (participant) {
   participant.createAvailableMoves();
 }
 
-const setShipImages = function(participantSubCells) {
-  display.setShips(participantSubCells, player.playerBoard.getPlacedShips());
-}
-
 const initGameLoop = function() {
 
   let playerOne;
@@ -68,13 +60,13 @@ const initGameLoop = function() {
     if (whoStarts == 0) {
       playerOne = playerTurn;
       playerTwo = computerTurn;
-      display.hideEnemyTurnHeader();
-      display.addHideClass();
+      display.setEnemyTurnHeaderToBeHidden();
+      display.addHideClassToTurnHeader();
     } else {
       playerOne = computerTurn;
       playerTwo = playerTurn;
-      display.hideYourTurnHeader();
-      display.addHideClass();
+      display.setYourTurnHeaderToBeHidden();
+      display.addHideClassToTurnHeader();
     }
   };
 
@@ -98,8 +90,8 @@ const initGameLoop = function() {
 
       display.emulateEnemyClick(row, col);
 
-      display.addHideClass();
-      display.removeHideClass();
+      display.addHideClassToTurnHeader();
+      display.removeHideClassFromTurnHeader();
 
       let cellsHit = player.playerBoard.getCellsHit();
 
@@ -133,8 +125,8 @@ const initGameLoop = function() {
     });
 
     clickPromise.then(() => { 
-      display.addHideClass();
-      display.removeHideClass();
+      display.addHideClassToTurnHeader();
+      display.removeHideClassFromTurnHeader();
     });
 
     return clickPromise
@@ -162,23 +154,32 @@ const initGameLoop = function() {
 const handleGameEnd = function(sunkenPlayerShips) {
   display.hideBothTurnTitles();
   display.removeBoardListeners();
-  sunkenPlayerShips.length == 10 ? display.showGameResult('You lose!') : display.showGameResult('You win!')
-  toggleElementVisibility(display.toggleWinnerAndRetryHeader);
-  toggleElementVisibility(display.toggleNewGameButtons);
+  if (sunkenPlayerShips.length == 10) {
+    display.showGameResult('You lose!');
+    display.colorGameResultTitle('negative');
+  } else {
+    display.showGameResult('You win!');
+    display.colorGameResultTitle('positive');
+  }
+  display.toggleWinnerAndRetryHeader();
+  display.toggleNewGameButtons();
 } 
 
-const currentAreaAvailable = function(shipFrontCoords, shipRearCoords) {
+const currentAreaAvailable = function(shipFrontCoords, shipRearCoords, dragged) {
   /* first parse dom string coordinates to interegrs, which we may then
   use in our boardhandler to evaluate ship placement validity */
   shipFrontCoords = shipFrontCoords.map(number => +number);
   shipRearCoords = shipRearCoords.map(number => +number);
 
-  return player.playerBoard.validPlacement(shipFrontCoords, shipRearCoords)
+  if (shipFrontCoords[0] < shipRearCoords[0] && dragged.classList.contains('horizontal')) return false;
+  if (shipFrontCoords[1] < shipRearCoords[1] && dragged.classList.contains('vertical')) return false;
+  if (!player.playerBoard.validPlacement(shipFrontCoords, shipRearCoords)) return false;
+  else return true
+  
 } 
 
 const clearCurrentArea = function(draggedShipImg) {
   
-    console.log(shipMapping)
     let shipObj = shipMapping.get(draggedShipImg)
     
     let placedShips = player.playerBoard.getPlacedShips();
@@ -201,7 +202,8 @@ const handlePlacement = function(shipFrontCoords, shipRearCoords, draggedShipImg
   /* and now we have all we need (ship's front and rear coords and the shipobject),
   which we pass straight to boardHandler to place the ship to our internal gameboard */
   player.playerBoard.setShip(shipFrontCoords, shipRearCoords, shipObj);
-  console.log(playerBoardObj)
+  display.hidePlacingInfo();
+  if (areAllShipsSet()) display.togglePlayButton('show')
 } 
 
 const handleTurn = function(e) {
@@ -245,10 +247,10 @@ const handleTurn = function(e) {
       display.turnShip(parent, replacingShipImg);
     } else {
       player.playerBoard.setShip(frontCoords, currentRearCoords, shipObj);
-      display.invalidPlacementText()
-    } console.log(playerBoardObj)
+      display.invalidPlacementText("Can't turn here, another ship would be too close!")
+    } 
 
-  } else display.invalidPlacementText()
+  } else display.invalidPlacementText("Can't place here, ship would be out of bounds!")
 };
 
 const handleAttack = function(domBoard, row, col) {
@@ -300,23 +302,23 @@ const setShipsAuto = function() {
   player.playerBoard.emptyPlacedShips();
   player.playerBoard.emptySurroundingCells();
   player.playerBoard.setShipsRandomly();
-  console.log(playerBoardObj);
-  setShipImages('shipSetterCells');
+  display.setShips('shipSetterCells', player.playerBoard.getPlacedShips());
+  display.hidePlacingInfo();
+  display.togglePlayButton('show');
+}
+
+const areAllShipsSet = function() {
+  let setShips = player.playerBoard.getPlacedShips();
+  return setShips.length < 10 ? false : true
 }
 
 const startGame = function() {
-  let setShips = player.playerBoard.getPlacedShips();
-  if (setShips.length < 10) {
-    console.log('kaikkia laivoja ei vielä asetettu')
-    return
-  };
-
   display.hideModal();
-  toggleElementVisibility(display.toggleGameTable);
+  display.toggleGameTable();
   createBoardAndShips(computer);
   createMovesForComputer(computerInt);
   computer.playerBoard.setShipsRandomly();
-  setShipImages('subCellsPlayer');
+  display.setShips('subCellsPlayer', player.playerBoard.getPlacedShips());
   initGameLoop();
 };
 
@@ -330,9 +332,10 @@ const redirect = function() {
 
 const init = function() {
   activateDOMelements();
-  toggleElementVisibility(display.toggleGameTable);
-  toggleElementVisibility(display.toggleWinnerAndRetryHeader);
-  toggleElementVisibility(display.toggleNewGameButtons);
+  display.toggleGameTable();
+  display.toggleWinnerAndRetryHeader();
+  display.toggleNewGameButtons();
+  display.togglePlayButton('hide');
   createBoardAndShips(player);
   mapDOMshipsToObjects(player.playerBoard.getCreatedShips());
 };

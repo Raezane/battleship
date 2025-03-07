@@ -123,7 +123,9 @@ const displayHandler = function() {
 
   const initiateOtherElements = function() {
     otherElements['shipSetterModal'] = document.querySelector('dialog');
+    otherElements['informText'] = document.querySelector('.play .informtext')
     otherElements['playButton'] = document.querySelector('.play > button');
+    otherElements['informPlacing'] = document.querySelector('.setship .informtext')
     otherElements['setShipsButton'] = document.querySelector('.setship > button')
     otherElements['placeableShips'] = document.querySelector('.placeableships');
     otherElements['gameTable'] = document.querySelector('#gametable');
@@ -216,8 +218,30 @@ const displayHandler = function() {
     replacingShipImg.classList.remove('removeElement');
   } 
 
-  const invalidPlacementText = function() {
-    console.log('ei voi asettaa tähän');
+  const invalidPlacementText = function(text) {
+    otherElements['informText'].textContent = text;
+    otherElements['informText'].classList.remove('positive');
+    otherElements['informText'].classList.remove('pulsateAnimation');
+    otherElements['informText'].classList.add('negative');
+    setTimeout(() => {
+      informAboutTurning();
+    }, 2000);
+    
+  }
+
+  const informAboutTurning = function() {
+    otherElements['informText'].classList.remove('negative');
+    otherElements['informText'].classList.add('positive');
+    otherElements['informText'].classList.add('pulsateAnimation');
+    otherElements['informText'].textContent = '* You can turn your ship by clicking it *';
+  }
+
+  const hidePlacingInfo = function() {
+    otherElements['informPlacing'].classList.add('hide');
+  }
+
+  const colorGameResultTitle = function(colorsignal) {
+    transformableTitles['gameEndStatus'].classList.add(colorsignal)
   }
 
   const attachListeners = function() {
@@ -225,9 +249,6 @@ const displayHandler = function() {
     let shipSize;
 
     function createInteractivityForShips() {
-
-      console.log(horizontalDraggableShips)
-      console.log(verticalDraggableShips)
 
       allDraggableShips.forEach((ship) => {
         ship[1].addEventListener('dragstart', (e) => {
@@ -243,11 +264,11 @@ const displayHandler = function() {
           };
         });
   
-        ship[1].addEventListener('dragend', (e) => {
+        ship[1].addEventListener('dragend', () => {
           dragged.classList.toggle('transparent');
         });
 
-        ship[1].addEventListener('click', handleTurn)
+        ship[1].addEventListener('click', handleTurn);
       });
     };
 
@@ -288,7 +309,7 @@ const displayHandler = function() {
                 cellsToBePlacedUpon[cellsToBePlacedUpon.length-1].dataset.row, 
                 cellsToBePlacedUpon[cellsToBePlacedUpon.length-1].dataset.col
               ];
-              if (!currentAreaAvailable(shipFrontCoords, shipRearCoords)) {
+              if (!currentAreaAvailable(shipFrontCoords, shipRearCoords, dragged)) {
                 intercectingCells.forEach((cell) => shipCurrentlyOutOfBounds(cell));
               } else intercectingCells.forEach((cell) => shipCurrentlyInBounds(cell));
             };
@@ -301,8 +322,10 @@ const displayHandler = function() {
         });
       });
 
-      document.addEventListener('dragend', (e) => {
+      document.addEventListener('dragend', () => {
+
         let cellsToBePlacedUpon = document.querySelectorAll('.validPlacement');
+
         if (cellsToBePlacedUpon.length > 0) {
 
           cellsToBePlacedUpon[0].append(dragged);
@@ -311,13 +334,35 @@ const displayHandler = function() {
             dragged.parentNode.dataset.row, 
             dragged.parentNode.dataset.col,
           ];
+
           let shipRearCoords = [
             cellsToBePlacedUpon[cellsToBePlacedUpon.length-1].dataset.row, 
             cellsToBePlacedUpon[cellsToBePlacedUpon.length-1].dataset.col
           ];
-          handlePlacement(shipFrontCoords, shipRearCoords, dragged)
+          handlePlacement(shipFrontCoords, shipRearCoords, dragged);
+          informAboutTurning();
 
+        } else {
+            console.log(dragged, dragged.parentNode)
+            let shipRearRow;
+            let shipRearCol;
+            if (dragged.classList.contains('horizontal')) {
+              shipRearRow = dragged.parentNode.dataset.row;
+              shipRearCol = parseInt(dragged.parentNode.dataset.col) + (shipSize-1);
+            } else {
+              shipRearRow = parseInt(dragged.parentNode.dataset.row) + (shipSize-1);
+              shipRearCol = dragged.parentNode.dataset.col;
+            }
+            let shipFrontCoords = [
+              dragged.parentNode.dataset.row, 
+              dragged.parentNode.dataset.col,
+            ];
+            let shipRearCoords = [shipRearRow, shipRearCol];
+            handlePlacement(shipFrontCoords, shipRearCoords, dragged);
+            invalidPlacementText("Placing area invalid!");
+          
         }
+
         boardCells['shipSetterCells'].forEach((cell) => {
           removeValidityStyling(cell);
         });
@@ -367,14 +412,19 @@ const displayHandler = function() {
     transformableTitles['askNewRound'].textContent = 'New game?';
   };
 
-  const toggleElementVisibility = function(callback) {
-    callback();
-  };
-
   const toggleWinnerAndRetryHeader = function() {
     transformableTitles['gameEndStatus'].classList.toggle('hide');
     transformableTitles['askNewRound'].classList.toggle('hide');
-  }
+  };
+
+  const togglePlayButton = function(hideOrShow) {
+    if (hideOrShow == 'hide') {
+      otherElements['playButton'].classList.add('hide')
+    } else {
+      otherElements['playButton'].classList.remove('hide')
+      otherElements['playButton'].classList.add('pulsateAnimation')
+    };
+  };
 
   const toggleNewGameButtons = function() {
     otherElements['choicesParent'].classList.toggle('hide');
@@ -395,28 +445,28 @@ const displayHandler = function() {
 
   const invalidClickNotify = function() {
     transformableTitles['yourTurn'].textContent = 'Cell already struck! Choose another.'
-    transformableTitles['yourTurn'].classList.add('invalidCellClick');
+    transformableTitles['yourTurn'].classList.add('informtext', 'negative');
   }
 
   const setDefaultTitle = function() {
     transformableTitles['yourTurn'].textContent = 'Your turn!';
-    transformableTitles['yourTurn'].classList.remove('invalidCellClick');
+    transformableTitles['yourTurn'].classList.remove('informtext', 'negative');
   }
 
-  const addHideClass = function() {
+  const addHideClassToTurnHeader = function() {
     headerToBeHidden.classList.add('hide');
   }
 
-  const removeHideClass = function() {
+  const removeHideClassFromTurnHeader = function() {
     headertoBeShown.classList.remove('hide');
   }
 
-  const hideYourTurnHeader = function() {
+  const setYourTurnHeaderToBeHidden = function() {
     headerToBeHidden = transformableTitles['yourTurn'];
     headertoBeShown = transformableTitles['enemyTurn'];
   }
 
-  const hideEnemyTurnHeader = function() {
+  const setEnemyTurnHeaderToBeHidden = function() {
     headerToBeHidden = transformableTitles['enemyTurn'];
     headertoBeShown = transformableTitles['yourTurn'];
   }
@@ -441,12 +491,12 @@ const displayHandler = function() {
 
     if (clickedBoard == 'enemy') {
       if (resolveClick) {
-        hideYourTurnHeader();
+        setYourTurnHeaderToBeHidden();
         resolveClick(this);
         resolveClick = null;
       }
     } else {
-        hideEnemyTurnHeader();
+        setEnemyTurnHeaderToBeHidden();
     };
 
     let row = this.dataset.row;
@@ -606,18 +656,21 @@ const displayHandler = function() {
     makePlayerBoardUnClickable,
     makeEnemyBoardClickable,
     makeEnemyBoardUnClickable,
-    addHideClass,
-    removeHideClass,
-    hideYourTurnHeader,
-    hideEnemyTurnHeader,
+    addHideClassToTurnHeader,
+    removeHideClassFromTurnHeader,
+    setYourTurnHeaderToBeHidden,
+    setEnemyTurnHeaderToBeHidden,
     hideBothTurnTitles,
     turnShip,
     invalidPlacementText,
+    hidePlacingInfo,
+    colorGameResultTitle,
+    informAboutTurning,
     attachListeners, 
     removeBoardListeners,
     showGameResult,
-    toggleElementVisibility,
     toggleWinnerAndRetryHeader,
+    togglePlayButton,
     toggleNewGameButtons,
     toggleGameTable,
     getResolveClick, 

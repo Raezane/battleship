@@ -3,6 +3,22 @@ html, body {
   user-select: none;
 }
 
+body {
+  background-image: url("../src/assets/images/battleshipsandsea.png");
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+@font-face {
+  font-family: 'RubikGlitch-Regular';
+  src: url('../src/assets/fonts/RubikGlitch-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'PressStart2P-Regular';
+  src: url('../src/assets/fonts/PressStart2P-Regular.ttf') format('truetype');
+}
+
 .gametablecontainer {
   display: flex;
   justify-content: center;
@@ -13,9 +29,10 @@ html, body {
 
 .title {
   position: absolute;
-  font-size: 30px;
-  top: 40px;
+  font-size: 50px;
+  top: 30px;
   left: 60px;
+  font-family: 'RubikGlitch-Regular', 'Arial', 'Helvetica', 'sans-serif';
 }
 
 dialog,
@@ -23,6 +40,7 @@ dialog,
   height: 550px;
   width: 800px;
   min-width: max-content;
+  border-width: 0px;
   border-radius: 10px;
   display: grid;
 }
@@ -33,6 +51,7 @@ dialog {
   grid-template-columns: 400px auto;
   grid-template-rows: 400px auto;
   grid-auto-flow: column;
+  background-color: rgba(255, 255, 255, 0.7);
 
   .placement {
     display: grid;
@@ -45,11 +64,14 @@ dialog {
   }
 
   .dialogbuttoncontainer {
+    display: flex;
+    flex-direction: column;
     box-sizing: border-box;
     padding: 10px;
     display: flex;
-    justify-content: space-around;
-    align-items: flex-end;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
     
   }
 
@@ -60,7 +82,6 @@ dialog {
     padding: 0 30px;
     height: 100%; 
     width: 100%;
-    //border: 1px solid rgba(130, 130, 130, 0.4);
   }
 }
 
@@ -85,9 +106,32 @@ dialog {
   height: 100%;
 }
 
-.dialogbuttoncontainer button {
+.horizontal,
+.vertical,
+.modalboat {
+  cursor: grab;
+}
+
+.dialogbuttoncontainer button,
+.choices button {
   height: 30px;
-  width: 150px;
+  width: fit-content;
+  background: none;
+  border: none;
+  font-size: 15px;
+  font-weight: bold;
+  transition: font-size 0.15s;
+  font-family: 'PressStart2P-Regular', 'Arial', 'Helvetica', 'sans-serif';
+}
+
+.choices button:hover {
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.dialogbuttoncontainer button:hover {
+  font-size: 20px;
+  cursor: pointer;
 }
 
 .placement > div {
@@ -186,7 +230,18 @@ dialog {
   .upperheaders,
   .choices {
     text-align: center;
+
   }
+}
+
+.upperheaders h2 {
+  font-family: 'RubikGlitch-Regular', 'Arial', 'Helvetica', 'sans-serif';
+  font-size: 40px;
+}
+
+.upperheaders h3 {
+  font-size: 20px;
+  font-weight: bold;
 }
 
 .boardscontainer {
@@ -206,6 +261,7 @@ dialog {
     width: 350px;
     background-color: white;
     justify-self: center;
+    background-color: rgba(255, 255, 255, 0.6);
   }
 
   .player,
@@ -228,6 +284,11 @@ dialog {
 .enemy > div:nth-child(n+2) {
   display: flex;
   justify-content: center;
+}
+
+.player > div:nth-child(n+2) img,
+.enemy > div:nth-child(n+2) img {
+  transition: display 0.5
 }
 
 .player > div:nth-child(n+2),
@@ -254,7 +315,6 @@ dialog {
 .boat img {
   width: 20px;
   height: 25px;
-  
 }
 
 .smallShip img {
@@ -268,7 +328,6 @@ dialog {
 }
 
 .largeShip img {
-  
   width: 27px;
   height: 132px;
 }
@@ -290,17 +349,30 @@ dialog {
 .turnheader {
   text-align: center;
   padding-top: 20px;
+  font-size: 15px;
+  font-family: 'PressStart2P-Regular', 'Arial', 'Helvetica', 'sans-serif';
 }
 
 .non-clickable {
   pointer-events: none;
 }
 
-.invalidCellClick {
-  color: red;
+.informtext {
   font-size: 1em;
   animation: pulsate 0.8s infinite ease-in-out;
   transition: transform 0.5s ease;
+}
+
+.negative {
+  color: red;
+}
+
+.positive {
+  color: rgb(0, 97, 0);
+}
+
+.pulsateAnimation {
+  animation: pulsate 2s infinite ease-in-out;
 }
 
 @keyframes pulsate {

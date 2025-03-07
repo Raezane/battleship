@@ -1,0 +1,8 @@
+Credits
+
+Graphics:
+- "Ships with ripple effect" by chabull, licensed CC-BY 3.0: https://opengameart.org/content/ships-with-ripple-effect
+- "Wooden Boat" by Kutejnikov, licended CC0: https://opengameart.org/content/wooden-boat
+- "Star Explosion" by Amir027, licenced CC0: https://opengameart.org/content/star-explosion
+- "watersplash" created by Antti Räsänen (myself)
+- background image for the game created with ChatGPT
