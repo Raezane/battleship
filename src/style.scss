@@ -1,10 +1,11 @@
-html, body {
+html,
+body {
   height: 100%;
   user-select: none;
 }
 
 body {
-  background-image: url("../src/assets/images/battleshipsandsea.png");
+  background-image: url('../src/assets/images/battleshipsandsea.png');
   background-repeat: no-repeat;
   background-size: cover;
 }
@@ -72,7 +73,6 @@ dialog {
     align-items: center;
     justify-content: space-between;
     gap: 10px;
-    
   }
 
   .placeableships {
@@ -80,7 +80,7 @@ dialog {
     grid-template-rows: repeat(4, 100px);
     box-sizing: border-box;
     padding: 0 30px;
-    height: 100%; 
+    height: 100%;
     width: 100%;
   }
 }
@@ -148,7 +148,7 @@ dialog {
 }
 
 .transparent {
-  opacity: 0
+  opacity: 0;
 }
 
 .horizontal.bigship,
@@ -168,7 +168,6 @@ dialog {
 .horizontal.smallship {
   width: 70px;
 }
-
 
 .placement > div > .vertical {
   position: absolute;
@@ -194,8 +193,6 @@ dialog {
 .vertical.smallship {
   height: 70px;
 }
-
-
 
 .modalboat {
   width: 30px;
@@ -230,7 +227,6 @@ dialog {
   .upperheaders,
   .choices {
     text-align: center;
-
   }
 }
 
@@ -271,7 +267,6 @@ dialog {
 
   .sub {
     position: absolute;
-    
 
     div {
       z-index: 1;
@@ -280,19 +275,19 @@ dialog {
 }
 
 .sub div,
-.player > div:nth-child(n+2),
-.enemy > div:nth-child(n+2) {
+.player > div:nth-child(n + 2),
+.enemy > div:nth-child(n + 2) {
   display: flex;
   justify-content: center;
 }
 
-.player > div:nth-child(n+2) img,
-.enemy > div:nth-child(n+2) img {
-  transition: display 0.5
+.player > div:nth-child(n + 2) img,
+.enemy > div:nth-child(n + 2) img {
+  transition: display 0.5;
 }
 
-.player > div:nth-child(n+2),
-.enemy > div:nth-child(n+2) {
+.player > div:nth-child(n + 2),
+.enemy > div:nth-child(n + 2) {
   z-index: 2;
   align-items: center;
   box-sizing: border-box;
@@ -370,7 +365,8 @@ dialog {
 }
 
 @keyframes pulsate {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
   }
   50% {
