@@ -122,7 +122,7 @@ const initGameLoop = function () {
       display.removeHideClassFromTurnHeader();
     });
 
-    //return clickPromise;
+    return clickPromise;
   }
 
   async function gameLoop(playerOne, playerTwo) {

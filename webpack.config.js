@@ -22,6 +22,13 @@ module.exports = {
         },
       },
       {
+        test: /\.html$/i,
+        loader: "html-loader",
+        options: {
+          sources: true,
+        },
+      },
+      {
         test: /\.scss$/i,
         use: ['style-loader', 'css-loader', 'sass-loader'],
       },
