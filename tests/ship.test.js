@@ -1,4 +1,4 @@
-import {ship} from '../src/models/shipHandler';
+import { ship } from '../src/models/shipHandler';
 
 let testShip;
 
@@ -12,11 +12,11 @@ describe('ship length tests', () => {
   });
 
   test("ship's length is 4 at maximum", () => {
-    expect(testShip.getLength()).toBeLessThanOrEqual(4)
+    expect(testShip.getLength()).toBeLessThanOrEqual(4);
   });
 
   test("ship's length is 1 at minimum", () => {
-    expect(testShip.getLength()).toBeGreaterThanOrEqual(0)
+    expect(testShip.getLength()).toBeGreaterThanOrEqual(0);
   });
 });
 
@@ -27,11 +27,10 @@ describe('hit and sinking tests', () => {
   });
 
   test('ship is sunk if hits are equal or more than ship length', () => {
-
     testShip.hit();
     testShip.hit();
     testShip.hit();
 
-    expect(testShip.isSunk()).toBe(true)
+    expect(testShip.isSunk()).toBe(true);
   });
 });

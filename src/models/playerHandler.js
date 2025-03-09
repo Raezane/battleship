@@ -1,12 +1,10 @@
-import { getRandomNumber } from "../utilities";
-import { boardHandler } from "./boardHandler";
+import { boardHandler } from './boardHandler';
 
-const playerHandler = function() {
-
+const playerHandler = function () {
   const playerBoard = boardHandler();
   const initiateBoard = () => playerBoard.buildBoard();
 
-  return { playerBoard, initiateBoard};
+  return { playerBoard, initiateBoard };
 };
 
-export {playerHandler}
+export { playerHandler };
