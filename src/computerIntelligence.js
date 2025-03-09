@@ -1,5 +1,5 @@
 import { getRandomNumber, getSurroundingArea, getMarkers, isInBounds, isShip } from "./utilities.js";
-import _, { shuffle } from "lodash";
+import { shuffle } from "lodash";
 
 const computerIntelligence = function() {
 
@@ -12,14 +12,17 @@ const computerIntelligence = function() {
   const resetStruckShipCoords = () => struckShipCoords = [];
 
   let struckShipSurroundings = [];
-
   const getStruckShipSurroundings = () => struckShipSurroundings;
+
   const getFirstOfStruckShipSurr = function(playerBoard) {
     let firstCell = struckShipSurroundings.shift()
+    /* if the current firstCell in a shuffled struckShipSurroundings array is an
+    hitSplash (i.e. cell which can't be struck anymore), we ignore it and take the
+    next one until the valid surrounding cell is found. */
     while (playerBoard[firstCell[0]][firstCell[1]] == markers.hitSplash) {
       firstCell = struckShipSurroundings.shift()
     }
-    return firstCell
+    return firstCell;
   }
 
   const addStruckShipSurroundings = function(hitCoords, playerBoard) {
@@ -27,10 +30,10 @@ const computerIntelligence = function() {
     let [north, east, south, west] = [surroundings.north, surroundings.east, surroundings.south, surroundings.west];
     /* from all the possible directions from the hit the computer can hit next, we 
     remove the ones which are already struck/touched or out of bounds so that computer knows which cells 
-    are available to strike*/
+    are available to strike */
     let adjacentMoves = getPossibleAdjacentMoves([north, east, south, west], playerBoard);
     /* then we randomize the order which the computer starts striking from the available adjacent cells */
-    let shuffled = _.shuffle(adjacentMoves);
+    let shuffled = shuffle(adjacentMoves);
     struckShipSurroundings = [...struckShipSurroundings, ...shuffled];
   };
 

@@ -28,24 +28,25 @@ const displayHandler = function() {
 
   let resolveClick;
 
+  //the currently dragged ship image, which will get defined as soon as ship image dragging starts
   let dragged;
 
+  //initial image position and x and y coordinates of the mouse clickdown when the dragging starts
   let imagePos;
-
   let mouseDownPosX;
   let mouseDownPosY;
-
   //distances to every edge of the image where the image is clicked from
   let distanceToTopEdge;
   let distanceToRightEdge;
   let distanceToBottomEdge;
   let distanceToLeftEdge;
-
+  //these four values below get updated live when the ship image is being dragged
   let liveTopEdge;
   let liveRightEdge;
   let liveBottomEdge;
   let liveLeftEdge;
-
+  /* cursor coordinates to-be, which we'll later use to calculate the current dragged
+  image's live position on the screen */
   let x; 
   let y;
 
@@ -123,8 +124,8 @@ const displayHandler = function() {
 
   const initiateOtherElements = function() {
     otherElements['shipSetterModal'] = document.querySelector('dialog');
-    otherElements['informText'] = document.querySelector('.play .informtext')
-    otherElements['playButton'] = document.querySelector('.play > button');
+    otherElements['informText'] = document.querySelector('.play h3')
+    otherElements['playButton'] = document.querySelector('.play button');
     otherElements['informPlacing'] = document.querySelector('.setship .informtext')
     otherElements['setShipsButton'] = document.querySelector('.setship > button')
     otherElements['placeableShips'] = document.querySelector('.placeableships');
@@ -139,8 +140,11 @@ const displayHandler = function() {
     initiateTitles();
     initiateOtherElements();
     addShipImagesToSet(horizontalDraggableShips, '.horizontal');
+    /* we need to manually create the vertical ships because they need to appear on screen
+    only after user turns them on the placing board */
     createVerticalDraggableShips();
     addShipImagesToSet(verticalDraggableShips, '.vertical');
+    // combine both to iterate later
     allDraggableShips = new Set([...horizontalDraggableShips, ...verticalDraggableShips]);
   }
 
@@ -181,7 +185,7 @@ const displayHandler = function() {
     [x, y] = [e.clientX, e.clientY];
   };
 
-  const setImgLivePosition = function(e) {
+  const setImgLivePosition = function() {
     liveTopEdge = (y - distanceToTopEdge) +5;
     liveRightEdge = (x + distanceToRightEdge) -10;
     liveBottomEdge = (y + distanceToBottomEdge) -5;
@@ -221,7 +225,7 @@ const displayHandler = function() {
   const invalidPlacementText = function(text) {
     otherElements['informText'].textContent = text;
     otherElements['informText'].classList.remove('positive');
-    otherElements['informText'].classList.remove('pulsateAnimation');
+    otherElements['informText'].classList.add('pulsateAnimation');
     otherElements['informText'].classList.add('negative');
     setTimeout(() => {
       informAboutTurning();
@@ -231,8 +235,8 @@ const displayHandler = function() {
 
   const informAboutTurning = function() {
     otherElements['informText'].classList.remove('negative');
+    otherElements['informText'].classList.remove('pulsateAnimation');
     otherElements['informText'].classList.add('positive');
-    otherElements['informText'].classList.add('pulsateAnimation');
     otherElements['informText'].textContent = '* You can turn your ship by clicking it *';
   }
 
@@ -252,13 +256,21 @@ const displayHandler = function() {
 
       allDraggableShips.forEach((ship) => {
         ship[1].addEventListener('dragstart', (e) => {
+          // set the current shipImage as the dragged variable
           setDraggedElement(e.target);
+          /* here we calculate the starting position of both the image and cursor when 
+          the dragging is started */
           setImageAndMouseDownPosition(e);
+          /* then we calculate the cursor distance to dragged image's each edge and use 
+          those values later when calculating the live position of the image */
           setMouseDownDistToImgEdges();
           e.target.classList.toggle('transparent');
           let formerParent = dragged.parentNode
           /* check if the former parent of the ship is a cell and not the initial 
-          area where the ships are being dragged originally from */
+          area where the ships are being dragged originally from. If the parent is a 
+          cell, we need to nullify the current area where the ship was currently placed
+          before dragging started so that the validation feedback will give valid placement
+          also for the area where the ship was just placed on. */
           if (!formerParent.classList.contains('shipimgdiv')){
             clearCurrentArea(dragged);
           };
@@ -277,6 +289,9 @@ const displayHandler = function() {
       let intercectingCells = [];
 
       document.addEventListener('dragover', (e) => {
+        /* set the live location of the cursor and image which we'll then use to determine
+        if the image being dragged overlaps the grid and which cells in it, and then give 
+        the visual feedback to user if the placement is valid or not. */
         setCursorTracker(e);
         setImgLivePosition();
         shipSize = dragged.dataset.shipsize
@@ -311,11 +326,13 @@ const displayHandler = function() {
               ];
               if (!currentAreaAvailable(shipFrontCoords, shipRearCoords, dragged)) {
                 intercectingCells.forEach((cell) => shipCurrentlyOutOfBounds(cell));
-              } else intercectingCells.forEach((cell) => shipCurrentlyInBounds(cell));
+              };
             };
 
         } else {
             let index = intercectingCells.indexOf(cell);
+            /* if the current cell being iterated does not overlap the image being dragged 
+            anymore, remove the styling */
             if (index !== -1) intercectingCells.splice(index, 1);
             removeValidityStyling(cell);
           };
@@ -324,6 +341,9 @@ const displayHandler = function() {
 
       document.addEventListener('dragend', () => {
 
+        /* get the overlapping cells array and then append the image to the first cell. The   
+        positioning settings provided in css make sure the image reaches all the overlapping cells when
+        the image is released from dragging. */
         let cellsToBePlacedUpon = document.querySelectorAll('.validPlacement');
 
         if (cellsToBePlacedUpon.length > 0) {
@@ -342,8 +362,11 @@ const displayHandler = function() {
           handlePlacement(shipFrontCoords, shipRearCoords, dragged);
           informAboutTurning();
 
+          /* if the current area, where the dragging just stopped and image was released, is 
+          not a valid placing area, we need to restore the previous ship placing area to our
+          internal game state which was recently deleted when the dragging started. Then 
+          the ship will snap back to its recent area. */
         } else {
-            console.log(dragged, dragged.parentNode)
             let shipRearRow;
             let shipRearCol;
             if (dragged.classList.contains('horizontal')) {
@@ -358,11 +381,14 @@ const displayHandler = function() {
               dragged.parentNode.dataset.col,
             ];
             let shipRearCoords = [shipRearRow, shipRearCol];
+            // place the ship internally and externally (GUI) to its previous area
             handlePlacement(shipFrontCoords, shipRearCoords, dragged);
+            // inform player the area where the shipped was attempted to place, is invalid
             invalidPlacementText("Placing area invalid!");
           
         }
 
+        //remove the placing feedback coloring, when the dragging is done
         boardCells['shipSetterCells'].forEach((cell) => {
           removeValidityStyling(cell);
         });
@@ -445,12 +471,12 @@ const displayHandler = function() {
 
   const invalidClickNotify = function() {
     transformableTitles['yourTurn'].textContent = 'Cell already struck! Choose another.'
-    transformableTitles['yourTurn'].classList.add('informtext', 'negative');
+    transformableTitles['yourTurn'].classList.add('pulsateAnimation', 'negative');
   }
 
   const setDefaultTitle = function() {
     transformableTitles['yourTurn'].textContent = 'Your turn!';
-    transformableTitles['yourTurn'].classList.remove('informtext', 'negative');
+    transformableTitles['yourTurn'].classList.remove('pulsateAnimation', 'negative');
   }
 
   const addHideClassToTurnHeader = function() {
@@ -492,7 +518,8 @@ const displayHandler = function() {
     if (clickedBoard == 'enemy') {
       if (resolveClick) {
         setYourTurnHeaderToBeHidden();
-        resolveClick(this);
+        //resolve the promise here which was created in controller at player's turn
+        resolveClick();
         resolveClick = null;
       }
     } else {

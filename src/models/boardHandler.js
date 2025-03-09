@@ -42,8 +42,6 @@ const boardHandler = function() {
     return false
   }
 
-  /* buildBoard function creates the gameboard and with the same iteration, 
-  also returns available moves for each player. */
   const buildBoard = function() {
     for (let y = 0; y < 10; y++) {
       let arr = [];
@@ -65,6 +63,8 @@ const boardHandler = function() {
 
   const setShipsRandomly = function() {
     let currentShip = 0
+    /* we first create the coordinates for the ships randomly here, and if they are 
+    valid we'll proceed to place the ship to the internal board */
     while (currentShip < 10) {
       let coords = getRandomCoords(createdShips[currentShip]);
       let areCoordsValid = validPlacement(coords[0], coords[1])
@@ -79,8 +79,9 @@ const boardHandler = function() {
 
     let randomCoords = [[], []]
 
-    let lengthOfShip = shipObj.getLength()
-    let direction = getRandomNumber(2)
+    let lengthOfShip = shipObj.getLength();
+    let direction = getRandomNumber(2);
+
     /* here we calculate the possible start area for the ship to be set by deducting current ship's length
     from board length. We need to do this so that part of the ship won't be outside bounds */
     let possibleArea = board.length - lengthOfShip +1
@@ -122,8 +123,13 @@ const boardHandler = function() {
   };
    
   const emptyShipSurrounding = function(playerBoardObj, shipObj) {
+    // this function erases the current ship's surroundings
     shipObj.shipSurroundingCells.forEach((cell) => {
       let strCell = JSON.stringify(cell);
+      /*if several ships share the same surrounding area, we need to make 
+      sure that we won't delete the surrounding area altogether from the internal 
+      gameboard, because even though we erase the surrounding area from the current 
+      ship, that same surrounding area may still be in use for another ship */
       if (sharedSurroundingCells.has(strCell)) {
         sharedSurroundingCells.set(strCell, sharedSurroundingCells.get(strCell) -1)
         if (sharedSurroundingCells.get(strCell) == 1) {
@@ -155,34 +161,36 @@ const boardHandler = function() {
     let rearCoordsSurrounding = getSurroundingArea(rearCoords);
 
     if (direction == 0) {
-      shipSurroundingCells = (Object.values([
+      shipSurroundingCells = Object.values([
         currentSurrounding.north, 
         currentSurrounding.northEast, 
         currentSurrounding.northWest,
         rearCoordsSurrounding.south, 
         rearCoordsSurrounding.southEast, 
         rearCoordsSurrounding.southWest
-      ]).filter(cell => isInBounds(cell)))
+      ]).filter(cell => isInBounds(cell))
 
-      placeSidesAndPartOfShip(0, currentSurrounding.west, currentSurrounding.east);
+      placePartOfShip(0, currentSurrounding.west, currentSurrounding.east);
 
     } else {
-        shipSurroundingCells = (Object.values([
+        shipSurroundingCells = Object.values([
           currentSurrounding.west, 
           currentSurrounding.northWest, 
           currentSurrounding.southWest,
           rearCoordsSurrounding.east, 
           rearCoordsSurrounding.northEast, 
           rearCoordsSurrounding.southEast
-        ]).filter(cell => isInBounds(cell)))
+        ]).filter(cell => isInBounds(cell))
 
-      placeSidesAndPartOfShip(1, currentSurrounding.north, currentSurrounding.south)
+      placePartOfShip(1, currentSurrounding.north, currentSurrounding.south)
     
     };
 
-    directionIterator(shipSurroundingCells)
+    placeSurroundings(shipSurroundingCells)
 
-    function placeSidesAndPartOfShip(axis, side1, side2) {
+    function placePartOfShip(axis, side1, side2) {
+      /* in this function we place the ship to the internal gameboard and add its
+      surrounding cells to array to place next after this function. */
       let side1coordsCopy = getCoordsCopy(side1);
       let side2coordsCopy = getCoordsCopy(side2);
       while (frontCoordsCopy[direction] <= rearCoords[direction]) {
@@ -203,10 +211,10 @@ const boardHandler = function() {
       };
     };
 
-    function directionIterator(surroundings) {
+    function placeSurroundings(surroundings) {
       surroundings.forEach(coords => {
         /* check if the current area is already some other shipObject's shipsurrounding area - if it is, 
-        append to sharedSurroundingCells for us to access later when changing a ship position in
+        append to sharedSurroundingCells for us to access later when changing a ship position in the
         ship placement modal */
         if (board[coords[0]][coords[1]] == markers.shipSurrounding) {
           //turn the coords to string first so we may use the array correctly as a key
@@ -218,6 +226,8 @@ const boardHandler = function() {
       });
     };
 
+    /* if the currently placed ship isn't already placed, we add it to the placed ships
+    array. If it is placed, we'll just update the placedShip object's values to the new ones */
     let isInPlacedShips = findPlacedShip(placedShips, shipObj)
     if (!isInPlacedShips) {
       placedShips.push(
@@ -257,7 +267,8 @@ const boardHandler = function() {
   };
 
   const receiveAttack = function(y, x) {
-
+    /* in this function the changes caused by a hit effect to the internal gameboard 
+    are made */
     function attackMissed() {
       board[y][x] = markers.miss;
       markCellAsTouched([y, x]);

@@ -357,12 +357,6 @@ dialog {
   pointer-events: none;
 }
 
-.informtext {
-  font-size: 1em;
-  animation: pulsate 0.8s infinite ease-in-out;
-  transition: transform 0.5s ease;
-}
-
 .negative {
   color: red;
 }
@@ -372,7 +366,7 @@ dialog {
 }
 
 .pulsateAnimation {
-  animation: pulsate 2s infinite ease-in-out;
+  animation: pulsate 0.8s infinite ease-in-out;
 }
 
 @keyframes pulsate {

@@ -1,4 +1,4 @@
-//functions in this module are used by both displayHandler and boardHandler
+//functions in this module are utilities used widely by other modules 
 
 const getSurroundingArea = function(coords) {
   let surroundingArea = {
@@ -14,6 +14,7 @@ const getSurroundingArea = function(coords) {
   return surroundingArea
 }
 
+// markers to the internal game board
 const getMarkers = function() {
   const markers = {
     hit: 'x',

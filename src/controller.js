@@ -43,10 +43,6 @@ const mapDOMshipsToObjects = function(createdShips) {
 
 };
 
-const createMovesForComputer = function (participant) {
-  participant.createAvailableMoves();
-}
-
 const initGameLoop = function() {
 
   let playerOne;
@@ -79,6 +75,8 @@ const initGameLoop = function() {
 
       display.makePlayerBoardClickable();
 
+      /* here we check if the last attack made by computer was a hit - if it was, 
+      the computer now picks the next possible adjacent move to make next */
       let wasLastAttackHit = computerInt.getStruckShipSurroundings();
       let row, col;
       
@@ -99,11 +97,10 @@ const initGameLoop = function() {
       less possible cells that can be attacked remain. */
       computerInt.refreshAvailableMoves(cellsHit);
 
-      /* ..and then we reset the opponent's board's cellsHit array to empty so that the 
-      refreshAvailableMoves method in playerHandler module has less items to iterate through 
-      and thus the performance will be a bit better. */
+      /* ..and then we reset the opponent's (user) board's cellsHit array to empty because the 
+      hits are now processed to computerplayer's available moves and we don't need to iterate
+      over these just hit cells again anymore next time. */
       player.playerBoard.resetCellsHit();
-
     };
 
     return new Promise((resolve) => {
@@ -121,6 +118,8 @@ const initGameLoop = function() {
     display.makeEnemyBoardClickable();
     
     let clickPromise = new Promise((resolve) => {
+      /* pass the resolve function of the created promise to a variable in displayHandler,
+      which then will be resolved after the player has made a click to an enemy board */
       display.setResolveClick(resolve);
     });
 
@@ -180,13 +179,13 @@ const currentAreaAvailable = function(shipFrontCoords, shipRearCoords, dragged) 
 
 const clearCurrentArea = function(draggedShipImg) {
   
-    let shipObj = shipMapping.get(draggedShipImg)
-    
-    let placedShips = player.playerBoard.getPlacedShips();
-    let placedShipObj = player.playerBoard.findPlacedShip(placedShips, shipObj);
+  let shipObj = shipMapping.get(draggedShipImg)
+  
+  let placedShips = player.playerBoard.getPlacedShips();
+  let placedShipObj = player.playerBoard.findPlacedShip(placedShips, shipObj);
 
-    player.playerBoard.nullifyCurrentShipArea(playerBoardObj, placedShipObj);
-    player.playerBoard.emptyShipSurrounding(playerBoardObj, placedShipObj);
+  player.playerBoard.nullifyCurrentShipArea(playerBoardObj, placedShipObj);
+  player.playerBoard.emptyShipSurrounding(playerBoardObj, placedShipObj);
 
 }
 
@@ -223,7 +222,12 @@ const handleTurn = function(e) {
 
   let replacingShipImg;
   
+
+  /* we will get the corrent ship object by fetching it with its classname, which
+  is used in our Map to store the ship object */ 
   let shipKey = e.target.classList[2];
+  /* by a class name of the current ship image we determine if the shipimage being appended 
+  next is horizontal or vertical */
   let currentDirection = e.target.classList[1];
 
   if (currentDirection === 'horizontal') {
@@ -238,10 +242,17 @@ const handleTurn = function(e) {
 
   if (isInBounds(newRearCoords)) {
 
+    /* first we'll check if the new rear coords of the ship being turned is in 
+    bounds, and if it is, then we need to clear the current area before updating
+    the internal gameboard again with new new placing data */
     let shipObj = shipMapping.get(e.target);
     
     clearCurrentArea(e.target);
     
+    /* this is the last validation before the turning of the ship manifests. Here we
+    still need to check if the area the ship is being turned to is not a surrounding 
+    area for another ship, because there always needs to be an area of at least one 
+    empty cell between ships */
     if (player.playerBoard.cellIsNull(newRearCoords)) {
       player.playerBoard.setShip(frontCoords, newRearCoords, shipObj);
       display.turnShip(parent, replacingShipImg);
@@ -273,14 +284,22 @@ const handleAttack = function(domBoard, row, col) {
     whichGameBoard = computer.playerBoard
   }
 
+  /* here we save the current state of the sunken ships, before we process the attack 
+  in our internal game state */
   let sunkenShipsStatus = whichGameBoard.getSunkenShips().length;
   
+  // coordsHit returns true, if the last attack was a hit
   let coordsHit = whichGameBoard.receiveAttack(rowInt, colInt);
+  /* if it was, we then add the struck ship surroundings to the struckShipSurroudings array
+  so that computerplayer may then use those cells for the adjacent, next attack on next turn */
   if (coordsHit && domBoard == 'mainCellsPlayer') {
     computerInt.addStruckShipSurroundings(coordsHit, playerBoardObj);
   };
 
   let boardObj = whichGameBoard.getGameBoard();
+
+  /* then we get the updated state of the sunken ships, in the probability if the 
+  attack which was just made, sank a ship */
   let sunkenShipsUpdated = whichGameBoard.getSunkenShips().length;
 
   if (sunkenShipsUpdated > sunkenShipsStatus) {
@@ -304,6 +323,7 @@ const setShipsAuto = function() {
   player.playerBoard.setShipsRandomly();
   display.setShips('shipSetterCells', player.playerBoard.getPlacedShips());
   display.hidePlacingInfo();
+  display.informAboutTurning();
   display.togglePlayButton('show');
 }
 
@@ -315,9 +335,12 @@ const areAllShipsSet = function() {
 const startGame = function() {
   display.hideModal();
   display.toggleGameTable();
-  createBoardAndShips(computer);
-  createMovesForComputer(computerInt);
+  /* now that the play-button has been pressed and game started, we create the
+  possible moves for the computer player and set its ships randomly */
+  computerInt.createAvailableMoves();
   computer.playerBoard.setShipsRandomly();
+  /* here we set the GUI player ships to correspond the placement status of the ships
+  in the ship placement modal to the actual gameboard when the game is on */
   display.setShips('subCellsPlayer', player.playerBoard.getPlacedShips());
   initGameLoop();
 };
@@ -331,12 +354,19 @@ const redirect = function() {
 }
 
 const init = function() {
+  //program starts here, init being called from index.js
   activateDOMelements();
   display.toggleGameTable();
   display.toggleWinnerAndRetryHeader();
   display.toggleNewGameButtons();
   display.togglePlayButton('hide');
+  // create internal board and ship objects for both players at this point
   createBoardAndShips(player);
+  createBoardAndShips(computer);
+  /* we need to map the ship images to their respective ship objects so that when
+  the ship image is placed to the GUI gameboard, it places the corresponding ship object to 
+  the internal game board. DisplayHandler then uses that updated internal gameboard state to 
+  determine where the currently dragged ship can be placed in the GUI gameboard. */
   mapDOMshipsToObjects(player.playerBoard.getCreatedShips());
 };
 
