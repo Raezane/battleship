@@ -106,10 +106,14 @@ dialog {
   height: 100%;
 }
 
-.horizontal,
-.vertical,
-.modalboat {
+.horizontal:hover,
+.vertical:hover,
+.modalboat:hover {
   cursor: grab;
+}
+
+.customcursor {
+  cursor: crosshair;
 }
 
 .dialogbuttoncontainer button,
@@ -263,6 +267,7 @@ dialog {
   .player,
   .enemy {
     position: relative;
+    cursor: pointer;
   }
 
   .sub {

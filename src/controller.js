@@ -262,12 +262,12 @@ const handleTurn = function (e) {
     } else {
       player.playerBoard.setShip(frontCoords, currentRearCoords, shipObj);
       display.invalidPlacementText(
-        "Can't turn here, another ship would be too close!"
+        "Can't turn here, another ship would be too close!", true
       );
     }
   } else
     display.invalidPlacementText(
-      "Can't place here, ship would be out of bounds!"
+      "Can't place here, ship would be out of bounds!", true
     );
 };
 

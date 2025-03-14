@@ -241,14 +241,20 @@ const displayHandler = function () {
     replacingShipImg.classList.remove('removeElement');
   };
 
-  const invalidPlacementText = function (text) {
+  const invalidPlacementText = function (text, informTurning) {
     otherElements['informText'].textContent = text;
     otherElements['informText'].classList.remove('positive');
     otherElements['informText'].classList.add('pulsateAnimation');
     otherElements['informText'].classList.add('negative');
-    setTimeout(() => {
-      informAboutTurning();
-    }, 2000);
+    if (informTurning) {
+      setTimeout(() => {
+        informAboutTurning();
+      }, 2000);
+    } else {
+      setTimeout(() => {
+        otherElements['informText'].textContent = '';
+      }, 2000);
+    };
   };
 
   const informAboutTurning = function () {
@@ -273,6 +279,7 @@ const displayHandler = function () {
     function createInteractivityForShips() {
       allDraggableShips.forEach((ship) => {
         ship[1].addEventListener('dragstart', (e) => {
+          e.dataTransfer.effectAllowed = 'copyMove'
           // set the current shipImage as the dragged variable
           setDraggedElement(e.target);
           /* here we calculate the starting position of both the image and cursor when 
@@ -305,6 +312,7 @@ const displayHandler = function () {
       let intercectingCells = [];
 
       document.addEventListener('dragover', (e) => {
+        e.preventDefault();
         /* set the live location of the cursor and image which we'll then use to determine
         if the image being dragged overlaps the grid and which cells in it, and then give 
         the visual feedback to user if the placement is valid or not. */
@@ -381,11 +389,15 @@ const displayHandler = function () {
           handlePlacement(shipFrontCoords, shipRearCoords, dragged);
           informAboutTurning();
 
+        } else if (cellsToBePlacedUpon.length == 0 && dragged.parentNode.classList.contains('shipimgdiv')) {
+          invalidPlacementText('Placing area invalid!', false);
+        }
+
           /* if the current area, where the dragging just stopped and image was released, is 
           not a valid placing area, we need to restore the previous ship placing area to our
           internal game state which was recently deleted when the dragging started. Then 
           the ship will snap back to its recent area. */
-        } else {
+        else {
           let shipRearRow;
           let shipRearCol;
           if (dragged.classList.contains('horizontal')) {
@@ -405,7 +417,7 @@ const displayHandler = function () {
           // place the ship internally and externally (GUI) to its previous area
           handlePlacement(shipFrontCoords, shipRearCoords, dragged);
           // inform player the area where the shipped was attempted to place, is invalid
-          invalidPlacementText('Placing area invalid!');
+          invalidPlacementText('Placing area invalid!', true);
         }
 
         //remove the placing feedback coloring, when the dragging is done
